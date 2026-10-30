@@ -1,38 +1,58 @@
 ---
 // Page block: Card Grid. A titled grid of portfolio entries. "More info" opens that entry in the popup
 // (CaseDialog, which must be on the same page) and puts its name in the address, e.g. /projects/ld-portfolio#baker-tilly.
-interface Props { title?: string; cases: { entry: any; Content: any }[]; }
-const { title, cases } = Astro.props;
-const roleLine = (d: any) => [d.role, d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
+// With groupBy="org" the cards sit under a heading for each position (the entry's `org`), in the order they are listed.
+interface Props { title?: string; cases: { entry: any; Content: any }[]; groupBy?: 'org'; }
+const { title, cases, groupBy } = Astro.props;
+const roleLine = (d: any) => [d.role, !groupBy && d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
+// A card only gets a "More info" button when there is something to open.
+const hasDetail = (e: any) => Boolean(e.body?.trim()) || e.data.media.length > 0 || e.data.images.length > 0 || e.data.artifacts.length > 0 || e.data.links.length > 0;
+
+const groups: { heading?: string; items: typeof cases }[] = [];
+for (const c of cases) {
+  const heading = groupBy ? c.entry.data[groupBy] || undefined : undefined;
+  const last = groups[groups.length - 1];
+  if (last && last.heading === heading) last.items.push(c); else groups.push({ heading, items: [c] });
+}
+const Heading = groupBy ? 'h4' : 'h3';   // cards step down a level when there are position headings above them
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 ---
 {cases.length > 0 && (
   <section class="cards" aria-labelledby={title ? 'cards-title' : undefined}>
     {title && <h2 id="cards-title" class="section-title">{title}</h2>}
-    <ul class="grid">
-      {cases.map(({ entry }) => (
-        <li>
-          <article class="card" id={entry.id}>
-            <h3>{entry.data.title}</h3>
-            {roleLine(entry.data) && <p class="role">{roleLine(entry.data)}</p>}
-            <p class="outcome">{entry.data.outcome}</p>
-            <button type="button" class="card-more" data-case={entry.id} aria-haspopup="dialog">More info</button>
-          </article>
-        </li>
-      ))}
-    </ul>
+    {groups.map((g) => (
+      <div class="group" role={g.heading ? 'group' : undefined} aria-labelledby={g.heading ? `grp-${slug(g.heading)}` : undefined}>
+        {g.heading && <h3 id={`grp-${slug(g.heading)}`} class="group-title">{g.heading}</h3>}
+        <ul class="grid">
+          {g.items.map(({ entry }) => (
+            <li>
+              <article class="card" id={entry.id}>
+                <Heading class="card-title">{entry.data.title}</Heading>
+                {roleLine(entry.data) && <p class="role">{roleLine(entry.data)}</p>}
+                <p class="outcome">{entry.data.outcome}</p>
+                {hasDetail(entry) && <button type="button" class="card-more" data-case={entry.id} aria-haspopup="dialog">More info</button>}
+              </article>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
   </section>
 )}
 
 <style>
   .cards { padding: 24px 0 72px; }
+  .group + .group { margin-top: 56px; }
+  .group-title { margin: 0 0 20px; padding-top: 20px; border-top: 1px solid var(--rule); font: 500 clamp(28px, 3.4vw, 38px)/1.15 var(--font-display); color: var(--text); }
   .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
   .card { display: flex; flex-direction: column; height: 100%; background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 26px; transition: border-color .2s, transform .2s; }
   .card:hover { border-color: var(--amber); transform: translateY(-3px); }
-  .card h3 { font: 600 26px/1.15 var(--font-display); margin: 0 0 6px; }
+  .card-title { font: 600 26px/1.15 var(--font-display); margin: 0 0 6px; }
   .role { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
   .outcome { margin: 0 0 20px; color: var(--text); font-size: 16px; line-height: 1.55; }
   .card-more { margin-top: auto; align-self: stretch; font: 600 15px var(--font-body); color: var(--amber); background: transparent; border: 1.5px solid var(--amber); border-radius: 6px; padding: 10px 14px; min-height: 44px; cursor: pointer; }
   .card-more:hover { background: var(--amber); color: var(--on-amber); }
   .card-more:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+  .card .outcome:last-child { margin-bottom: 0; }
   @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 </style>

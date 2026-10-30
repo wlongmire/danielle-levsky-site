@@ -86,8 +86,10 @@ export async function validateMarkdown(path: string, text: string): Promise<stri
   };
 
   if (kind === 'work') {
-    ['title', 'outcome', 'role', 'org', 'dates'].forEach((k) => need(k));
+    ['title', 'outcome'].forEach((k) => need(k));
     const d = data as any;
+    // role, org and dates must be there but may be empty (a project box under a position heading leaves role and dates blank)
+    ['role', 'org', 'dates'].forEach((k) => { if (typeof d[k] !== 'string') errors.push(`"${k}" is required (write "" if there is nothing to say).`); });
     if (d.tracks !== undefined && (!Array.isArray(d.tracks) || d.tracks.some((t: unknown) => !TRACKS.includes(t as string))))
       errors.push(`"tracks" may only contain: ${TRACKS.join(', ')}.`);
     if (d.order !== undefined && typeof d.order !== 'number') errors.push('"order" must be a number.');

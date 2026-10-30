@@ -4,7 +4,7 @@ outcome: "Built and managed the Teammate Success team: learning programs, the pe
 role: "Head of Teammate Success"
 org: "eighty2i"
 dates: ""
-sections: [ld-portfolio, dei]
+sections: [dei]
 tools: ["Lattice", "Notion"]
 tracks: []
 ---

@@ -43,6 +43,10 @@ Left over from the template and not used by any page yet: `Timeline.astro`, `Res
 ## Content model (Danielle edits these by hand)
 - `src/content/work/*.md`: one file per portfolio entry (card and popup). `sections:` lists the section pages that show it
   (`ld-portfolio`, `dei`, `digital-humanities`); an entry in two sections is still one file.
+  On the L&D Portfolio page each entry is one asset box from her old site (title, one-line `outcome`, the full write-up as the
+  body, pictures in `media`). `org` is the position heading the box sits under (`groupCards: true` in that section's file turns
+  the headings on); `role` and `dates` are left empty. The text is her old site's, word for word. The picture alt text there is a
+  generic placeholder ("Picture 2 of 7 from ...") until she describes each one.
 - `src/content/sections/*.md`: one file per section page (headline, intro, optional button, optional hero picture via `image`/`imageAlt`/`imagePosition` with files in `src/assets/<section>/`, Overview List items, card grid title). Nav order is `sections` in `src/data/order.json`.
 - `src/content/pages/home.md`, `about.md`
 - `public/resumes/*.pdf`: resumes (not wired to a page yet; her CV is a Google Doc link in `site.json`)

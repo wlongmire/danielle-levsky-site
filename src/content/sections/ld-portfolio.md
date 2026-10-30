@@ -93,4 +93,6 @@ overview:
 
       Cognitive Arts develops bespoke learning and training programs, recognized as the largest global provider of learning design and development services.
 cardsTitle: "Project details"
+# true = the cards sit under a heading for each position (each entry's `org`)
+groupCards: true
 ---

@@ -9,7 +9,9 @@ import { loadCases } from '../lib/cases';
 import { site } from '../data/site';
 
 const home = await getEntry('pages', 'home');
-const cases = (await loadCases('ld-portfolio')).slice(0, 3);
+// One card from each of the first three positions (the first listed asset of each), so the home page shows a spread.
+const all = await loadCases('ld-portfolio');
+const cases = all.filter((c, i) => all.findIndex((o) => o.entry.data.org === c.entry.data.org) === i).slice(0, 3);
 ---
 <Base description={home!.data.description}>
   <Hero

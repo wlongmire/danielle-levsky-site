@@ -78,6 +78,7 @@ const sections = defineCollection({
     overviewTitle: z.string().optional(),
     overview: z.array(z.object({ title: z.string(), text: z.string() })).default([]),
     cardsTitle: z.string().optional(),   // shown only when entries list this section
+    groupCards: z.boolean().default(false),  // true = the cards sit under a heading for each position (each entry's `org`)
     draft: z.boolean().default(false),
   }),
 });
