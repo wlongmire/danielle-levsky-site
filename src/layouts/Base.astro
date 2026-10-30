@@ -32,6 +32,7 @@ const nav = [
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script is:inline>document.documentElement.classList.add('js');</script>
 </head>
 <body class="b">
   <a class="skip" href="#main">Skip to content</a>
@@ -41,10 +42,15 @@ const nav = [
         <Image src={logo} alt="" height={96} class="logo" loading="eager" />
         <span class="name">{site.name}</span>
       </a>
-      <nav aria-label="Main">
+      <button type="button" class="menu-btn" aria-expanded="false" aria-controls="site-nav">
+        <svg class="i-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+        <svg class="i-close" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" /></svg>
+        <span class="menu-label">Menu</span>
+      </button>
+      <nav id="site-nav" class="site-nav" aria-label="Main">
         {nav.map((n) => <a href={n.href} aria-current={here === n.href ? 'page' : undefined}>{n.label}</a>)}
+        <a class="btn" href={`mailto:${site.email}`} data-open-contact>Contact</a>
       </nav>
-      <a class="btn" href={`mailto:${site.email}`} data-open-contact>Contact</a>
     </div>
   </header>
 
@@ -66,6 +72,26 @@ const nav = [
   </footer>
 
   <ContactDialog />
+
+  <script>
+    // Phone menu: the Menu button opens and closes the links. Without JavaScript the links simply show.
+    const header = document.querySelector<HTMLElement>('.site-header')!;
+    const btn = header.querySelector<HTMLButtonElement>('.menu-btn')!;
+    const label = btn.querySelector<HTMLElement>('.menu-label')!;
+    const setOpen = (open: boolean) => {
+      header.toggleAttribute('data-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      label.textContent = open ? 'Close' : 'Menu';
+    };
+    btn.addEventListener('click', () => setOpen(!header.hasAttribute('data-open')));
+    header.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && header.hasAttribute('data-open')) { setOpen(false); btn.focus(); }
+    });
+    // Choosing Contact opens its popup, so close the menu behind it.
+    header.querySelectorAll('[data-open-contact]').forEach((el) => el.addEventListener('click', () => setOpen(false)));
+    // Growing past the phone layout resets it.
+    matchMedia('(min-width: 770px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+  </script>
 </body>
 </html>
 
@@ -87,13 +113,30 @@ const nav = [
   .b .logo { height: 48px; width: auto; display: block; }
   .b .name { font: 500 28px/1 var(--font-display); color: var(--amber); }
   @media (max-width: 480px) { .b .logo { height: 40px; } .b .name { font-size: 24px; } }
-  .b .bar nav { display: flex; flex-wrap: wrap; gap: 0 22px; font-weight: 500; font-size: 16px; }
-  .b .bar nav a { text-decoration: none; padding: 10px 0; border-bottom: 2px solid transparent; }
-  .b .bar nav a:hover { color: var(--amber); }
-  .b .bar nav a[aria-current] { color: var(--amber); border-bottom-color: var(--amber); }
-  .b .btn { display: inline-flex; align-items: center; background: var(--amber); color: var(--on-amber); text-decoration: none; padding: 12px 22px; min-height: 44px; border-radius: 4px; font-weight: 500; }
-  .b .btn:hover { filter: brightness(1.15); }
-  @media (max-width: 760px) { .b .bar nav { order: 3; width: 100%; } }
+  .b .site-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0 22px; font-weight: 500; font-size: 16px; }
+  .b .site-nav a:not(.btn) { text-decoration: none; padding: 10px 0; border-bottom: 2px solid transparent; }
+  .b .site-nav a:not(.btn):hover { color: var(--amber); }
+  .b .site-nav a[aria-current] { color: var(--amber); border-bottom-color: var(--amber); }
+  /* Contact and Menu share one look: the filled accent button. */
+  .b .btn, .b .menu-btn { display: inline-flex; align-items: center; background: var(--amber); color: var(--on-amber); text-decoration: none; padding: 12px 22px; min-height: 44px; border-radius: 4px; font: 500 16px var(--font-body); }
+  .b .btn:hover, .b .menu-btn:hover { filter: brightness(1.15); }
+  .b .menu-btn { display: none; gap: 10px; padding: 12px 18px; border: 0; cursor: pointer; }
+  .b .menu-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  .b .menu-btn .i-close, .b .menu-btn[aria-expanded='true'] .i-open { display: none; }
+  .b .menu-btn[aria-expanded='true'] .i-close { display: block; }
+  /* Phones and small tablets (under 770px). Without JavaScript the links wrap onto a second row under the name.
+     With it, only the name and the Menu button show; Menu opens the links (and Contact) as a list below. */
+  @media (max-width: 769px) {
+    .b .site-nav { order: 3; width: 100%; }
+    .b .site-header { position: static; }
+    .js .site-header { position: sticky; }
+    .js .menu-btn { display: inline-flex; }
+    .js .site-nav { display: none; flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 0; margin-top: 4px; padding-bottom: 16px; border-top: 1px solid var(--rule); max-height: calc(100svh - 100px); overflow-y: auto; font-size: 18px; }
+    .js .site-header[data-open] .site-nav { display: flex; }
+    .js .site-nav a:not(.btn) { display: flex; align-items: center; min-height: 52px; padding: 12px 4px; border-bottom: 1px solid var(--rule); }
+    .js .site-nav a[aria-current] { border-bottom-color: var(--rule); box-shadow: inset 4px 0 0 var(--amber); padding-left: 16px; }
+    .js .site-nav .btn { justify-content: center; margin-top: 16px; }
+  }
 
   .b .section-title { font: 500 clamp(30px, 4vw, 42px)/1.15 var(--font-display); color: var(--amber); margin: 0 0 24px; }
 
