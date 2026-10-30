@@ -1,9 +1,9 @@
 ---
 title: "About"
 tagline: "Learning, Innovation, and Efficiency in Sync"
-# Add the photo as src/assets/headshot.jpg, then uncomment the next two lines.
-# headshot: "../../assets/headshot.jpg"
-# headshotAlt: "short, plain description of the photo"
+# The photo lives at src/assets/headshot.jpg. Keep the alt text a short, plain description of it.
+headshot: "../../assets/headshot.jpg"
+headshotAlt: "Danielle Levsky smiling at the camera outdoors, with shoulder-length auburn hair and a denim jacket over a purple shirt"
 ---
 
 I’m passionate about tackling learning challenges with a critical eye, a strategic plan of action, a people-first mindset, and big-time curiosity.
