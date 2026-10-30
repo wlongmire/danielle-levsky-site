@@ -5,6 +5,10 @@ intro: "Learning and development programs are key to building high-performing te
 cta:
   label: "Get in touch"
   url: "#contact"
+# The picture lives in src/assets/consulting/. imagePosition is where it is cropped to (left/right, top/bottom).
+image: "../../assets/consulting/consulting-1.jpeg"
+imageAlt: "Danielle Levsky with long red hair, looking down as she types on a vintage typewriter in a dark room"
+imagePosition: "46% 30%"
 overviewTitle: "What I offer"
 overview:
   - title: "Learning Strategy Development"

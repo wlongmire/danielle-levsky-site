@@ -43,7 +43,7 @@ Left over from the template and not used by any page yet: `Timeline.astro`, `Res
 ## Content model (Danielle edits these by hand)
 - `src/content/work/*.md`: one file per portfolio entry (card and popup). `sections:` lists the section pages that show it
   (`ld-portfolio`, `dei`, `digital-humanities`); an entry in two sections is still one file.
-- `src/content/sections/*.md`: one file per section page (headline, intro, optional button, Overview List items, card grid title). Nav order is `sections` in `src/data/order.json`.
+- `src/content/sections/*.md`: one file per section page (headline, intro, optional button, optional hero picture via `image`/`imageAlt`/`imagePosition` with files in `src/assets/<section>/`, Overview List items, card grid title). Nav order is `sections` in `src/data/order.json`.
 - `src/content/pages/home.md`, `about.md`
 - `public/resumes/*.pdf`: resumes (not wired to a page yet; her CV is a Google Doc link in `site.json`)
 

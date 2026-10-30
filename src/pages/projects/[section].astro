@@ -19,7 +19,7 @@ const d = section.data;
 const cases = await loadCases(section.id);
 ---
 <Base title={d.navLabel} description={d.intro}>
-  <Hero headline={d.headline} intro={d.intro} cta={d.cta} />
+  <Hero headline={d.headline} intro={d.intro} cta={d.cta} image={d.image} imageAlt={d.imageAlt} imagePosition={d.imagePosition} />
   <OverviewList title={d.overviewTitle} items={d.overview} />
   <CardGrid title={d.cardsTitle} {cases} />
   <CaseDialog {cases} />

@@ -14,9 +14,10 @@ interface Props {
   imageAlt?: string;
   imageSlot?: boolean;   // show the logo mark where the picture will go, until there is one
   h1?: boolean;
+  imagePosition?: string; // where a wide picture is cropped to inside the frame, e.g. "46% 30%"
   large?: boolean;       // taller, and wider than the page content on big screens (the home page)
 }
-const { headline, intro, cta, image, imageAlt = '', imageSlot = false, h1 = true, large = false } = Astro.props;
+const { headline, intro, cta, image, imageAlt = '', imagePosition, imageSlot = false, h1 = true, large = false } = Astro.props;
 const Tag = h1 ? 'h1' : 'h2';
 const opensContact = cta?.url === '#contact';
 ---
@@ -29,7 +30,7 @@ const opensContact = cta?.url === '#contact';
     )}
   </div>
   {image ? (
-    <div class="hero-img"><Image src={image} alt={imageAlt} width={large ? 1200 : 900} loading="eager" /></div>
+    <div class="hero-img" style={imagePosition ? `--img-pos: ${imagePosition}` : undefined}><Image src={image} alt={imageAlt} width={large ? 1200 : 900} loading="eager" /></div>
   ) : imageSlot ? (
     <div class="hero-img hero-img-empty" aria-hidden="true"><Image src={logo} alt="" width={600} /></div>
   ) : null}
@@ -40,13 +41,14 @@ const opensContact = cta?.url === '#contact';
   .hero-text { flex: 2 1 380px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
   .hero h1, .hero h2 { margin: 0; font: 500 clamp(40px, 5.5vw, 68px)/1.05 var(--font-display); color: var(--amber); text-wrap: balance; max-width: 16em; }
   .hero-intro { margin: 0; font-size: 20px; line-height: 1.55; color: var(--muted); max-width: 40em; }
-  .hero-img { flex: 1 1 240px; min-width: 0; max-width: 360px; aspect-ratio: 4 / 5; border-radius: 4px 40px 4px 4px; overflow: hidden; background: var(--rule); }
+  /* --r is the big rounded corner; the picture is clipped to it. */
+  .hero-img { --r: 40px; flex: 1 1 240px; min-width: 0; max-width: 360px; aspect-ratio: 4 / 5; }
   /* The photo is landscape; crop to the portrait frame around her face. Re-tune object-position if the photo changes. */
-  .hero-img :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: 57% 30%; display: block; }
+  .hero-img :global(img) { width: 100%; height: 100%; object-fit: cover; object-position: var(--img-pos, 57% 30%); display: block; border-radius: 4px var(--r) 4px 4px; background: var(--rule); }
   /* Phones: the photo comes first, full width and a little wider than tall, so it shows on the first screen. */
   @media (max-width: 769px) {
     .hero { padding: 20px 0 40px; gap: 24px; }
-    .hero-img { order: -1; flex: 1 1 100%; max-width: none; aspect-ratio: 4 / 3; border-radius: 4px 32px 4px 4px; }
+    .hero-img { --r: 32px; order: -1; flex: 1 1 100%; max-width: none; aspect-ratio: 4 / 3; }
   }
   /* Large (home page): more height and a bigger picture and headline; on wide screens it also runs
      wider than the page content, centred on it. Phones keep the compact layout above. */
@@ -60,6 +62,7 @@ const opensContact = cta?.url === '#contact';
   @media (min-width: 1300px) {
     .hero.large { width: 1200px; margin-left: calc((100% - 1200px) / 2); }
   }
-  .hero-img-empty { display: flex; align-items: center; justify-content: center; }
-  .hero-img-empty :global(img) { width: 70%; height: auto; object-fit: contain; }
+  /* The placeholder (logo mark where a picture will go) is a plain clipped box. */
+  .hero-img-empty { display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 4px var(--r) 4px 4px; background: var(--rule); }
+  .hero-img-empty :global(img) { width: 70%; height: auto; object-fit: contain; border-radius: 0; background: none; }
 </style>

@@ -67,11 +67,14 @@ const pages = defineCollection({
 // that list this section). Any block left empty is simply not shown. The nav order is in src/data/order.json.
 const sections = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
-  schema: z.object({
+  schema: ({ image }) => z.object({
     navLabel: z.string(),
     headline: z.string(),
     intro: z.string(),
     cta: z.object({ label: z.string(), url: z.string() }).optional(),
+    image: image().optional(),           // the Hero's picture, e.g. "../../assets/consulting/consulting-1.jpeg"
+    imageAlt: z.string().optional(),     // a short, plain description of the picture
+    imagePosition: z.string().optional(), // where the picture is cropped to, e.g. "46% 30%" (left/right, top/bottom)
     overviewTitle: z.string().optional(),
     overview: z.array(z.object({ title: z.string(), text: z.string() })).default([]),
     cardsTitle: z.string().optional(),   // shown only when entries list this section
