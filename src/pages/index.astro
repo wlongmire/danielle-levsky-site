@@ -10,7 +10,6 @@ import { site } from '../data/site';
 
 const home = await getEntry('pages', 'home');
 const cases = (await loadCases('ld-portfolio')).slice(0, 3);
-const initials = site.name.split(' ').map((w) => w[0]).join('');
 ---
 <Base description={home!.data.description}>
   <Hero
@@ -20,7 +19,6 @@ const initials = site.name.split(' ').map((w) => w[0]).join('');
     image={home!.data.headshot}
     imageAlt={home!.data.headshotAlt}
     imageSlot
-    {initials}
   />
   <CardGrid title="Selected projects" {cases} />
   <CaseDialog {cases} />
