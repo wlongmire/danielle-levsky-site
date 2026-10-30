@@ -18,8 +18,8 @@ const { section } = Astro.props;
 const d = section.data;
 const cases = await loadCases(section.id);
 ---
-<Base title={d.navLabel} description={d.intro}>
-  <Hero headline={d.headline} intro={d.intro} cta={d.cta} image={d.image} imageAlt={d.imageAlt} imagePosition={d.imagePosition} />
+<Base title={d.navLabel} description={d.intro.split(/\n\s*\n/)[0].trim()}>
+  <Hero headline={d.headline} intro={d.intro} cta={d.cta} image={d.image} imageAlt={d.imageAlt} imagePosition={d.imagePosition} mark={d.logo} />
   <OverviewList title={d.overviewTitle} items={d.overview} />
   <CardGrid title={d.cardsTitle} {cases} groupBy={d.groupCards ? 'org' : undefined} />
   <CaseDialog {cases} />

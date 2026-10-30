@@ -75,6 +75,8 @@ const sections = defineCollection({
     image: image().optional(),           // the Hero's picture, e.g. "../../assets/consulting/consulting-1.jpeg"
     imageAlt: z.string().optional(),     // a short, plain description of the picture
     imagePosition: z.string().optional(), // where the picture is cropped to, e.g. "46% 30%" (left/right, top/bottom)
+    // An optional logo shown under the Hero's text (e.g. a program or employer), shown whole, never cropped. `url` makes it a link.
+    logo: z.object({ src: image(), alt: z.string(), url: z.string().optional() }).optional(),
     overviewTitle: z.string().optional(),
     overview: z.array(z.object({ title: z.string(), text: z.string() })).default([]),
     cardsTitle: z.string().optional(),   // shown only when entries list this section

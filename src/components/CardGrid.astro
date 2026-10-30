@@ -15,7 +15,10 @@ for (const c of cases) {
   const last = groups[groups.length - 1];
   if (last && last.heading === heading) last.items.push(c); else groups.push({ heading, items: [c] });
 }
-const Heading = groupBy ? 'h4' : 'h3';   // cards step down a level when there are position headings above them
+// Heading levels follow what is above them: a grid title is h2, a position heading under it h3 (h2 when there is no
+// grid title), and the cards one level below whatever heading they sit under.
+const GroupHeading = title ? 'h3' : 'h2';
+const Heading = groupBy ? (title ? 'h4' : 'h3') : 'h3';
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 ---
 {cases.length > 0 && (
@@ -23,7 +26,7 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
     {title && <h2 id="cards-title" class="section-title">{title}</h2>}
     {groups.map((g) => (
       <div class:list={['group', { boxed: g.heading }]} role={g.heading ? 'group' : undefined} aria-labelledby={g.heading ? `grp-${slug(g.heading)}` : undefined}>
-        {g.heading && <h3 id={`grp-${slug(g.heading)}`} class="group-title">{g.heading}</h3>}
+        {g.heading && <GroupHeading id={`grp-${slug(g.heading)}`} class="group-title">{g.heading}</GroupHeading>}
         <ul class="grid">
           {g.items.map(({ entry }) => (
             <li>
