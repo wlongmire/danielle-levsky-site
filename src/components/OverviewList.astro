@@ -3,6 +3,8 @@
 // The first item starts open so a skimmer sees what an item looks like.
 interface Props { title?: string; items: { title: string; text: string }[]; }
 const { title, items } = Astro.props;
+// An item's text can run to several paragraphs: a blank line in the Markdown file starts a new one.
+const paragraphs = (text: string) => text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 ---
 {items.length > 0 && (
   <section class="overview" aria-labelledby={title ? 'overview-title' : undefined}>
@@ -11,7 +13,7 @@ const { title, items } = Astro.props;
       {items.map((item, i) => (
         <details open={i === 0}>
           <summary>{item.title}</summary>
-          <p>{item.text}</p>
+          {paragraphs(item.text).map((p) => <p>{p}</p>)}
         </details>
       ))}
     </div>
