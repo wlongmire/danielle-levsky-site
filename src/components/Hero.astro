@@ -1,0 +1,45 @@
+---
+// Page block: Hero. A headline, a paragraph, an optional picture and an optional button.
+// A button whose url is "#contact" opens the contact popup instead of going to a page.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { site } from '../data/site';
+
+interface Props {
+  headline: string;
+  intro?: string;
+  cta?: { label: string; url: string };
+  image?: ImageMetadata;
+  imageAlt?: string;
+  imageSlot?: boolean;   // show a placeholder where the picture will go
+  initials?: string;
+  h1?: boolean;
+}
+const { headline, intro, cta, image, imageAlt = '', imageSlot = false, initials = '', h1 = true } = Astro.props;
+const Tag = h1 ? 'h1' : 'h2';
+const opensContact = cta?.url === '#contact';
+---
+<section class:list={['hero', { 'has-img': image || imageSlot }]} aria-labelledby="hero-title">
+  <div class="hero-text">
+    <Tag id="hero-title">{headline}</Tag>
+    {intro && <p class="hero-intro">{intro}</p>}
+    {cta && (
+      <a class="btn" href={opensContact ? `mailto:${site.email}` : cta.url} data-open-contact={opensContact ? '' : undefined}>{cta.label}</a>
+    )}
+  </div>
+  {image ? (
+    <div class="hero-img"><Image src={image} alt={imageAlt} width={900} loading="eager" /></div>
+  ) : imageSlot ? (
+    <div class="hero-img hero-img-empty" aria-hidden="true">{initials}</div>
+  ) : null}
+</section>
+
+<style>
+  .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 40px; padding: 72px 0 56px; }
+  .hero-text { flex: 2 1 420px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+  .hero h1, .hero h2 { margin: 0; font: 500 clamp(40px, 5.5vw, 68px)/1.05 var(--font-display); color: var(--amber); text-wrap: balance; max-width: 16em; }
+  .hero-intro { margin: 0; font-size: 20px; line-height: 1.55; color: var(--muted); max-width: 40em; }
+  .hero-img { flex: 1 1 260px; min-width: 0; max-width: 360px; aspect-ratio: 4 / 5; border-radius: 4px 40px 4px 4px; overflow: hidden; background: var(--rule); }
+  .hero-img :global(img) { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hero-img-empty { display: grid; place-items: center; font: 500 96px/1 var(--font-display); color: var(--amber); }
+</style>

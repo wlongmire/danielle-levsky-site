@@ -1,0 +1,26 @@
+---
+// One page per file in src/content/sections, built from the page blocks: Hero, Overview List, Card Grid.
+// Anything deeper than this page (a project's details) opens as a popup with its own URL, never a page.
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import OverviewList from '../../components/OverviewList.astro';
+import CardGrid from '../../components/CardGrid.astro';
+import CaseDialog from '../../components/CaseDialog.astro';
+import { loadCases } from '../../lib/cases';
+
+export async function getStaticPaths() {
+  const sections = await getCollection('sections', (e) => !e.data.draft);
+  return sections.map((section) => ({ params: { section: section.id }, props: { section } }));
+}
+
+const { section } = Astro.props;
+const d = section.data;
+const cases = await loadCases(section.id);
+---
+<Base title={d.navLabel} description={d.intro}>
+  <Hero headline={d.headline} intro={d.intro} cta={d.cta} />
+  <OverviewList title={d.overviewTitle} items={d.overview} />
+  <CardGrid title={d.cardsTitle} {cases} />
+  <CaseDialog {cases} />
+</Base>

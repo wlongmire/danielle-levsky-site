@@ -1,0 +1,27 @@
+---
+// Home: Hero plus the first three L&D Portfolio entries as a Card Grid.
+import { getEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import CardGrid from '../components/CardGrid.astro';
+import CaseDialog from '../components/CaseDialog.astro';
+import { loadCases } from '../lib/cases';
+import { site } from '../data/site';
+
+const home = await getEntry('pages', 'home');
+const cases = (await loadCases('ld-portfolio')).slice(0, 3);
+const initials = site.name.split(' ').map((w) => w[0]).join('');
+---
+<Base description={home!.data.description}>
+  <Hero
+    headline={home!.data.tagline ?? site.name}
+    intro={home!.data.description}
+    cta={home!.data.cta}
+    image={home!.data.headshot}
+    imageAlt={home!.data.headshotAlt}
+    imageSlot
+    {initials}
+  />
+  <CardGrid title="Selected projects" {cases} />
+  <CaseDialog {cases} />
+</Base>

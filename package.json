@@ -1,0 +1,17 @@
+{
+  "name": "dani-portfolio-site",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/vercel": "^11.0.16",
+    "astro": "^7.3.5",
+    "js-yaml": "^5.5.0"
+  }
+}

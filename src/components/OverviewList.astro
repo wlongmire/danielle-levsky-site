@@ -1,0 +1,32 @@
+---
+// Page block: Overview List. A headline over a list of items that open and close (native <details>, no JavaScript).
+// The first item starts open so a skimmer sees what an item looks like.
+interface Props { title?: string; items: { title: string; text: string }[]; }
+const { title, items } = Astro.props;
+---
+{items.length > 0 && (
+  <section class="overview" aria-labelledby={title ? 'overview-title' : undefined}>
+    {title && <h2 id="overview-title" class="section-title">{title}</h2>}
+    <div class="ov-list">
+      {items.map((item, i) => (
+        <details open={i === 0}>
+          <summary>{item.title}</summary>
+          <p>{item.text}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .overview { padding: 24px 0 56px; }
+  .ov-list { border-top: 1px solid var(--rule); }
+  details { border-bottom: 1px solid var(--rule); }
+  summary { cursor: pointer; padding: 18px 40px 18px 0; position: relative; list-style: none; font: 600 22px/1.25 var(--font-display); color: var(--text); min-height: 44px; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: '+'; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font: 400 28px/1 var(--font-body); color: var(--amber); }
+  details[open] summary::after { content: '−'; }
+  summary:hover { color: var(--amber); }
+  summary:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+  details p { margin: 0 0 20px; max-width: 46em; color: var(--muted); font-size: 17px; line-height: 1.6; }
+</style>

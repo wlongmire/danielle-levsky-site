@@ -1,0 +1,27 @@
+---
+navLabel: "L&D Portfolio"
+headline: "Training solutions that drive measurable business results"
+intro: "With a decade of experience in Learning & Development, I design and deliver training solutions that drive measurable business results, from reducing onboarding time by 40% to boosting sales proficiency by 30% to increasing learner engagement by 35%. I take an omni-channel approach, architecting blended and microlearning experiences that balance scale with customization."
+cta:
+  label: "Work with me"
+  url: "/projects/ld-consulting"
+overviewTitle: "Top positions"
+overview:
+  - title: "Baker Tilly"
+    text: "Project management, process design, technical documentation, and learning enablement for Global Trade and PMO initiatives."
+  - title: "Judge Learning Solutions, Project Manager"
+    text: "Led multi-deliverable training programs for Fortune 500 clients in the pharmaceutical and energy sectors."
+  - title: "Comcast, Instructional Designer (from 2023)"
+    text: "Upskilled sales teams to adopt new systems through asynchronous and instructor-led training."
+  - title: "eighty2i, Head of Teammate Success"
+    text: "Built and managed a team fostering professional growth, including learning programs and the performance management process."
+  - title: "Meta, Technical Program Manager"
+    text: "Managed internal operational support requests for Enterprise Learning Operations."
+  - title: "BenchPrep, Manager of Learning Technology & Conversion"
+    text: "Led six full-time employees and a network of freelance content conversion reviewers."
+  - title: "SMS Assist, Instructional Designer (2018 to 2019)"
+    text: "Created in-person and online curriculum for 400+ customer service representatives."
+  - title: "Cognitive Arts (NIIT), E-Learning Developer (2016 to 2018)"
+    text: "Improved process structure and maintained comprehensive project schedules."
+cardsTitle: "Project details"
+---

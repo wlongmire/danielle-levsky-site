@@ -1,0 +1,39 @@
+---
+// Page block: Card Grid. A titled grid of portfolio entries. "More info" opens that entry in the popup
+// (CaseDialog, which must be on the same page) and puts its name in the address, e.g. /projects/ld-portfolio#baker-tilly.
+interface Props { title?: string; cases: { entry: any; Content: any }[]; }
+const { title, cases } = Astro.props;
+const roleLine = (d: any) => [d.role, d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
+---
+{cases.length > 0 && (
+  <section class="cards" aria-labelledby={title ? 'cards-title' : undefined}>
+    {title && <h2 id="cards-title" class="section-title">{title}</h2>}
+    <ul class="grid">
+      {cases.map(({ entry }) => (
+        <li>
+          <article class="card" id={entry.id}>
+            <h3>{entry.data.title}</h3>
+            {roleLine(entry.data) && <p class="role">{roleLine(entry.data)}</p>}
+            <p class="outcome">{entry.data.outcome}</p>
+            <button type="button" class="card-more" data-case={entry.id} aria-haspopup="dialog">More info</button>
+          </article>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .cards { padding: 24px 0 72px; }
+  .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .card { display: flex; flex-direction: column; height: 100%; background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 26px; transition: border-color .2s, transform .2s; }
+  .card:hover { border-color: var(--amber); transform: translateY(-3px); }
+  .card h3 { font: 600 26px/1.15 var(--font-display); margin: 0 0 6px; }
+  .role { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+  .outcome { margin: 0; color: var(--text); font-size: 16px; line-height: 1.55; }
+  .card-more { margin-top: auto; align-self: stretch; font: 600 15px var(--font-body); color: var(--amber); background: transparent; border: 1.5px solid var(--amber); border-radius: 6px; padding: 10px 14px; min-height: 44px; cursor: pointer; }
+  .outcome + .card-more { margin-top: 20px; }
+  .card-more:hover { background: var(--amber); color: var(--on-amber); }
+  .card-more:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>

@@ -1,0 +1,17 @@
+/* The palette and type for the whole site, in one place. The companion artist site should import this same
+   file (or a copy) so the two feel like one person. Names like --amber are historical: --amber is the accent. */
+:root {
+  /* Type */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  /* Palette (all text pairs meet WCAG AA on their grounds) */
+  --bg: #eaeaee;        /* page ground, her current soft grey-lavender */
+  --card: #ffffff;
+  --text: #1b2733;
+  --muted: #45505b;
+  --rule: #c4c7d2;
+  --amber: #0f5a8e;     /* accent: links, buttons, highlights (a slightly darker take on her current blue) */
+  --on-amber: #ffffff;  /* text on top of the accent */
+  --scrim: rgba(27, 39, 51, .55);
+}
