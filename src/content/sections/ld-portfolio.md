@@ -92,7 +92,7 @@ overview:
       At CogArts, I gained experience as an instructional designer by implementing changes to the structure of our process, and building/maintaining Level 1-2 comprehensive schedules of all project deliverables.
 
       Cognitive Arts develops bespoke learning and training programs, recognized as the largest global provider of learning design and development services.
-cardsTitle: "Project details"
+cardsTitle: "Project Assets"
 # true = the cards sit under a heading for each position (each entry's `org`)
 groupCards: true
 ---
