@@ -56,6 +56,8 @@ const pages = defineCollection({
     description: z.string().optional(),
     headshot: image().optional(),
     headshotAlt: z.string().optional(),
+    // Pictures shown beside the text on the About page, in order. Each needs a short plain description (alt).
+    photos: z.array(z.object({ src: image(), alt: z.string() })).default([]),
     cta: z.object({ label: z.string(), url: z.string() }).optional(),  // the Hero's button
   }),
 });

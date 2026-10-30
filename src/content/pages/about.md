@@ -1,9 +1,12 @@
 ---
 title: "About"
 tagline: "Learning, Innovation, and Efficiency in Sync"
-# The photo lives at src/assets/headshot.jpg. Keep the alt text a short, plain description of it.
-headshot: "../../assets/headshot.jpg"
-headshotAlt: "Danielle Levsky smiling at the camera outdoors, with shoulder-length auburn hair and a denim jacket over a purple shirt"
+# The pictures live in src/assets/about/. Keep each alt text a short, plain description of the picture.
+photos:
+  - src: "../../assets/about/about-1.jpeg"
+    alt: "Danielle Levsky in a black cardigan and white floral top, standing beside a tall stone column in the sun and looking off to the side"
+  - src: "../../assets/about/about-2.png"
+    alt: "Danielle Levsky with long red hair, in a dark dress and black sneakers, standing on a sandy path between tall rounded hedges"
 ---
 
 I’m passionate about tackling learning challenges with a critical eye, a strategic plan of action, a people-first mindset, and big-time curiosity.

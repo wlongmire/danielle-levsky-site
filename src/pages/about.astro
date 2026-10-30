@@ -1,11 +1,12 @@
 ---
-// About: the Free Text / Image block.
+// About: the Free Text / Image block. The text on one side, a stack of pictures on the other.
 import { getEntry, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 
 const about = await getEntry('pages', 'about');
 const { Content } = await render(about!);
+const photos = about!.data.photos;
 ---
 <Base title="About" description={about!.data.description}>
   <article class="about">
@@ -13,8 +14,12 @@ const { Content } = await render(about!);
       <h1>{about!.data.title}</h1>
       <Content />
     </div>
-    {about!.data.headshot && (
-      <div class="about-img"><Image src={about!.data.headshot} alt={about!.data.headshotAlt ?? ''} width={900} loading="eager" /></div>
+    {photos.length > 0 && (
+      <div class="about-pics">
+        {photos.map((p, i) => (
+          <div class="about-img"><Image src={p.src} alt={p.alt} width={720} loading={i === 0 ? 'eager' : 'lazy'} /></div>
+        ))}
+      </div>
     )}
   </article>
 </Base>
@@ -25,11 +30,16 @@ const { Content } = await render(about!);
   .about-text h1 { margin: 0 0 24px; font: 500 clamp(40px, 5vw, 60px)/1.05 var(--font-display); color: var(--amber); }
   .about-text :global(p) { margin: 0 0 1.1em; font-size: 18px; line-height: 1.65; }
   .about-text :global(p:first-of-type) { font: 500 clamp(24px, 3vw, 32px)/1.25 var(--font-display); color: var(--text); }
-  .about-img { flex: 1 1 240px; max-width: 360px; align-self: flex-start; border-radius: 4px 40px 4px 4px; overflow: hidden; }
+  .about-pics { flex: 1 1 240px; max-width: 360px; align-self: flex-start; display: flex; flex-direction: column; gap: 24px; }
+  .about-img { border-radius: 4px 40px 4px 4px; overflow: hidden; background: var(--rule); }
+  .about-img:nth-child(even) { border-radius: 4px 4px 40px 4px; }
+  .about-img :global(img) { width: 100%; height: auto; display: block; }
+  /* Phones: the pictures sit side by side above the text, cropped to the same shape so they line up. */
   @media (max-width: 769px) {
     .about { padding: 20px 0 64px; gap: 28px; }
-    .about-img { order: -1; flex: 1 1 100%; max-width: none; border-radius: 4px 32px 4px 4px; }
-    .about-img :global(img) { aspect-ratio: 4 / 3 !important; }
+    .about-pics { order: -1; flex: 1 1 100%; max-width: none; flex-direction: row; gap: 12px; }
+    .about-img { flex: 1 1 0; min-width: 0; border-radius: 4px 24px 4px 4px; }
+    .about-img:nth-child(even) { border-radius: 4px 4px 24px 4px; }
+    .about-img :global(img) { aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 38%; }
   }
-  .about-img :global(img) { width: 100%; aspect-ratio: 4 / 5; height: auto; object-fit: cover; object-position: 57% 30%; display: block; }
 </style>

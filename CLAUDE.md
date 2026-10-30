@@ -73,6 +73,8 @@ on-demand routes via `@astrojs/vercel`; every public page stays static. Code is 
 also add it to the checks in `src/lib/editor/rules.ts`.
 **Gap:** `/edit` still only knows `work`, `timeline`, `about.md` and `site.json`. The new `sections` files and `home.md` are
 not editable there yet (and the `sections:` field on work entries is not checked), so that needs doing before handoff.
+The About page shows a `photos:` list (pictures in `src/assets/about/`, each with alt text). `rules.ts` checks it, but `/edit` has
+no way to upload or reorder those pictures yet, and its About-page "Replace the headshot photo" button swaps the home-page headshot only.
 
 ## Rules
 - Keep content editable by a non-developer: never hard-code entry text in components.

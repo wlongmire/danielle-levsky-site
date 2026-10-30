@@ -18,7 +18,7 @@ export function kindOf(path: string): Kind | null {
 export const IMAGE_TYPES: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
 export function previewablePath(path: string): boolean {
   if (path.includes('..')) return false;
-  return path === 'src/assets/headshot.jpg' || /^src\/assets\/(work|timeline)\/[A-Za-z0-9][A-Za-z0-9._-]*\.(jpe?g|png|webp)$/i.test(path);
+  return path === 'src/assets/headshot.jpg' || /^src\/assets\/(work|timeline|about)\/[A-Za-z0-9][A-Za-z0-9._-]*\.(jpe?g|png|webp)$/i.test(path);
 }
 export const canCreate = (path: string) => ['work', 'timeline'].includes(kindOf(path) ?? '');
 
@@ -113,6 +113,13 @@ export async function validateMarkdown(path: string, text: string): Promise<stri
     const d = data as any;
     if (d.tagline !== undefined && !isStr(d.tagline)) errors.push('"tagline" must be a line of text.');
     if (d.headshot !== undefined && !(isStr(d.headshot) && (await assetExists(path, d.headshot)))) errors.push('The headshot file has not been uploaded.');
+    if (d.photos !== undefined) {
+      if (!Array.isArray(d.photos)) errors.push('"photos" must be a list.');
+      else for (const [i, p] of d.photos.entries()) {
+        if (!isObj(p) || !isStr(p.src) || !isStr(p.alt)) errors.push(`photos item ${i + 1} needs a src and an alt.`);
+        else if (!(await assetExists(path, p.src))) errors.push(`photos item ${i + 1}: the picture "${p.src}" has not been uploaded.`);
+      }
+    }
   }
   return errors;
 }
