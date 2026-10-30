@@ -14,12 +14,13 @@ interface Props {
   imageAlt?: string;
   imageSlot?: boolean;   // show the logo mark where the picture will go, until there is one
   h1?: boolean;
+  large?: boolean;       // taller, and wider than the page content on big screens (the home page)
 }
-const { headline, intro, cta, image, imageAlt = '', imageSlot = false, h1 = true } = Astro.props;
+const { headline, intro, cta, image, imageAlt = '', imageSlot = false, h1 = true, large = false } = Astro.props;
 const Tag = h1 ? 'h1' : 'h2';
 const opensContact = cta?.url === '#contact';
 ---
-<section class:list={['hero', { 'has-img': image || imageSlot }]} aria-labelledby="hero-title">
+<section class:list={['hero', { 'has-img': image || imageSlot, large }]} aria-labelledby="hero-title">
   <div class="hero-text">
     <Tag id="hero-title">{headline}</Tag>
     {intro && <p class="hero-intro">{intro}</p>}
@@ -28,7 +29,7 @@ const opensContact = cta?.url === '#contact';
     )}
   </div>
   {image ? (
-    <div class="hero-img"><Image src={image} alt={imageAlt} width={900} loading="eager" /></div>
+    <div class="hero-img"><Image src={image} alt={imageAlt} width={large ? 1200 : 900} loading="eager" /></div>
   ) : imageSlot ? (
     <div class="hero-img hero-img-empty" aria-hidden="true"><Image src={logo} alt="" width={600} /></div>
   ) : null}
@@ -46,6 +47,18 @@ const opensContact = cta?.url === '#contact';
   @media (max-width: 769px) {
     .hero { padding: 20px 0 40px; gap: 24px; }
     .hero-img { order: -1; flex: 1 1 100%; max-width: none; aspect-ratio: 4 / 3; border-radius: 4px 32px 4px 4px; }
+  }
+  /* Large (home page): more height and a bigger picture and headline; on wide screens it also runs
+     wider than the page content, centred on it. Phones keep the compact layout above. */
+  @media (min-width: 770px) {
+    .hero.large { padding: 104px 0 96px; gap: 64px; min-height: clamp(540px, 74svh, 760px); }
+    .hero.large .hero-text { flex: 3 1 420px; gap: 28px; }
+    .hero.large h1, .hero.large h2 { font-size: clamp(44px, 6vw, 84px); }
+    .hero.large .hero-intro { font-size: 22px; }
+    .hero.large .hero-img { flex: 1 1 320px; max-width: 480px; }
+  }
+  @media (min-width: 1300px) {
+    .hero.large { width: 1200px; margin-left: calc((100% - 1200px) / 2); }
   }
   .hero-img-empty { display: flex; align-items: center; justify-content: center; }
   .hero-img-empty :global(img) { width: 70%; height: auto; object-fit: contain; }
