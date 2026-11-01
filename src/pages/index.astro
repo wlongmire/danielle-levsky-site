@@ -9,6 +9,8 @@ import { loadCases } from '../lib/cases';
 import { site } from '../data/site';
 
 const home = await getEntry('pages', 'home');
+// The CV button reads the "CV" link in site.json (editable on /edit); with no link or an empty one, no button shows.
+const cv = site.links.find((l) => /\bcv\b/i.test(l.label) && l.url);
 // One card from each of the first three positions (the first listed asset of each), so the home page shows a spread.
 const all = await loadCases('ld-portfolio');
 const cases = all.filter((c, i) => all.findIndex((o) => o.entry.data.org === c.entry.data.org) === i).slice(0, 3);
@@ -18,6 +20,7 @@ const cases = all.filter((c, i) => all.findIndex((o) => o.entry.data.org === c.e
     headline={home!.data.tagline ?? site.name}
     intro={home!.data.description}
     cta={home!.data.cta}
+    secondary={cv}
     image={home!.data.headshot}
     imageAlt={home!.data.headshotAlt}
     imageSlot
