@@ -71,10 +71,14 @@ const paragraphs = (intro ?? '').split(/\n\s*\n/).map((p) => p.trim()).filter(Bo
     .hero { padding: 20px 0 40px; gap: 24px; }
     .hero-img { --r: 32px; order: -1; flex: 1 1 100%; max-width: none; aspect-ratio: 4 / 3; }
   }
+  /* Large (home page): the hero sits on a backing panel, which adds breathing room around the text and picture. */
+  .hero.large { --skew: -1.5deg; position: relative; isolation: isolate; margin-top: 24px; padding: 28px clamp(26px, 5vw, 72px) 36px; }
+  /* The panel is a rounded rectangle tilted a little, so its left and right sides lean; the content on top is not tilted. */
+  .hero.large::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--card); border-radius: 16px; transform: skewX(var(--skew)); }
   /* Large (home page): more height and a bigger picture and headline; on wide screens it also runs
      wider than the page content, centred on it. Phones keep the compact layout above. */
   @media (min-width: 770px) {
-    .hero.large { padding: 104px 0 96px; gap: 64px; min-height: clamp(540px, 74svh, 760px); }
+    .hero.large { --skew: -4deg; padding-block: 104px 96px; gap: 64px; min-height: clamp(540px, 74svh, 760px); }
     .hero.large .hero-text { flex: 3 1 420px; gap: 28px; }
     .hero.large h1, .hero.large h2 { font-size: clamp(44px, 6vw, 84px); }
     .hero.large .hero-intro { font-size: 22px; }

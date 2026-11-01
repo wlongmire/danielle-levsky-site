@@ -14,6 +14,9 @@
   --amber: #0f5a8e;     /* accent: links, buttons, highlights (a slightly darker take on her current blue) */
   --on-amber: #ffffff;  /* text on top of the accent */
   --scrim: rgba(27, 39, 51, .55);
+  /* A faint paper-like grain laid over --bg on the page background (a tiny inline SVG, no image file). The alpha (.09) is the strength;
+     raise it for a stronger texture. Text on it still meets AA. */
+  --bg-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .11 0 0 0 0 .16 0 0 0 0 .3 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
   /* Dark panels (a highlighted group of cards): a deep navy drawn from the accent blue, with its own text and accent
      colours. Pairs: --on-dark and --on-dark-muted on --dark and --dark-card, and --accent-on-dark, all meet WCAG AA. */
