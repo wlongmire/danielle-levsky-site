@@ -1,0 +1,17 @@
+---
+// Page block: Text Title. A heading on its own, to introduce the blocks beneath it (for example "Project Assets" above a
+// run of Card Grids). The first block with a title on a page is its main title (h1); anywhere else it is an h2.
+interface Props { title: string; h1?: boolean; uid?: string; }
+const { title, h1 = false, uid = '' } = Astro.props;
+const Tag = h1 ? 'h1' : 'h2';
+---
+{title && (
+  <section class="text-title">
+    <Tag id={`text-title${uid}`} class="section-title">{title}</Tag>
+  </section>
+)}
+
+<style>
+  .text-title { padding: 24px 0 0; }
+  .text-title .section-title { margin-bottom: 0; }
+</style>

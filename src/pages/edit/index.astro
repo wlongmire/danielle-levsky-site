@@ -334,7 +334,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
         case 'image': return imageField(f, obj, ctx);
         case 'list': return listField(f, obj, ctx);
         case 'strings': return stringsField(f, obj);
-        case 'cards': return cardsField(f, obj);
+        case 'cards': return cardList(obj[f.key] || (obj[f.key] = []));
       }
       return el('div');
     }
@@ -460,15 +460,20 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
           el('div', { class: 'hint', text: 'A line starting with ### makes a subheading. A blank line starts a new paragraph. [words](address) makes a link.' })));
     }
 
-    function cardsField(f, obj) {
-      const arr = obj[f.key] || (obj[f.key] = []);
+    // A Card Grid's cards: ordered, each opening in place.
+    function cardList(arr) {
+      const taken = () => arr;
       const wrap = el('div', { class: 'field' });
       let openId = null;
       const draw = () => {
-        const sel = el('select', { 'aria-label': 'Add an existing card' }, el('option', { value: '' }, 'Add an existing card…'),
-          files.entries.filter((e) => !arr.includes(e.id)).map((e) => el('option', { value: e.id }, e.title)));
+        const sel = el('select', { 'aria-label': 'Add an existing card' });
+        // Rebuilt whenever it is opened, so a card just added to another group is not offered again.
+        const options = () => sel.replaceChildren(el('option', { value: '' }, 'Add an existing card…'),
+          ...files.entries.filter((e) => !taken().includes(e.id)).map((e) => el('option', { value: e.id }, e.title)));
+        options();
+        sel.addEventListener('mousedown', options); sel.addEventListener('focus', options);
         sel.addEventListener('change', () => { if (sel.value) { arr.push(sel.value); openId = null; touch(); draw(); } });
-        const head = el('div', { class: 'block-head' }, el('span', { class: 'lbl', text: f.label }),
+        const head = el('div', { class: 'block-head' }, el('span', { class: 'lbl', text: 'Cards' }),
           el('div', { class: 'bar-add' }, sel, el('button', { class: 'btn small', type: 'button', onclick: () => {
             const id = 'new-card-' + ++newCardCount;
             cardStore.set(id, { id, path: '', title: '', loaded: true, isNew: true, dirty: true, data: { title: '', outcome: '', role: '', org: '', dates: '' }, body: '', sha: null });
@@ -617,7 +622,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
         st.sha = r.data.sha; st.dirty = false;
         if (st.isNew) {
           cardStore.delete(id); st.isNew = false; st.id = real; st.path = 'src/content/work/' + real + '.md'; cardStore.set(real, st);
-          for (const b of blocks) b.entries.forEach((x, i) => { if (x === id) b.entries[i] = real; });
+          for (const b of blocks) (b.entries || []).forEach((x, i) => { if (x === id) b.entries[i] = real; });
         }
       }
       return problems;

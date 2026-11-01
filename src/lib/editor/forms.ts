@@ -37,6 +37,13 @@ export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: 
       ] },
     ],
   },
+  title: {
+    ...BLOCK_TYPES.title,
+    defaults: { type: 'title', title: '' },
+    fields: [
+      { key: 'title', label: 'Title', type: 'text' },
+    ],
+  },
   overview: {
     ...BLOCK_TYPES.overview,
     defaults: { type: 'overview', title: '', items: [] },
@@ -52,9 +59,11 @@ export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: 
     ...BLOCK_TYPES.cards,
     defaults: { type: 'cards', title: '', entries: [] },
     fields: [
-      { key: 'title', label: 'Heading (optional)', type: 'text' },
+      { key: 'title', label: 'Title (optional)', type: 'text' },
       { key: 'entries', label: 'Cards', type: 'cards' },
-      { key: 'groupByOrg', label: 'Group the cards under a heading for each card\'s "Group heading"', type: 'bool' },
+      { key: 'style', label: 'Style', type: 'group', fields: [
+        { key: 'boxed', label: 'Dark Panel', type: 'bool' },
+      ] },
     ],
   },
   text: {
@@ -74,7 +83,7 @@ export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: 
 export const ENTRY_FIELDS: Field[] = [
   { key: 'title', label: 'Title', type: 'text', hint: 'Shown on the card and at the top of the popup.' },
   { key: 'outcome', label: 'One-line summary', type: 'textarea', rows: 3, hint: 'Shown on the card, and in bold at the top of the popup.' },
-  { key: 'org', label: 'Group heading', type: 'text', hint: 'The heading the card sits under on a grouped card grid (a position, a program, "DEI Projects"). Cards with the same words sit together.' },
+  { key: 'org', label: 'Organization (optional)', type: 'text' },
   { key: 'role', label: 'Role (optional)', type: 'text' },
   { key: 'dates', label: 'Dates (optional)', type: 'text' },
   { key: 'confidential', label: 'Described or recreated, not the original (confidential work)', type: 'bool' },

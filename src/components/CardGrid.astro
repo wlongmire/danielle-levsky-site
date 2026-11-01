@@ -1,52 +1,43 @@
 ---
-// Page block: Card Grid. A titled grid of portfolio entries. "More info" opens that entry in the popup
+// Page block: Card Grid. A grid of portfolio entries with an optional title. "More info" opens that entry in the popup
 // (CaseDialog, which must be on the same page) and puts its name in the address, e.g. /projects/ld-portfolio#baker-tilly.
-// With groupBy="org" the cards sit under a heading for each position (the entry's `org`), in the order they are listed,
-// each position in its own dark panel.
-interface Props { title?: string; cases: { entry: any; Content: any }[]; groupBy?: 'org'; uid?: string; }
-const { title, cases, groupBy, uid = '' } = Astro.props;
-const roleLine = (d: any) => [d.role, !groupBy && d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
+// With `boxed` the title and the cards sit together in a dark panel; otherwise the title is a plain section title.
+interface Props { title?: string; cases: { entry: any; Content: any }[]; boxed?: boolean; below?: boolean; uid?: string; }
+const { title, cases, boxed = false, below = false, uid = '' } = Astro.props;
+// Under the panel's title the card line is role · dates (the title already says where); otherwise the organization is added.
+const headed = boxed && !!title;
+const roleLine = (d: any) => [d.role, !headed && d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
 // A card only gets a "More info" button when there is something to open.
 const hasDetail = (e: any) => Boolean(e.body?.trim()) || e.data.media.length > 0 || e.data.images.length > 0 || e.data.artifacts.length > 0 || e.data.links.length > 0;
 
-const groups: { heading?: string; items: typeof cases }[] = [];
-for (const c of cases) {
-  const heading = groupBy ? c.entry.data[groupBy] || undefined : undefined;
-  const last = groups[groups.length - 1];
-  if (last && last.heading === heading) last.items.push(c); else groups.push({ heading, items: [c] });
-}
-// Heading levels follow what is above them: a grid title is h2, a position heading under it h3 (h2 when there is no
-// grid title), and the cards one level below whatever heading they sit under.
-const GroupHeading = title ? 'h3' : 'h2';
-const Heading = groupBy ? (title ? 'h4' : 'h3') : 'h3';
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+// Heading levels follow what is above them: a title is h2 (h3 when a Text Title sits above this block), and the cards one level
+// below whatever title they sit under (h3 when there is no title).
+const Title = below ? 'h3' : 'h2';
+const Heading = title ? (below ? 'h4' : 'h3') : 'h3';
 ---
 {cases.length > 0 && (
-  <section class="cards" aria-labelledby={title ? `cards-title${uid}` : undefined}>
-    {title && <h2 id={`cards-title${uid}`} class="section-title">{title}</h2>}
-    {groups.map((g) => (
-      <div class:list={['group', { boxed: g.heading }]} role={g.heading ? 'group' : undefined} aria-labelledby={g.heading ? `grp-${slug(g.heading)}` : undefined}>
-        {g.heading && <GroupHeading id={`grp-${slug(g.heading)}`} class="group-title">{g.heading}</GroupHeading>}
-        <ul class="grid">
-          {g.items.map(({ entry }) => (
-            <li>
-              <article class="card" id={entry.id}>
-                <Heading class="card-title">{entry.data.title}</Heading>
-                {roleLine(entry.data) && <p class="role">{roleLine(entry.data)}</p>}
-                <p class="outcome">{entry.data.outcome}</p>
-                {hasDetail(entry) && <button type="button" class="card-more" data-case={entry.id} aria-haspopup="dialog">More info</button>}
-              </article>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
+  <section class:list={['cards', { boxed: headed }]} aria-labelledby={title ? `cards-title${uid}` : undefined}>
+    {title && <Title id={`cards-title${uid}`} class={headed ? 'group-title' : 'section-title'}>{title}</Title>}
+    <ul class="grid">
+      {cases.map(({ entry }) => (
+        <li>
+          <article class="card" id={entry.id}>
+            <Heading class="card-title">{entry.data.title}</Heading>
+            {roleLine(entry.data) && <p class="role">{roleLine(entry.data)}</p>}
+            <p class="outcome">{entry.data.outcome}</p>
+            {hasDetail(entry) && <button type="button" class="card-more" data-case={entry.id} aria-haspopup="dialog">More info</button>}
+          </article>
+        </li>
+      ))}
+    </ul>
   </section>
 )}
 
 <style>
   .cards { padding: 24px 0 72px; }
-  .group + .group { margin-top: 28px; }
+  /* Card Grids that follow one another sit close together; the last one keeps the full space below the page. */
+  .cards:has(+ .cards) { padding-bottom: 0; }
+  .cards + .cards { padding-top: 28px; }
   .grid { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
   .card { display: flex; flex-direction: column; height: 100%; background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 16px 18px; transition: border-color .2s, transform .2s; }
   .card:hover { border-color: var(--amber); transform: translateY(-2px); }
@@ -60,7 +51,8 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(
   .card-more:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
 
   /* A position's cards sit in a dark panel: its heading, the cards and their buttons all switch to the dark-panel colours. */
-  .boxed { background: var(--dark); border-radius: 16px; padding: clamp(16px, 3vw, 32px); }
+  .cards.boxed { background: var(--dark); border-radius: 16px; padding: clamp(16px, 3vw, 32px); margin: 24px 0 0; }
+  .cards.boxed:not(:has(+ .cards)) { margin-bottom: 72px; }
   .group-title { margin: 0 0 18px; font: 500 clamp(28px, 3.4vw, 38px)/1.15 var(--font-display); color: var(--on-dark); }
   .boxed .card { background: var(--dark-card); border-color: var(--dark-rule); }
   .boxed .card:hover { border-color: var(--accent-on-dark); }

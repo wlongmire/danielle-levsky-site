@@ -34,6 +34,11 @@ export const blocksSchema = (image: () => z.ZodType<ImageMetadata>) =>
         imageCrop: z.enum(CROP_KEYS).optional(),        // where the picture is cropped to (see CROPS)
         featured: z.boolean().default(false),           // the big home-page look: taller, on a panel, with a picture slot
       }),
+      // A heading on its own, to introduce the blocks beneath it.
+      z.object({
+        type: z.literal('title'),
+        title: z.string().default(''),
+      }),
       // A headline over a list of items that open and close.
       z.object({
         type: z.literal('overview'),
@@ -45,7 +50,7 @@ export const blocksSchema = (image: () => z.ZodType<ImageMetadata>) =>
         type: z.literal('cards'),
         title: z.string().optional(),
         entries: z.array(z.string()).default([]),       // the cards (file names in src/content/work), in the order shown; one card can be in several grids
-        groupByOrg: z.boolean().default(false),         // true = under a heading for each entry's `org`
+        boxed: z.boolean().default(false),              // true = the title and cards sit together in a dark panel
       }),
       // Text (Markdown) with optional pictures beside it.
       z.object({
@@ -63,7 +68,8 @@ export type Block = z.infer<ReturnType<typeof blocksSchema>>[number];
 export const BLOCK_TYPES = {
   hero: { label: 'Hero', hint: 'A headline, a short paragraph, optional buttons and a picture.' },
   overview: { label: 'Overview list', hint: 'A heading over a list of items that open and close.' },
-  cards: { label: 'Card grid', hint: 'Boxes for portfolio cards; each opens a popup.' },
+  cards: { label: 'Card grid', hint: 'Boxes for portfolio cards, with an optional title; each card opens a popup.' },
+  title: { label: 'Text Title', hint: 'A heading on its own, to introduce the blocks beneath it.' },
   text: { label: 'Text and pictures', hint: 'Longer text with optional pictures beside it.' },
 } as const;
 

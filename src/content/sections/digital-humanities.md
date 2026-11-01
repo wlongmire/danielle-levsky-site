@@ -10,9 +10,10 @@ blocks:
     image: ../../assets/digital-humanities/loyola-dh-logo.png
     imageAlt: Center for Textual Studies and Digital Humanities, Loyola University Chicago
   - type: cards
+    title: Digital Humanities Projects
+    boxed: true
     entries:
       - chicago-queer-performance-map
       - prototype-k12-educators-learners
       - accessibility-usability-presentation
-    groupByOrg: true
 ---

@@ -168,9 +168,12 @@ export async function validatePage(path: string, data: any): Promise<string[]> {
           else if (/<\s*(script|iframe|object|embed)\b/i.test(it.text)) errors.push(`${at} item ${n + 1}: the text may not contain <script>, <iframe>, <object> or <embed>.`);
         });
         break;
+      case 'title':
+        if (!isStr(b.title)) errors.push(`${at} (Text Title): the title is required.`);
+        break;
       case 'cards':
         strs(['title']);
-        if (b.groupByOrg !== undefined && typeof b.groupByOrg !== 'boolean') errors.push(`${at}: grouping must be on or off.`);
+        if (b.boxed !== undefined && typeof b.boxed !== 'boolean') errors.push(`${at}: the dark panel must be on or off.`);
         if (!Array.isArray(b.entries) || b.entries.length === 0) errors.push(`${at} (Card grid): add at least one card.`);
         else for (const id of b.entries) if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(id) || (await shaOf(`src/content/work/${id}.md`)) === null) errors.push(`${at}: the card "${id}" does not exist.`);
         break;

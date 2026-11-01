@@ -94,8 +94,11 @@ blocks:
           At CogArts, I gained experience as an instructional designer by implementing changes to the structure of our process, and building/maintaining Level 1-2 comprehensive schedules of all project deliverables.
 
           Cognitive Arts develops bespoke learning and training programs, recognized as the largest global provider of learning design and development services.
-  - type: cards
+  - type: title
     title: Project Assets
+  - type: cards
+    title: Baker Tilly
+    boxed: true
     entries:
       - pmo-requirements-backlog-alignment
       - qa-qc-uat-process-design
@@ -103,19 +106,39 @@ blocks:
       - client-portal-guides-uat-walkthroughs
       - regulatory-requirements-translation
       - ocr-vlm-evaluation-audit-ready-data-requirements
+  - type: cards
+    title: Judge Learning Solutions
+    boxed: true
+    entries:
       - learning-project-management-client-delivery
+  - type: cards
+    title: Comcast (Effectv)
+    boxed: true
+    entries:
       - aos-user-guide-training
       - global-course-audit-assessment
       - auto-industry-curriculum-architecture
+  - type: cards
+    title: eighty2i
+    boxed: true
+    entries:
       - organizational-charts-creation-and-revamp
       - quick-start-onboarding-experience
       - culture-promotion-and-employee-engagement
       - communication-guidelines-process-refinement
       - performance-management-system-creation
+  - type: cards
+    title: Meta
+    boxed: true
+    entries:
       - csod-configuration-analysis
       - documentation-procedures-session-demand-planning-process-optimization
       - team-wiki-development
       - department-intake-process-evaluation
+  - type: cards
+    title: BenchPrep
+    boxed: true
+    entries:
       - learning-technologist-onboarding-training
       - course-program-improvements-and-management
       - company-team-onboarding-training-plan
@@ -124,9 +147,16 @@ blocks:
       - coaching-mentoring
       - pm-systems
       - managing-and-training-content-review-freelancers
+  - type: cards
+    title: SMS Assist
+    boxed: true
+    entries:
       - software-and-technical-training
       - standard-operating-procedures-for-training-teams
       - company-culture-training
+  - type: cards
+    title: Cognitive Arts (NIIT)
+    boxed: true
+    entries:
       - auto-and-property-insurance-course
-    groupByOrg: true
 ---

@@ -12,7 +12,8 @@ blocks:
       - title: Celebration posts
         text: Unique and meaningful DEI posts for celebrations like Juneteenth, Pride Month, Filipino Independence Day, and the Fourth of July, fostering understanding and open discussion.
   - type: cards
+    title: DEI Projects
+    boxed: true
     entries:
       - eighty2i
-    groupByOrg: true
 ---

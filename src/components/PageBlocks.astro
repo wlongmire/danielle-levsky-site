@@ -5,6 +5,7 @@ import Hero from './Hero.astro';
 import OverviewList from './OverviewList.astro';
 import CardGrid from './CardGrid.astro';
 import TextBlock from './TextBlock.astro';
+import TitleBlock from './TitleBlock.astro';
 import CaseDialog from './CaseDialog.astro';
 import { loadPicks } from '../lib/cases';
 import { CROPS, type Block } from '../lib/blocks';
@@ -18,7 +19,7 @@ const casesFor = await Promise.all(
 );
 const popupCases = [...new Map(casesFor.flat().map((c) => [c.entry.id, c])).values()];
 // The first block with a headline holds the page's main title (h1); the rest step down to h2.
-const firstTitled = blocks.findIndex((b) => b.type === 'hero' || (b.type === 'text' && b.title));
+const firstTitled = blocks.findIndex((b) => b.type === 'hero' || (b.type === 'text' && b.title) || (b.type === 'title' && b.title));
 ---
 {blocks.map((b, i) => {
   const uid = i === 0 ? '' : `-${i}`;
@@ -41,7 +42,9 @@ const firstTitled = blocks.findIndex((b) => b.type === 'hero' || (b.type === 'te
     case 'overview':
       return <OverviewList title={b.title} items={b.items} uid={uid} />;
     case 'cards':
-      return <CardGrid title={b.title} cases={casesFor[i]} groupBy={b.groupByOrg ? 'org' : undefined} uid={uid} />;
+      return <CardGrid title={b.title} cases={casesFor[i]} boxed={b.boxed} below={blocks.slice(0, i).some((x) => x.type === 'title')} uid={uid} />;
+    case 'title':
+      return <TitleBlock title={b.title} h1={i === firstTitled} uid={uid} />;
     case 'text':
       return <TextBlock title={b.title} body={b.body} photos={b.photos} h1={i === firstTitled} />;
   }
