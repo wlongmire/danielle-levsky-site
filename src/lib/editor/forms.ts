@@ -6,7 +6,7 @@ import { BLOCK_TYPES, CROPS } from '../blocks';
 export type Field = {
   key: string;
   label: string;
-  type: 'text' | 'textarea' | 'markdown' | 'bool' | 'select' | 'checks' | 'image' | 'button' | 'object' | 'group' | 'list' | 'strings' | 'cards';
+  type: 'text' | 'textarea' | 'markdown' | 'bool' | 'select' | 'checks' | 'image' | 'button' | 'object' | 'group' | 'list' | 'strings' | 'cards' | 'body';
   hint?: string;
   rows?: number;
   options?: [value: string, label: string][];
@@ -79,30 +79,29 @@ export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: 
   },
 };
 
-/** The entry (card and popup) form. The write-up is edited separately, below these fields. */
+/** The entry (card and popup) form. `body` is the Markdown content under the front matter; the page draws it where it sits here. */
 export const ENTRY_FIELDS: Field[] = [
-  { key: 'title', label: 'Title', type: 'text', hint: 'Shown on the card and at the top of the popup.' },
-  { key: 'outcome', label: 'One-line summary', type: 'textarea', rows: 3, hint: 'Shown on the card, and in bold at the top of the popup.' },
-  { key: 'org', label: 'Organization (optional)', type: 'text' },
-  { key: 'role', label: 'Role (optional)', type: 'text' },
-  { key: 'dates', label: 'Dates (optional)', type: 'text' },
-  { key: 'confidential', label: 'Described or recreated, not the original (confidential work)', type: 'bool' },
-  { key: 'draft', label: 'Hide this card from the site', type: 'bool' },
-  { key: 'media', label: 'Pictures and videos in the popup', type: 'list', itemName: 'picture or video', defaults: { type: 'image', fit: 'contain' }, fields: [
-    { key: 'type', label: 'Kind', type: 'select', options: [['image', 'Picture'], ['video', 'YouTube video']] },
-    { key: 'src', label: 'Picture', type: 'image', altKey: 'alt', showIf: { key: 'type', is: 'image' } },
-    { key: 'fit', label: 'Show', type: 'select', options: [['contain', 'The whole picture'], ['cover', 'Cropped to fill']], showIf: { key: 'type', is: 'image' } },
-    { key: 'url', label: 'YouTube link', type: 'text', showIf: { key: 'type', is: 'video' } },
-    { key: 'title', label: 'Video title (read aloud by screen readers)', type: 'text', showIf: { key: 'type', is: 'video' } },
-    { key: 'caption', label: 'Caption (optional)', type: 'text' },
-  ] },
-  { key: 'artifacts', label: 'Files and samples to link to', type: 'list', itemTitle: 'label', itemName: 'link', defaults: { label: '', url: '' }, fields: [
-    { key: 'label', label: 'Words', type: 'text' },
-    { key: 'url', label: 'Address', type: 'text' },
-  ] },
-  { key: 'links', label: 'Other links', type: 'list', itemTitle: 'label', itemName: 'link', defaults: { label: '', url: '' }, fields: [
-    { key: 'label', label: 'Words', type: 'text' },
-    { key: 'url', label: 'Address', type: 'text' },
+  { key: 'title', label: 'Title', type: 'text' },
+  { key: 'org', label: 'Subtitle', type: 'text' },
+  { key: 'outcome', label: 'Summary', type: 'textarea', rows: 3 },
+  { key: 'body', label: 'Content', type: 'body', rows: 18, hint: 'A line starting with ### makes a subheading. A blank line starts a new paragraph. [words](address) makes a link.' },
+  { key: 'mediaGroup', label: 'Media', type: 'group', fields: [
+    { key: 'media', label: 'Image', type: 'list', itemName: 'image', defaults: { type: 'image' }, fields: [
+      { key: 'type', label: 'Type', type: 'select', options: [['image', 'Picture'], ['video', 'YouTube video']] },
+      { key: 'src', label: 'Image', type: 'image', altKey: 'alt', showIf: { key: 'type', is: 'image' } },
+      { key: 'crop', label: 'Picture cropping', type: 'select', options: Object.entries(CROPS).map(([v, c]) => [v, c.label] as [string, string]), showIf: { key: 'type', is: 'image' } },
+      { key: 'url', label: 'YouTube link', type: 'text', showIf: { key: 'type', is: 'video' } },
+      { key: 'title', label: 'Video title (read aloud by screen readers)', type: 'text', showIf: { key: 'type', is: 'video' } },
+      { key: 'caption', label: 'Caption (optional)', type: 'text' },
+    ] },
+    { key: 'artifacts', label: 'Artifacts', type: 'list', itemTitle: 'label', itemName: 'artifact', defaults: { label: '', url: '' }, fields: [
+      { key: 'label', label: 'Title', type: 'text' },
+      { key: 'url', label: 'URL', type: 'text' },
+    ] },
+    { key: 'links', label: 'Links', type: 'list', itemTitle: 'label', itemName: 'link', defaults: { label: '', url: '' }, fields: [
+      { key: 'label', label: 'Title', type: 'text' },
+      { key: 'url', label: 'URL', type: 'text' },
+    ] },
   ] },
 ];
 

@@ -1,7 +1,7 @@
 ---
 title: eighty2i
 outcome: 'Built and managed the Teammate Success team: learning programs, the performance management process, onboarding, and DEI initiatives that fostered belonging and inclusivity.'
-role: Head of Teammate Success
+role: ''
 org: DEI Projects
 dates: ''
 tools:
@@ -9,6 +9,8 @@ tools:
   - Notion
 tracks: []
 ---
+
+**Role:** Head of Teammate Success
 
 When I joined eighty2i as the Head of Teammate Success, I took the helm of building and managing a team that would execute the vision of fostering the professional growth of team members.
 

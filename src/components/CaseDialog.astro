@@ -5,6 +5,7 @@
 import { Image } from 'astro:assets';
 import { trackLabel } from '../data/home';
 import { resolveMedia } from '../lib/media';
+import { CROPS } from '../lib/blocks';
 
 const { cases } = Astro.props as { cases: { entry: any; Content: any }[] };
 
@@ -28,7 +29,7 @@ function youtubeId(url: string): string | null {
 <!-- One template per case study; the script copies the one that was clicked into the popup. -->
 {cases.map(({ entry, Content }) => {
   const d = entry.data;
-  const meta = [d.role, d.title.includes(d.org) ? '' : d.org, d.dates].filter(Boolean).join(' · ');
+  const meta = d.title.includes(d.org) ? '' : d.org;
   const artifacts = d.artifacts.filter((a: any) => a.url);
   const links = d.links.filter((l: any) => l.url);
   // Older `images` lists first, then the `media` list: pictures and YouTube videos in one slideshow.
@@ -50,7 +51,7 @@ function youtubeId(url: string): string | null {
                 </figure>
               ) : m.type === 'image' ? (
                 <figure class="cs-frame" hidden={i > 0}>
-                  <Image src={m.src} alt={m.alt} width={1200} loading="eager" class={m.fit === 'cover' ? 'cs-cover' : undefined} />
+                  <Image src={m.src} alt={m.alt} width={1200} loading="eager" class={m.crop || m.fit === 'cover' ? 'cs-cover' : undefined} style={m.crop ? `object-position: ${CROPS[m.crop as keyof typeof CROPS]?.position ?? 'center'}` : undefined} />
                   {m.caption && <figcaption>{m.caption}</figcaption>}
                 </figure>
               ) : null;

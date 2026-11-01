@@ -1,11 +1,9 @@
 ---
 title: Interactive Map of Chicago Queer Performance Spaces
 outcome: Along with three other graduate students in Loyola University’s Digital Humanities and Public History masters programs, I built an interactive map highlighting Chicago locations that consider themselves LGBTQ+ entertainment spaces, or spaces that put on LGBTQ+ programming regularly.
-role: Graduate project
+role: ''
 org: Digital Humanities Projects
-dates: Fall 2019–Spring 2020
-tools: []
-tracks: []
+dates: ''
 media:
   - type: image
     src: chicago-queer-performance-map-1.png
@@ -20,6 +18,9 @@ media:
     alt: The Come Out & Play discussion board page, with a note inviting people to share their experiences of Chicago's queer performance spaces.
     fit: contain
 ---
+
+**Role:** Graduate project  
+**Dates:** Fall 2019–Spring 2020
 
 Our interactive map aims to capture the history and culture of queer performance spaces in Chicago. LGBTQ+ history is often excluded from the popular historical narrative, yet it remains an integral part of the context and community of many Chicago neighborhoods.
 

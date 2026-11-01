@@ -4,9 +4,9 @@
 // With `boxed` the title and the cards sit together in a dark panel; otherwise the title is a plain section title.
 interface Props { title?: string; cases: { entry: any; Content: any }[]; boxed?: boolean; below?: boolean; uid?: string; }
 const { title, cases, boxed = false, below = false, uid = '' } = Astro.props;
-// Under the panel's title the card line is role · dates (the title already says where); otherwise the organization is added.
+// The subtitle (organization) sits under the card's title; inside a titled panel it is left out, since the panel's title already says it.
 const headed = boxed && !!title;
-const roleLine = (d: any) => [d.role, !headed && d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
+const roleLine = (d: any) => (!headed && d.org && !d.title.includes(d.org) ? d.org : '');
 // A card only gets a "More info" button when there is something to open.
 const hasDetail = (e: any) => Boolean(e.body?.trim()) || e.data.media.length > 0 || e.data.images.length > 0 || e.data.artifacts.length > 0 || e.data.links.length > 0;
 

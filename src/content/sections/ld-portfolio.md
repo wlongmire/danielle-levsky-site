@@ -108,9 +108,9 @@ blocks:
       - ocr-vlm-evaluation-audit-ready-data-requirements
   - type: cards
     title: Judge Learning Solutions
-    boxed: true
     entries:
       - learning-project-management-client-delivery
+    boxed: true
   - type: cards
     title: Comcast (Effectv)
     boxed: true

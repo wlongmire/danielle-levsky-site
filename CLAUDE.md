@@ -46,17 +46,17 @@ Left over from the template and not used by any page yet: `Timeline.astro`, `Res
   subheading (a position) is its own Card Grid block with a title and `boxed: true`.
   On the L&D Portfolio page each entry is one asset box from her old site (title, one-line `outcome`, the full write-up as the
   body, pictures in `media`). The position a box sits under is the title of the Card Grid block it is in;
-  `org` only names the organization on a card that is not under a subheading; `role` and `dates` are left empty. The text is her old site's, word for word. The picture alt text there is a
+  `org` is the card's Subtitle (shown under its title, and left off a card that sits in a titled panel); `role` and `dates` are no longer shown or edited (the few that had values moved into the top of the card's Content as `**Role:**` / `**Dates:**` lines; the keys stay in the files as empty strings because the schema still requires them). The text is her old site's, word for word. The picture alt text there is a
   generic placeholder ("Picture 2 of 7 from ...") until she describes each one.
-- `src/content/pages/home.md`, `about.md` and `src/content/sections/<slug>.md`: one file per page. Each is a page name (`title`, or `navLabel` for section pages; `draft: true` hides a section page), an optional `description`, and an ordered `blocks:` list. Block types (defined once in `src/lib/blocks.ts`, drawn by `components/PageBlocks.astro`): `hero` (headline, intro, `buttons` (first is the main one, the rest outlined; `#contact` opens the contact popup), `image`/`imageAlt`/`imageCrop` (where the picture is cropped to: top, upper, center, bottom, left, right; a picture more than 2.5 times wider than tall, like a logo, is shown whole instead of cropped), `featured`), `overview` (title, items), `title` (Text Title: a heading on its own, e.g. "Project Assets" above a run of card grids), `cards` (optional `title`, `entries` = the cards in order, `boxed` = dark panel), `text` (title, Markdown `body`, `photos`). Pictures live in `src/assets/pages/` (uploads from /edit) or the older `src/assets/<page>/` folders. Menu order is `sections` in `src/data/order.json`.
+- `src/content/pages/home.md`, `about.md` and `src/content/sections/<slug>.md`: one file per page. Each is a page name (`title`, or `navLabel` for section pages; `draft: true` hides a section page; /edit has no checkbox for it for now), an optional `description`, and an ordered `blocks:` list. Block types (defined once in `src/lib/blocks.ts`, drawn by `components/PageBlocks.astro`): `hero` (headline, intro, `buttons` (first is the main one, the rest outlined; `#contact` opens the contact popup), `image`/`imageAlt`/`imageCrop` (where the picture is cropped to: top, upper, center, bottom, left, right; a picture more than 2.5 times wider than tall, like a logo, is shown whole instead of cropped), `featured`), `overview` (title, items), `title` (Text Title: a heading on its own, e.g. "Project Assets" above a run of card grids), `cards` (optional `title`, `entries` = the cards in order, `boxed` = dark panel), `text` (title, Markdown `body`, `photos`). Pictures live in `src/assets/pages/` (uploads from /edit) or the older `src/assets/<page>/` folders. Menu order is `sections` in `src/data/order.json`.
 - `public/resumes/*.pdf`: resumes (not wired to a page yet; her CV is a Google Doc link in `site.json`)
 
 Entry front matter:
 ```yaml
 title: ""
-outcome: ""          # one line, shown on the card
+outcome: ""          # /edit calls it Summary: one line, shown on the card and in bold in the popup
 role: ""
-org: ""
+org: ""            # /edit calls it Subtitle
 dates: ""
 audience: ""
 tools: []
@@ -66,6 +66,7 @@ media: []            # optional popup slideshow: items of {type: image, src: "fi
 confidential: false  # true = described/recreated, not original artifacts
 draft: false
 ```
+/edit's card form, in order: Title, Subtitle (`org`), Summary (`outcome`), Content (the Markdown body), then a Media box (Image = `media`, whose Type is Picture or YouTube video; a picture's `crop` uses the same choices as a hero picture: empty shows the whole picture, any other crops it to a wide banner at that position, Artifacts = `artifacts`, Links = `links`). It has no checkbox for `confidential` or `draft`; both stay in the files (six cards are `confidential: true`; it is not displayed).
 Body sections, in order: Context, Approach, What I built, Outcome, Reflection.
 
 ## Editing from the web
@@ -79,6 +80,7 @@ appears in several grids. The forms are drawn from field lists in `src/lib/edito
 `src/pages/api/edit/doc.ts` (one endpoint for pages, cards and site) and is checked in `src/lib/editor/rules.ts` (`validatePage`,
 `validateMarkdown`). Setup and safety rules: `EDITING.md` (partly out of date: still describes the old raw-Markdown editor). Site-wide
 details live in `src/data/site.json`. The menu order lives in `src/data/order.json` (its old `work` list is no longer used; a grid's own list sets card order).
+Each block's form opens with a small drawing of that block type (`DEMOS` in `src/pages/edit/index.astro`); a new block type needs a drawing there too.
 To teach /edit a new field: add it to `blocks.ts` or `content.config.ts`, to `forms.ts`, and to the checks in `rules.ts`.
 Not editable there: creating new pages, the `timeline` collection, resumes, the contact form endpoint. Saving a card rewrites its
 front matter in tidy YAML (same data, different style). In dev, saving triggers a page reload.

@@ -1,7 +1,7 @@
 ---
 title: Prototype of System for K-12 Educators and Learners
 outcome: This project proposal sought to provide an online website that would function as a customizable resource for facilitators, education organizations/institutions, and their students to have a place that stores different free sources across the internet to improve e-learning programs.
-role: Graduate project
+role: ''
 org: Digital Humanities Projects
 dates: ''
 tools: []
@@ -15,3 +15,5 @@ artifacts:
   - label: View the full paper (PDF)
     url: https://drive.google.com/file/d/1XxgLp0ncZAkB8S5gdc63ykPvX2C5gpc2/view?usp=sharing
 ---
+
+**Role:** Graduate project

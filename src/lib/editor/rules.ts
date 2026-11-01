@@ -4,7 +4,7 @@ import { load as yamlLoad } from 'js-yaml';
 import { MAX_TEXT_BYTES } from './config';
 import { shaOf } from './storage';
 import { resumes } from '../../data/resumes';
-import { CROPS } from '../blocks';
+import { CROPS, CROP_KEYS } from '../blocks';
 
 export type Kind = 'work' | 'timeline' | 'page' | 'site';
 
@@ -79,6 +79,7 @@ export async function validateMarkdown(path: string, text: string): Promise<stri
       if (m.type === 'image') {
         if (!isStr(m.src) || !isStr(m.alt)) errors.push(`media item ${i + 1} (picture) needs a src and an alt.`);
         else if (!(await assetExists(path, m.src))) errors.push(`media item ${i + 1}: the picture "${m.src}" has not been uploaded.`);
+        if (m.crop !== undefined && m.crop !== '' && !CROP_KEYS.includes(m.crop as string)) errors.push(`media item ${i + 1}: the picture cropping is not one of the choices.`);
         if (m.fit !== undefined && !['contain', 'cover'].includes(m.fit as string)) errors.push(`media item ${i + 1}: fit must be contain or cover.`);
       } else if (m.type === 'video') {
         if (!isStr(m.url) || !/(youtu\.be\/|youtube\.com\/(watch\?|embed\/|shorts\/))/.test(m.url)) errors.push(`media item ${i + 1} (video) needs a YouTube link as its url.`);

@@ -1,7 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
-import { blocksSchema } from './lib/blocks';
+import { blocksSchema, CROP_KEYS } from './lib/blocks';
 
 const work = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/work' }),
@@ -26,7 +26,8 @@ const work = defineCollection({
         src: z.string(),   // a picture file name, e.g. "my-picture.jpg" (or the older full path)
         alt: z.string(),
         caption: z.string().optional(),
-        fit: z.enum(['contain', 'cover']).default('contain'),
+        fit: z.enum(['contain', 'cover']).default('contain'),   // older; `crop` below replaces it
+        crop: z.enum(CROP_KEYS).optional(),                     // empty = the whole picture; otherwise cropped to a wide banner, kept at this position (see CROPS in lib/blocks.ts)
       }),
       z.object({
         type: z.literal('video'),

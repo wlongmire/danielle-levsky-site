@@ -1,7 +1,7 @@
 ---
 title: Accessibility & Usability Presentation
 outcome: For my class, I led a presentation on Accessibility from a Digital Humanities lense. I specifically chose to focus on disability studies, and in particular, how web usability testing can truly make a difference in assistive technology when implemented with intention and attention.
-role: Graduate project
+role: ''
 org: Digital Humanities Projects
 dates: ''
 tools: []
@@ -17,3 +17,5 @@ artifacts:
   - label: Read the presentation response paper (PDF)
     url: https://docs.google.com/document/d/1jUQM0EBCYgAaEFzJh-v9pKhnjj-nGCR5ycqgq_P9N9Q/edit?usp=sharing
 ---
+
+**Role:** Graduate project

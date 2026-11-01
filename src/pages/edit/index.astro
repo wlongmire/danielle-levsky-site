@@ -68,6 +68,15 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     .field { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
     .field > label, .field > .lbl { font-weight: 600; font-size: 14px; }
     .hint { font-size: 12.5px; color: var(--muted); }
+    .demo-row { display: flex; gap: 14px; align-items: center; }
+    .demo { flex: none; width: 150px; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg); padding: 6px; }
+    .demo svg { display: block; width: 100%; height: auto; }
+    .demo .ln { fill: var(--rule); }
+    .demo .hd { fill: var(--text); opacity: .75; }
+    .demo .ac { fill: var(--amber); }
+    .demo .bx { fill: none; stroke: var(--rule); stroke-width: 1.5; }
+    .demo .dk { fill: var(--text); opacity: .85; }
+    .demo .pic { fill: color-mix(in srgb, var(--amber) 22%, var(--bg)); }
     .field input[type='text'], .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--bg); }
     .field textarea { resize: vertical; line-height: 1.5; }
     .field textarea.md { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; }
@@ -335,6 +344,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
         case 'list': return listField(f, obj, ctx);
         case 'strings': return stringsField(f, obj);
         case 'cards': return cardList(obj[f.key] || (obj[f.key] = []));
+        case 'body':   // a card's Markdown content, kept apart from its front matter (ctx.st is the card)
+          return el('div', { class: 'field' }, el('label', { for: id, text: f.label }), el('textarea', { id, class: 'md', rows: f.rows || 18, ...describe, oninput: (e) => (ctx.st.body = e.target.value) }, ctx.st.body || ''), hint);
       }
       return el('div');
     }
@@ -451,13 +462,9 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
     function cardBody(st) {
       const others = ((files.entries.find((e) => e.id === st.id) || {}).usedOn || []).filter((l) => l !== thisPageLabel());
-      const wid = nextId();
       return el('div', { class: 'grp' },
         others.length ? el('p', { class: 'hint', text: 'This card is also shown on ' + others.join(' and ') + ', so changes here appear there too.' }) : null,
-        group(SPEC.entry, st.data, { target: 'work-image' }),
-        el('div', { class: 'field' }, el('label', { for: wid, text: 'Write-up (shown in the popup, under the summary)' }),
-          el('textarea', { id: wid, class: 'md', rows: 18, oninput: (e) => (st.body = e.target.value) }, st.body || ''),
-          el('div', { class: 'hint', text: 'A line starting with ### makes a subheading. A blank line starts a new paragraph. [words](address) makes a link.' })));
+        group(SPEC.entry, st.data, { target: 'work-image', st }));
     }
 
     // A Card Grid's cards: ordered, each opening in place.
@@ -519,12 +526,25 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       return wrap;
     }
 
+    // A small drawing of each kind of block, shown at the top of its form (decorative: the words beside it say the same).
+    const DEMOS = {
+      hero: '<rect class="pic" x="92" y="12" width="52" height="64" rx="4"/><rect class="hd" x="12" y="14" width="64" height="8" rx="2"/><rect class="ln" x="12" y="32" width="68" height="4" rx="2"/><rect class="ln" x="12" y="42" width="60" height="4" rx="2"/><rect class="ln" x="12" y="52" width="66" height="4" rx="2"/><rect class="ac" x="12" y="64" width="34" height="12" rx="6"/><rect class="bx" x="50" y="64" width="30" height="12" rx="6"/>',
+      title: '<rect class="hd" x="12" y="30" width="96" height="12" rx="2"/><rect class="ac" x="12" y="48" width="30" height="3" rx="1.5"/>',
+      overview: '<rect class="hd" x="12" y="8" width="70" height="8" rx="2"/><rect class="bx" x="12" y="24" width="120" height="14" rx="3"/><rect class="ln" x="20" y="29" width="54" height="4" rx="2"/><path class="bx" d="M120 29l4 4 4-4"/><rect class="bx" x="12" y="42" width="120" height="30" rx="3"/><rect class="ln" x="20" y="47" width="54" height="4" rx="2"/><path class="bx" d="M120 51l4-4 4 4"/><rect class="ln" x="20" y="57" width="100" height="3" rx="1.5"/><rect class="ln" x="20" y="63" width="86" height="3" rx="1.5"/><rect class="bx" x="12" y="76" width="120" height="14" rx="3"/><rect class="ln" x="20" y="81" width="54" height="4" rx="2"/><path class="bx" d="M120 81l4 4 4-4"/>',
+      cards: '<rect class="hd" x="12" y="8" width="70" height="8" rx="2"/><g><rect class="bx" x="12" y="24" width="38" height="58" rx="4"/><rect class="hd" x="17" y="30" width="26" height="4" rx="2"/><rect class="ln" x="17" y="40" width="28" height="3" rx="1.5"/><rect class="ln" x="17" y="46" width="22" height="3" rx="1.5"/><rect class="ac" x="17" y="68" width="20" height="8" rx="4"/></g><g><rect class="bx" x="56" y="24" width="38" height="58" rx="4"/><rect class="hd" x="61" y="30" width="26" height="4" rx="2"/><rect class="ln" x="61" y="40" width="28" height="3" rx="1.5"/><rect class="ln" x="61" y="46" width="22" height="3" rx="1.5"/><rect class="ac" x="61" y="68" width="20" height="8" rx="4"/></g><g><rect class="bx" x="100" y="24" width="38" height="58" rx="4"/><rect class="hd" x="105" y="30" width="26" height="4" rx="2"/><rect class="ln" x="105" y="40" width="28" height="3" rx="1.5"/><rect class="ln" x="105" y="46" width="22" height="3" rx="1.5"/><rect class="ac" x="105" y="68" width="20" height="8" rx="4"/></g>',
+      text: '<rect class="hd" x="12" y="10" width="60" height="8" rx="2"/><rect class="ln" x="12" y="26" width="76" height="4" rx="2"/><rect class="ln" x="12" y="35" width="70" height="4" rx="2"/><rect class="ln" x="12" y="44" width="76" height="4" rx="2"/><rect class="ln" x="12" y="53" width="64" height="4" rx="2"/><rect class="ln" x="12" y="62" width="72" height="4" rx="2"/><rect class="pic" x="100" y="26" width="40" height="52" rx="4"/>',
+    };
+    const demo = (type) => {
+      const box = el('div', { class: 'demo', 'aria-hidden': 'true' });
+      box.innerHTML = '<svg viewBox="0 0 150 94" xmlns="http://www.w3.org/2000/svg">' + (DEMOS[type] || '') + '</svg>';
+      return box;
+    };
+
     // ---- a page: its details, then its blocks in order ----
     function pageForm() {
       const isSection = cur.kind === 'page:section';
       const top = [
         { key: isSection ? 'navLabel' : 'title', label: isSection ? 'Page Title (also the menu name)' : 'Page Title', type: 'text' },
-        ...(isSection ? [{ key: 'draft', label: 'Hide this page from the site and menu', type: 'bool' }] : []),
       ];
       const wrap = el('div', { class: 'grp' }, group(top, cur.data, {}));
       const list = el('div', { class: 'grp' });
@@ -543,7 +563,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
                 el('button', { type: 'button', 'aria-label': 'Move block up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
                 el('button', { type: 'button', 'aria-label': 'Move block down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
                 el('button', { type: 'button', 'aria-label': 'Remove block', onclick: (e) => { e.preventDefault(); if (confirm('Remove this ' + spec.label + ' block from the page?')) { blocks.splice(i, 1); touch(); openIndex = -1; drawBlocks(); } } }, '×'))),
-            el('div', { class: 'in' }, el('p', { class: 'hint', text: spec.hint }), group(spec.fields, b, { target: 'page-image' })));
+            el('div', { class: 'in' }, el('div', { class: 'demo-row' }, demo(b.type), el('p', { class: 'hint', text: spec.hint })), group(spec.fields, b, { target: 'page-image' })));
           d.addEventListener('input', () => { t.textContent = b.headline || b.title || spec.label; });
           list.append(d);
         });
