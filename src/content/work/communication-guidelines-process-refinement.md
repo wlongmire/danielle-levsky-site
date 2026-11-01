@@ -1,10 +1,11 @@
 ---
-title: "Communication Guidelines Process Refinement"
-outcome: "Created communication guidelines across different platforms (Slack, Email, Front, etc.) as well as re-organized Slack channels for max efficiency"
-role: ""
-org: "eighty2i"
-dates: ""
-sections: [ld-portfolio]
+title: Communication Guidelines Process Refinement
+outcome: Created communication guidelines across different platforms (Slack, Email, Front, etc.) as well as re-organized Slack channels for max efficiency
+role: ''
+org: eighty2i
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Led comprehensive communication infrastructure improvement to enhance team collaboration and reduce friction in daily operations.

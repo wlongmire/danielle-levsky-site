@@ -1,10 +1,11 @@
 ---
-title: "Global Course Audit & Assessment"
-outcome: "Co-led large scale multi-phase audit of 300+ piece learning portfolio benchmarking adoption trends, learner perceptions, design gaps to inform strategic roadmap"
-role: ""
-org: "Comcast (Effectv)"
-dates: ""
-sections: [ld-portfolio]
+title: Global Course Audit & Assessment
+outcome: Co-led large scale multi-phase audit of 300+ piece learning portfolio benchmarking adoption trends, learner perceptions, design gaps to inform strategic roadmap
+role: ''
+org: Comcast (Effectv)
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Spearheaded a comprehensive audit initiative providing stakeholders with critical visibility into course health, impact, and rationalization opportunities across Comcast Effectv’s online learning catalog.

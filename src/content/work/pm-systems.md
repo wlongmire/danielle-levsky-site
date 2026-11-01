@@ -1,38 +1,39 @@
 ---
-title: "Project Management Systems"
-outcome: "Determined team assignments, bandwidth, and how to best delegate existing and incoming tasks."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Project Management Systems
+outcome: Determined team assignments, bandwidth, and how to best delegate existing and incoming tasks.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "pm-systems-1.png"
-    alt: "Picture 1 of 7 from Project Management Systems"
+    src: pm-systems-1.png
+    alt: Picture 1 of 7 from Project Management Systems
     fit: contain
   - type: image
-    src: "pm-systems-2.png"
-    alt: "Picture 2 of 7 from Project Management Systems"
+    src: pm-systems-2.png
+    alt: Picture 2 of 7 from Project Management Systems
     fit: contain
   - type: image
-    src: "pm-systems-3.png"
-    alt: "Picture 3 of 7 from Project Management Systems"
+    src: pm-systems-3.png
+    alt: Picture 3 of 7 from Project Management Systems
     fit: contain
   - type: image
-    src: "pm-systems-4.png"
-    alt: "Picture 4 of 7 from Project Management Systems"
+    src: pm-systems-4.png
+    alt: Picture 4 of 7 from Project Management Systems
     fit: contain
   - type: image
-    src: "pm-systems-5.png"
-    alt: "Picture 5 of 7 from Project Management Systems"
+    src: pm-systems-5.png
+    alt: Picture 5 of 7 from Project Management Systems
     fit: contain
   - type: image
-    src: "pm-systems-6.png"
-    alt: "Picture 6 of 7 from Project Management Systems"
+    src: pm-systems-6.png
+    alt: Picture 6 of 7 from Project Management Systems
     fit: contain
   - type: image
-    src: "pm-systems-7.png"
-    alt: "Picture 7 of 7 from Project Management Systems"
+    src: pm-systems-7.png
+    alt: Picture 7 of 7 from Project Management Systems
     fit: contain
 ---
 

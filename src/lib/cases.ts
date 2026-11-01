@@ -10,3 +10,11 @@ export async function loadCases(section?: string) {
   );
   return Promise.all(entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })));
 }
+
+/** Hand-picked entries for a Card Grid block, in the order listed (names that no longer exist are skipped). */
+export async function loadPicks(ids: string[]) {
+  const all = await getCollection('work', (e) => !e.data.draft);
+  const byId = new Map(all.map((e) => [e.id, e]));
+  const entries = ids.map((id) => byId.get(id)).filter((e): e is NonNullable<typeof e> => !!e);
+  return Promise.all(entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })));
+}

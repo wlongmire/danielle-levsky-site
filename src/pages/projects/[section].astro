@@ -1,13 +1,10 @@
 ---
-// One page per file in src/content/sections, built from the page blocks: Hero, Overview List, Card Grid.
+// One page per file in src/content/sections, drawn from its ordered blocks (Hero, Overview List, Card Grid, Text).
 // Anything deeper than this page (a project's details) opens as a popup with its own URL, never a page.
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import Hero from '../../components/Hero.astro';
-import OverviewList from '../../components/OverviewList.astro';
-import CardGrid from '../../components/CardGrid.astro';
-import CaseDialog from '../../components/CaseDialog.astro';
-import { loadCases } from '../../lib/cases';
+import PageBlocks from '../../components/PageBlocks.astro';
+import { pageDescription } from '../../lib/blocks';
 
 export async function getStaticPaths() {
   const sections = await getCollection('sections', (e) => !e.data.draft);
@@ -16,11 +13,7 @@ export async function getStaticPaths() {
 
 const { section } = Astro.props;
 const d = section.data;
-const cases = await loadCases(section.id);
 ---
-<Base title={d.navLabel} description={d.intro.split(/\n\s*\n/)[0].trim()}>
-  <Hero headline={d.headline} intro={d.intro} cta={d.cta} image={d.image} imageAlt={d.imageAlt} imagePosition={d.imagePosition} mark={d.logo} />
-  <OverviewList title={d.overviewTitle} items={d.overview} />
-  <CardGrid title={d.cardsTitle} {cases} groupBy={d.groupCards ? 'org' : undefined} />
-  <CaseDialog {cases} />
+<Base title={d.navLabel} description={pageDescription(d)}>
+  <PageBlocks blocks={d.blocks} />
 </Base>

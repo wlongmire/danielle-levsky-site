@@ -1,10 +1,11 @@
 ---
-title: "Auto & Property Insurance Course"
-outcome: "Designed 39 segments of educational courses for the customer services representatives of an insurance company."
-role: ""
-org: "Cognitive Arts (NIIT)"
-dates: ""
-sections: [ld-portfolio]
+title: Auto & Property Insurance Course
+outcome: Designed 39 segments of educational courses for the customer services representatives of an insurance company.
+role: ''
+org: Cognitive Arts (NIIT)
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 I worked as a content developer for Cognitive Arts, a division of NIIT, the largest global provider of learning design and development services. I developed and constructed their courses using Articulate Storyline.

@@ -1,10 +1,11 @@
 ---
-title: "OCR/VLM Evaluation & Audit-Ready Data Requirements"
-outcome: "Supported evaluation of OCR and vision-language model approaches by focusing requirements on downstream audit usability and data quality."
-role: ""
-org: "Baker Tilly"
-dates: ""
-sections: [ld-portfolio]
+title: OCR/VLM Evaluation & Audit-Ready Data Requirements
+outcome: Supported evaluation of OCR and vision-language model approaches by focusing requirements on downstream audit usability and data quality.
+role: ''
+org: Baker Tilly
+dates: ''
+sections:
+  - ld-portfolio
 confidential: true
 ---
 

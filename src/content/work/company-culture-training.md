@@ -1,22 +1,23 @@
 ---
-title: "Company Culture Training"
-outcome: "Created, designed, and revamped SMS Assist’s company culture training based on the “Great Places to Work” model."
-role: ""
-org: "SMS Assist"
-dates: ""
-sections: [ld-portfolio]
+title: Company Culture Training
+outcome: Created, designed, and revamped SMS Assist’s company culture training based on the “Great Places to Work” model.
+role: ''
+org: SMS Assist
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "company-culture-training-1.png"
-    alt: "Snippet 1 of 3 from the company culture training project"
+    src: company-culture-training-1.png
+    alt: Snippet 1 of 3 from the company culture training project
     fit: contain
   - type: image
-    src: "company-culture-training-2.png"
-    alt: "Snippet 2 of 3 from the company culture training project"
+    src: company-culture-training-2.png
+    alt: Snippet 2 of 3 from the company culture training project
     fit: contain
   - type: image
-    src: "company-culture-training-3.png"
-    alt: "Snippet 3 of 3 from the company culture training project"
+    src: company-culture-training-3.png
+    alt: Snippet 3 of 3 from the company culture training project
     fit: contain
 ---
 

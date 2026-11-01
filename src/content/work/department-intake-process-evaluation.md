@@ -1,10 +1,11 @@
 ---
-title: "Department Intake Process Evaluation"
-outcome: "Facilitated working sessions and created proposals with phased enhancement roadmaps to introduce new customers to department services"
-role: ""
-org: "Meta"
-dates: ""
-sections: [ld-portfolio]
+title: Department Intake Process Evaluation
+outcome: Facilitated working sessions and created proposals with phased enhancement roadmaps to introduce new customers to department services
+role: ''
+org: Meta
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Led evaluation and redesign initiative for the Enterprise Learning Operations (ELO) department's customer intake process, addressing partner feedback and developing innovative service delivery concepts.

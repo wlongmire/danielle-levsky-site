@@ -1,10 +1,11 @@
 ---
-title: "Culture Promotion and Employee Engagement"
-outcome: "Transparently communicated with employees about cross-company updates, made introductions to new hires, and created/scheduled entrepreneur monthly spark presentations to align team philosophically"
-role: ""
-org: "eighty2i"
-dates: ""
-sections: [ld-portfolio]
+title: Culture Promotion and Employee Engagement
+outcome: Transparently communicated with employees about cross-company updates, made introductions to new hires, and created/scheduled entrepreneur monthly spark presentations to align team philosophically
+role: ''
+org: eighty2i
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Drove engagement and retention through proactive culture-focused initiatives that fostered team connection and aligned employees with company vision.

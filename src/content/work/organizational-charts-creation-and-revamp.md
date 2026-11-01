@@ -1,10 +1,11 @@
 ---
-title: "Organizational Charts Creation and Revamp"
-outcome: "Updated and development organizational charts: traditional and accountability focused"
-role: ""
-org: "eighty2i"
-dates: ""
-sections: [ld-portfolio]
+title: Organizational Charts Creation and Revamp
+outcome: 'Updated and development organizational charts: traditional and accountability focused'
+role: ''
+org: eighty2i
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Led the comprehensive redesign of eighty2i's organizational structure documentation to improve team transparency and role clarity across the growing strategic growth services firm.

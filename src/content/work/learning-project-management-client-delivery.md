@@ -1,10 +1,11 @@
 ---
-title: "Learning Project Management & Client Delivery"
-outcome: "Managed end-to-end delivery of custom learning solutions for Fortune 500 clients including healthcare, financial services, and enterprise technology sectors"
-role: ""
-org: "Judge Learning Solutions"
-dates: ""
-sections: [ld-portfolio]
+title: Learning Project Management & Client Delivery
+outcome: Managed end-to-end delivery of custom learning solutions for Fortune 500 clients including healthcare, financial services, and enterprise technology sectors
+role: ''
+org: Judge Learning Solutions
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Served as Project Manager responsible for all aspects of assigned client programs, managing relationships, project execution, quality assurance, and team coordination across custom eLearning, instructor-led training, and blended learning solutions.

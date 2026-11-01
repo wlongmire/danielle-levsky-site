@@ -1,10 +1,11 @@
 ---
-title: "Auto Industry Curriculum Architecture"
-outcome: "Forged trusted partnership with sales SMEs to create comprehensive, blended trainings on auto industry landscape and discovery questioning"
-role: ""
-org: "Comcast (Effectv)"
-dates: ""
-sections: [ld-portfolio]
+title: Auto Industry Curriculum Architecture
+outcome: Forged trusted partnership with sales SMEs to create comprehensive, blended trainings on auto industry landscape and discovery questioning
+role: ''
+org: Comcast (Effectv)
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Led optimization and content development for the Automotive Learning Journey, Comcast Effectv’s marquee skills development offering for sales representatives selling advertising solutions to automotive dealerships.

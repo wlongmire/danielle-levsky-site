@@ -6,6 +6,14 @@ const COOKIE = 'edit_session';
 
 export const passwordConfigured = () => !!env('EDIT_PASSWORD');
 
+/** Local testing only: on the dev server, from this computer, with no GitHub token set (so saves go to the local files),
+    /edit opens without a password. It is switched off in every built or deployed copy (import.meta.env.DEV is false there),
+    and whenever a GITHUB_TOKEN is set or the page is reached from another address. */
+export function devBypass(request: Request): boolean {
+  if (!import.meta.env.DEV || env('GITHUB_TOKEN')) return false;
+  try { return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(request.url).hostname); } catch { return false; }
+}
+
 const sha = (s: string) => createHash('sha256').update(s).digest();
 
 // The signing key is derived from the password, so changing the password signs everyone out.
@@ -39,6 +47,7 @@ function readCookie(header: string | null): string | null {
 }
 
 export function isAuthed(request: Request): boolean {
+  if (devBypass(request)) return true;
   if (!passwordConfigured()) return false;
   const token = readCookie(request.headers.get('cookie'));
   if (!token) return false;

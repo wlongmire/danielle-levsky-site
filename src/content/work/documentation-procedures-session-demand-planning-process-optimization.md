@@ -1,10 +1,11 @@
 ---
-title: "Documentation Procedures & Session Demand Planning Process Optimization"
-outcome: "Uncovered workflow inconsistencies and proposed solutions across groups utilizing documentation procedures and session scheduling"
-role: ""
-org: "Meta"
-dates: ""
-sections: [ld-portfolio]
+title: Documentation Procedures & Session Demand Planning Process Optimization
+outcome: Uncovered workflow inconsistencies and proposed solutions across groups utilizing documentation procedures and session scheduling
+role: ''
+org: Meta
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Conducted comprehensive process analysis examining Desktop Procedures (DTP) creation workflows and Session Demand Planning processes across three distinct organizational "Stacks" (Recruiting/PM/Peeps, L&D, and Tech Learning) to identify standardization opportunities and improve operational efficiency.

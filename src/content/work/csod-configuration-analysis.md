@@ -1,10 +1,11 @@
 ---
-title: "CSOD Configuration Analysis"
-outcome: "Performed comprehensive analysis of Cornerstone configurations, identifying optimization opportunities."
-role: ""
-org: "Meta"
-dates: ""
-sections: [ld-portfolio]
+title: CSOD Configuration Analysis
+outcome: Performed comprehensive analysis of Cornerstone configurations, identifying optimization opportunities.
+role: ''
+org: Meta
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Led a data-driven analysis initiative examining Cornerstone OnDemand (CSOD) learning management system configurations across Meta's enterprise learning environment to identify optimization opportunities and inform strategic decision-making.

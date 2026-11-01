@@ -1,26 +1,27 @@
 ---
-title: "Company Team Onboarding Training Plan"
-outcome: "Created templates and processes for building new company-wide team onboarding materials."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Company Team Onboarding Training Plan
+outcome: Created templates and processes for building new company-wide team onboarding materials.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "company-team-onboarding-training-plan-1.png"
-    alt: "Picture 1 of 4 from Company Team Onboarding Training Plan"
+    src: company-team-onboarding-training-plan-1.png
+    alt: Picture 1 of 4 from Company Team Onboarding Training Plan
     fit: contain
   - type: image
-    src: "company-team-onboarding-training-plan-2.png"
-    alt: "Picture 2 of 4 from Company Team Onboarding Training Plan"
+    src: company-team-onboarding-training-plan-2.png
+    alt: Picture 2 of 4 from Company Team Onboarding Training Plan
     fit: contain
   - type: image
-    src: "company-team-onboarding-training-plan-3.png"
-    alt: "Picture 3 of 4 from Company Team Onboarding Training Plan"
+    src: company-team-onboarding-training-plan-3.png
+    alt: Picture 3 of 4 from Company Team Onboarding Training Plan
     fit: contain
   - type: image
-    src: "company-team-onboarding-training-plan-4.png"
-    alt: "Picture 4 of 4 from Company Team Onboarding Training Plan"
+    src: company-team-onboarding-training-plan-4.png
+    alt: Picture 4 of 4 from Company Team Onboarding Training Plan
     fit: contain
 ---
 

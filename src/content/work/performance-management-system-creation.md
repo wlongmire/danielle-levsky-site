@@ -1,10 +1,11 @@
 ---
-title: "Performance Management System Creation"
-outcome: "Set up initial system, trained, and integrated 30+ members into performance management system Lattice to lead the creation and advancement of individual, departmental, and overall company goals"
-role: ""
-org: "eighty2i"
-dates: ""
-sections: [ld-portfolio]
+title: Performance Management System Creation
+outcome: Set up initial system, trained, and integrated 30+ members into performance management system Lattice to lead the creation and advancement of individual, departmental, and overall company goals
+role: ''
+org: eighty2i
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Led the end-to-end implementation of Lattice as eighty2i's performance management platform, enabling effective tracking, feedback, and goal alignment for personal and professional growth.

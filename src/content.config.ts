@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { blocksSchema } from './lib/blocks';
 
 const work = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/work' }),
@@ -48,39 +49,27 @@ const work = defineCollection({
   }),
 });
 
+// Home and About: one file each in src/content/pages. A page is an ordered list of blocks (see src/lib/blocks.ts),
+// drawn in order by components/PageBlocks.astro. `title` is the browser-tab name; `description` is the search-result text
+// (left empty, it falls back to the first paragraph on the page).
 const pages = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/pages' }),
   schema: ({ image }) => z.object({
     title: z.string(),
-    tagline: z.string().optional(),   // the big line at the top of the home page
     description: z.string().optional(),
-    headshot: image().optional(),
-    headshotAlt: z.string().optional(),
-    // Pictures shown beside the text on the About page, in order. Each needs a short plain description (alt).
-    photos: z.array(z.object({ src: image(), alt: z.string() })).default([]),
-    cta: z.object({ label: z.string(), url: z.string() }).optional(),  // the Hero's button
+    blocks: blocksSchema(image),
+    draft: z.boolean().default(false),
   }),
 });
 
-// One file per section page (L&D Portfolio, Consulting, Digital Humanities, DEI), built from the page blocks:
-// Hero (headline, intro, optional button), Overview List (collapsible items) and Card Grid (entries from `work`
-// that list this section). Any block left empty is simply not shown. The nav order is in src/data/order.json.
+// One file per section page (L&D Portfolio, Consulting, Digital Humanities, DEI), at /projects/<file name>.
+// The same block list as every other page. `navLabel` is its name in the menu; the menu order is in src/data/order.json.
 const sections = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
   schema: ({ image }) => z.object({
     navLabel: z.string(),
-    headline: z.string(),
-    intro: z.string(),
-    cta: z.object({ label: z.string(), url: z.string() }).optional(),
-    image: image().optional(),           // the Hero's picture, e.g. "../../assets/consulting/consulting-1.jpeg"
-    imageAlt: z.string().optional(),     // a short, plain description of the picture
-    imagePosition: z.string().optional(), // where the picture is cropped to, e.g. "46% 30%" (left/right, top/bottom)
-    // An optional logo shown under the Hero's text (e.g. a program or employer), shown whole, never cropped. `url` makes it a link.
-    logo: z.object({ src: image(), alt: z.string(), url: z.string().optional() }).optional(),
-    overviewTitle: z.string().optional(),
-    overview: z.array(z.object({ title: z.string(), text: z.string() })).default([]),
-    cardsTitle: z.string().optional(),   // shown only when entries list this section
-    groupCards: z.boolean().default(false),  // true = the cards sit under a heading for each position (each entry's `org`)
+    description: z.string().optional(),
+    blocks: blocksSchema(image),
     draft: z.boolean().default(false),
   }),
 });

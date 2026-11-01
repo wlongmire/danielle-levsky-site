@@ -1,10 +1,11 @@
 ---
-title: "AOS User Guide & Training"
-outcome: "Created comprehensive training detailing next-gen order management system capabilities for multiple sales audiences"
-role: ""
-org: "Comcast (Effectv)"
-dates: ""
-sections: [ld-portfolio]
+title: AOS User Guide & Training
+outcome: Created comprehensive training detailing next-gen order management system capabilities for multiple sales audiences
+role: ''
+org: Comcast (Effectv)
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Partnered with subject matter experts (PTX tech team, Campaign Management leadership) to develop end-to-end training materials supporting Comcast Effectv’s migration from Operative.One to Operative AOS (Advertising Operating System), a next-generation campaign and order stewardship platform enabling impression-based multi-screen audience advertising.

@@ -1,34 +1,35 @@
 ---
-title: "Learning Technologist Onboarding Training"
-outcome: "Updated and improved on role-specific onboarding training materials."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Learning Technologist Onboarding Training
+outcome: Updated and improved on role-specific onboarding training materials.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "learning-technologist-onboarding-training-1.png"
-    alt: "Picture 1 of 6 from Learning Technologist Onboarding Training"
+    src: learning-technologist-onboarding-training-1.png
+    alt: Picture 1 of 6 from Learning Technologist Onboarding Training
     fit: contain
   - type: image
-    src: "learning-technologist-onboarding-training-2.png"
-    alt: "Picture 2 of 6 from Learning Technologist Onboarding Training"
+    src: learning-technologist-onboarding-training-2.png
+    alt: Picture 2 of 6 from Learning Technologist Onboarding Training
     fit: contain
   - type: image
-    src: "learning-technologist-onboarding-training-3.png"
-    alt: "Picture 3 of 6 from Learning Technologist Onboarding Training"
+    src: learning-technologist-onboarding-training-3.png
+    alt: Picture 3 of 6 from Learning Technologist Onboarding Training
     fit: contain
   - type: image
-    src: "learning-technologist-onboarding-training-4.png"
-    alt: "Picture 4 of 6 from Learning Technologist Onboarding Training"
+    src: learning-technologist-onboarding-training-4.png
+    alt: Picture 4 of 6 from Learning Technologist Onboarding Training
     fit: contain
   - type: image
-    src: "learning-technologist-onboarding-training-5.png"
-    alt: "Picture 5 of 6 from Learning Technologist Onboarding Training"
+    src: learning-technologist-onboarding-training-5.png
+    alt: Picture 5 of 6 from Learning Technologist Onboarding Training
     fit: contain
   - type: image
-    src: "learning-technologist-onboarding-training-6.png"
-    alt: "Picture 6 of 6 from Learning Technologist Onboarding Training"
+    src: learning-technologist-onboarding-training-6.png
+    alt: Picture 6 of 6 from Learning Technologist Onboarding Training
     fit: contain
 ---
 

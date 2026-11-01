@@ -3,8 +3,8 @@
 // (CaseDialog, which must be on the same page) and puts its name in the address, e.g. /projects/ld-portfolio#baker-tilly.
 // With groupBy="org" the cards sit under a heading for each position (the entry's `org`), in the order they are listed,
 // each position in its own dark panel.
-interface Props { title?: string; cases: { entry: any; Content: any }[]; groupBy?: 'org'; }
-const { title, cases, groupBy } = Astro.props;
+interface Props { title?: string; cases: { entry: any; Content: any }[]; groupBy?: 'org'; uid?: string; }
+const { title, cases, groupBy, uid = '' } = Astro.props;
 const roleLine = (d: any) => [d.role, !groupBy && d.org && !d.title.includes(d.org) ? d.org : '', d.dates].filter(Boolean).join(' · ');
 // A card only gets a "More info" button when there is something to open.
 const hasDetail = (e: any) => Boolean(e.body?.trim()) || e.data.media.length > 0 || e.data.images.length > 0 || e.data.artifacts.length > 0 || e.data.links.length > 0;
@@ -22,8 +22,8 @@ const Heading = groupBy ? (title ? 'h4' : 'h3') : 'h3';
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 ---
 {cases.length > 0 && (
-  <section class="cards" aria-labelledby={title ? 'cards-title' : undefined}>
-    {title && <h2 id="cards-title" class="section-title">{title}</h2>}
+  <section class="cards" aria-labelledby={title ? `cards-title${uid}` : undefined}>
+    {title && <h2 id={`cards-title${uid}`} class="section-title">{title}</h2>}
     {groups.map((g) => (
       <div class:list={['group', { boxed: g.heading }]} role={g.heading ? 'group' : undefined} aria-labelledby={g.heading ? `grp-${slug(g.heading)}` : undefined}>
         {g.heading && <GroupHeading id={`grp-${slug(g.heading)}`} class="group-title">{g.heading}</GroupHeading>}

@@ -1,10 +1,11 @@
 ---
-title: "QA/QC & UAT Process Design"
-outcome: "Created testing structures, ownership models, and sign-off frameworks to help business and technical teams validate portal functionality with clarity."
-role: ""
-org: "Baker Tilly"
-dates: ""
-sections: [ld-portfolio]
+title: QA/QC & UAT Process Design
+outcome: Created testing structures, ownership models, and sign-off frameworks to help business and technical teams validate portal functionality with clarity.
+role: ''
+org: Baker Tilly
+dates: ''
+sections:
+  - ld-portfolio
 confidential: true
 ---
 

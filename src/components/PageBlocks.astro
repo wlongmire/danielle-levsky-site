@@ -1,0 +1,55 @@
+---
+// Draws a page from its ordered `blocks:` list (home, about and each section page all use this). Each block type is one
+// component: Hero, Overview List, Card Grid, Text. The project popup (CaseDialog) is added once for all the cards on the page.
+import Hero from './Hero.astro';
+import OverviewList from './OverviewList.astro';
+import CardGrid from './CardGrid.astro';
+import TextBlock from './TextBlock.astro';
+import CaseDialog from './CaseDialog.astro';
+import { loadCases, loadPicks } from '../lib/cases';
+import { site } from '../data/site';
+import type { Block } from '../lib/blocks';
+
+interface Props { blocks: Block[]; }
+const { blocks } = Astro.props;
+
+// The CV button reads the "CV" link in site.json (editable on /edit); with no link or an empty one, no button shows.
+const cv = site.links.find((l) => /\bcv\b/i.test(l.label) && l.url);
+
+// The entries behind every Card Grid block, loaded up front so one popup serves them all.
+const casesFor = await Promise.all(
+  blocks.map((b) => (b.type !== 'cards' ? [] : b.source === 'picks' ? loadPicks(b.entries) : loadCases(b.source))),
+);
+const popupCases = [...new Map(casesFor.flat().map((c) => [c.entry.id, c])).values()];
+// The first block with a headline holds the page's main title (h1); the rest step down to h2.
+const firstTitled = blocks.findIndex((b) => b.type === 'hero' || (b.type === 'text' && b.title));
+---
+{blocks.map((b, i) => {
+  const uid = i === 0 ? '' : `-${i}`;
+  switch (b.type) {
+    case 'hero':
+      return (
+        <Hero
+          headline={b.headline}
+          intro={b.intro}
+          cta={b.cta}
+          secondary={b.showCv ? cv : undefined}
+          image={b.image}
+          imageAlt={b.imageAlt}
+          imagePosition={b.imagePosition}
+          mark={b.logo}
+          imageSlot={b.featured}
+          large={b.featured}
+          h1={i === firstTitled}
+          uid={uid}
+        />
+      );
+    case 'overview':
+      return <OverviewList title={b.title} items={b.items} uid={uid} />;
+    case 'cards':
+      return <CardGrid title={b.title} cases={casesFor[i]} groupBy={b.groupByOrg ? 'org' : undefined} uid={uid} />;
+    case 'text':
+      return <TextBlock title={b.title} body={b.body} photos={b.photos} h1={i === firstTitled} />;
+  }
+})}
+{popupCases.length > 0 && <CaseDialog cases={popupCases} />}

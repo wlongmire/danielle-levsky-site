@@ -1,31 +1,12 @@
 ---
-// Home: Hero plus the first three L&D Portfolio entries as a Card Grid.
+// Home: drawn from the ordered blocks in src/content/pages/home.md.
 import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import Hero from '../components/Hero.astro';
-import CardGrid from '../components/CardGrid.astro';
-import CaseDialog from '../components/CaseDialog.astro';
-import { loadCases } from '../lib/cases';
-import { site } from '../data/site';
+import PageBlocks from '../components/PageBlocks.astro';
+import { pageDescription } from '../lib/blocks';
 
-const home = await getEntry('pages', 'home');
-// The CV button reads the "CV" link in site.json (editable on /edit); with no link or an empty one, no button shows.
-const cv = site.links.find((l) => /\bcv\b/i.test(l.label) && l.url);
-// One card from each of the first three positions (the first listed asset of each), so the home page shows a spread.
-const all = await loadCases('ld-portfolio');
-const cases = all.filter((c, i) => all.findIndex((o) => o.entry.data.org === c.entry.data.org) === i).slice(0, 3);
+const home = (await getEntry('pages', 'home'))!;
 ---
-<Base description={home!.data.description}>
-  <Hero
-    headline={home!.data.tagline ?? site.name}
-    intro={home!.data.description}
-    cta={home!.data.cta}
-    secondary={cv}
-    image={home!.data.headshot}
-    imageAlt={home!.data.headshotAlt}
-    imageSlot
-    large
-  />
-  <CardGrid title="Selected projects" {cases} />
-  <CaseDialog {cases} />
+<Base description={pageDescription(home.data)}>
+  <PageBlocks blocks={home.data.blocks} />
 </Base>

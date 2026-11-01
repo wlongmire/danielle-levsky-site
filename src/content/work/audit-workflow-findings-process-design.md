@@ -1,10 +1,11 @@
 ---
-title: "Audit Workflow & Findings Process Design"
-outcome: "Mapped complex audit review workflows, escalation paths, user roles, and completion logic to support portal development and stakeholder alignment."
-role: ""
-org: "Baker Tilly"
-dates: ""
-sections: [ld-portfolio]
+title: Audit Workflow & Findings Process Design
+outcome: Mapped complex audit review workflows, escalation paths, user roles, and completion logic to support portal development and stakeholder alignment.
+role: ''
+org: Baker Tilly
+dates: ''
+sections:
+  - ld-portfolio
 confidential: true
 ---
 

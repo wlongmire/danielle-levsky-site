@@ -1,14 +1,15 @@
 ---
-title: "Course Program Improvements & Management"
-outcome: "Used pedagogical and technological expertise to assess clients’ portfolios and consult on improvements in a Program Manager capacity."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Course Program Improvements & Management
+outcome: Used pedagogical and technological expertise to assess clients’ portfolios and consult on improvements in a Program Manager capacity.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "course-program-improvements-and-management-1.png"
-    alt: "Picture 1 of 1 from Course Program Improvements & Management"
+    src: course-program-improvements-and-management-1.png
+    alt: Picture 1 of 1 from Course Program Improvements & Management
     fit: contain
 ---
 

@@ -1,10 +1,11 @@
 ---
-title: "PMO Requirements & Backlog Alignment"
-outcome: "Translated meeting notes, business decisions, and emerging requirements into structured backlog-ready documentation for engineering and PMO teams."
-role: ""
-org: "Baker Tilly"
-dates: ""
-sections: [ld-portfolio]
+title: PMO Requirements & Backlog Alignment
+outcome: Translated meeting notes, business decisions, and emerging requirements into structured backlog-ready documentation for engineering and PMO teams.
+role: ''
+org: Baker Tilly
+dates: ''
+sections:
+  - ld-portfolio
 confidential: true
 ---
 

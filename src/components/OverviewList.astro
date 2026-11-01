@@ -1,14 +1,14 @@
 ---
 // Page block: Overview List. A headline over a list of items that open and close (native <details>, no JavaScript).
 // The first item starts open so a skimmer sees what an item looks like.
-interface Props { title?: string; items: { title: string; text: string }[]; }
-const { title, items } = Astro.props;
+interface Props { title?: string; items: { title: string; text: string }[]; uid?: string; }
+const { title, items, uid = '' } = Astro.props;
 // An item's text can run to several paragraphs: a blank line in the Markdown file starts a new one.
 const paragraphs = (text: string) => text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 ---
 {items.length > 0 && (
-  <section class="overview" aria-labelledby={title ? 'overview-title' : undefined}>
-    {title && <h2 id="overview-title" class="section-title">{title}</h2>}
+  <section class="overview" aria-labelledby={title ? `overview-title${uid}` : undefined}>
+    {title && <h2 id={`overview-title${uid}`} class="section-title">{title}</h2>}
     <div class="ov-list">
       {items.map((item, i) => (
         <details open={i === 0}>

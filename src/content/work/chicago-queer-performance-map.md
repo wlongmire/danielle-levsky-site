@@ -1,24 +1,25 @@
 ---
-title: "Interactive Map of Chicago Queer Performance Spaces"
-outcome: "Along with three other graduate students in Loyola University’s Digital Humanities and Public History masters programs, I built an interactive map highlighting Chicago locations that consider themselves LGBTQ+ entertainment spaces, or spaces that put on LGBTQ+ programming regularly."
-role: "Graduate project"
-org: "Digital Humanities Projects"
-dates: "Fall 2019–Spring 2020"
-sections: [digital-humanities]
+title: Interactive Map of Chicago Queer Performance Spaces
+outcome: Along with three other graduate students in Loyola University’s Digital Humanities and Public History masters programs, I built an interactive map highlighting Chicago locations that consider themselves LGBTQ+ entertainment spaces, or spaces that put on LGBTQ+ programming regularly.
+role: Graduate project
+org: Digital Humanities Projects
+dates: Fall 2019–Spring 2020
+sections:
+  - digital-humanities
 tools: []
 tracks: []
 media:
   - type: image
-    src: "chicago-queer-performance-map-1.png"
-    alt: "The Come Out & Play home page: an interactive Google map of Chicago's LGBTQ+ performance spaces, with a legend of colour-coded neighbourhood layers and pins beside it."
+    src: chicago-queer-performance-map-1.png
+    alt: 'The Come Out & Play home page: an interactive Google map of Chicago''s LGBTQ+ performance spaces, with a legend of colour-coded neighbourhood layers and pins beside it.'
     fit: contain
   - type: image
-    src: "chicago-queer-performance-map-2.png"
-    alt: "The Come Out & Play map in Google My Maps, with the neighbourhood layers (North, Northwest, West, Southwest) and their venues listed on the left and colour-coded pins on the map."
+    src: chicago-queer-performance-map-2.png
+    alt: The Come Out & Play map in Google My Maps, with the neighbourhood layers (North, Northwest, West, Southwest) and their venues listed on the left and colour-coded pins on the map.
     fit: contain
   - type: image
-    src: "chicago-queer-performance-map-3.png"
-    alt: "The Come Out & Play discussion board page, with a note inviting people to share their experiences of Chicago's queer performance spaces."
+    src: chicago-queer-performance-map-3.png
+    alt: The Come Out & Play discussion board page, with a note inviting people to share their experiences of Chicago's queer performance spaces.
     fit: contain
 ---
 

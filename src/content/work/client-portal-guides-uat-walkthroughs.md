@@ -1,10 +1,11 @@
 ---
-title: "Client Portal Guides & UAT Walkthroughs"
-outcome: "Developed practical internal and client-facing documentation to explain portal access, account setup, upload flows, and troubleshooting paths."
-role: ""
-org: "Baker Tilly"
-dates: ""
-sections: [ld-portfolio]
+title: Client Portal Guides & UAT Walkthroughs
+outcome: Developed practical internal and client-facing documentation to explain portal access, account setup, upload flows, and troubleshooting paths.
+role: ''
+org: Baker Tilly
+dates: ''
+sections:
+  - ld-portfolio
 confidential: true
 ---
 

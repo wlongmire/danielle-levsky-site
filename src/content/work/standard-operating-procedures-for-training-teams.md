@@ -1,10 +1,11 @@
 ---
-title: "Standard Operating Procedure for Training Teams"
-outcome: "Worked with the learning team to analyze instructional outcomes and provide expertise to plan, develop, and deliver high-quality learning experiences."
-role: ""
-org: "SMS Assist"
-dates: ""
-sections: [ld-portfolio]
+title: Standard Operating Procedure for Training Teams
+outcome: Worked with the learning team to analyze instructional outcomes and provide expertise to plan, develop, and deliver high-quality learning experiences.
+role: ''
+org: SMS Assist
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 During my time working at SMS Assist, I worked collaboratively with the training team to analyze instructional outcomes and provide expertise in the planning, development, and delivery of high-quality learning experiences.

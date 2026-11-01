@@ -1,13 +1,17 @@
 ---
-title: "eighty2i"
-outcome: "Built and managed the Teammate Success team: learning programs, the performance management process, onboarding, and DEI initiatives that fostered belonging and inclusivity."
-role: "Head of Teammate Success"
-org: "DEI Projects"
-dates: ""
-sections: [dei]
-tools: ["Lattice", "Notion"]
+title: eighty2i
+outcome: 'Built and managed the Teammate Success team: learning programs, the performance management process, onboarding, and DEI initiatives that fostered belonging and inclusivity.'
+role: Head of Teammate Success
+org: DEI Projects
+dates: ''
+sections:
+  - dei
+tools:
+  - Lattice
+  - Notion
 tracks: []
 ---
+
 When I joined eighty2i as the Head of Teammate Success, I took the helm of building and managing a team that would execute the vision of fostering the professional growth of team members.
 
 I was instrumental in creating and implementing learning programs and initiatives to nurture team member growth, maintain employee satisfaction and engagement, and foster team retention. I also oversaw the creation of our performance management process and implemented it through Lattice, including goal-setting, performance evaluations, feedback sessions, and training and documentation on OKRs.

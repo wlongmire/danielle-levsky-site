@@ -17,16 +17,17 @@ interface Props {
   imagePosition?: string; // where a wide picture is cropped to inside the frame, e.g. "46% 30%"
   large?: boolean;       // taller, and wider than the page content on big screens (the home page)
   secondary?: { label: string; url: string }; // a quieter second button beside the main one (opens in a new tab)
+  uid?: string;          // makes the title's id unique when a page has more than one of this block
   mark?: { src: ImageMetadata; alt: string; url?: string }; // a logo shown whole under the text (e.g. a program); a url makes it a link
 }
-const { headline, intro, cta, image, imageAlt = '', imagePosition, imageSlot = false, h1 = true, large = false, mark, secondary } = Astro.props;
+const { headline, intro, cta, image, imageAlt = '', imagePosition, imageSlot = false, h1 = true, large = false, mark, secondary, uid = '' } = Astro.props;
 const Tag = h1 ? 'h1' : 'h2';
 const opensContact = cta?.url === '#contact';
 const paragraphs = (intro ?? '').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);   // a blank line in the text starts a new paragraph
 ---
-<section class:list={['hero', { 'has-img': image || imageSlot, large }]} aria-labelledby="hero-title">
+<section class:list={['hero', { 'has-img': image || imageSlot, large }]} aria-labelledby={`hero-title${uid}`}>
   <div class="hero-text">
-    <Tag id="hero-title">{headline}</Tag>
+    <Tag id={`hero-title${uid}`}>{headline}</Tag>
     {paragraphs.map((p) => <p class="hero-intro">{p}</p>)}
     {(cta || secondary) && (
       <div class="hero-actions">

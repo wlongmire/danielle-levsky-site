@@ -4,13 +4,14 @@ import { load as yamlLoad } from 'js-yaml';
 import { MAX_TEXT_BYTES } from './config';
 import { shaOf } from './storage';
 import { resumes } from '../../data/resumes';
+import { CARD_SOURCES } from '../blocks';
 
-export type Kind = 'work' | 'timeline' | 'about' | 'site';
+export type Kind = 'work' | 'timeline' | 'page' | 'site';
 
 export function kindOf(path: string): Kind | null {
   if (/^src\/content\/work\/[a-z0-9][a-z0-9-]*\.md$/.test(path)) return 'work';
   if (/^src\/content\/timeline\/[a-z0-9][a-z0-9-]*\.md$/.test(path)) return 'timeline';
-  if (path === 'src/content/pages/about.md') return 'about';
+  if (/^src\/content\/pages\/(home|about)\.md$/.test(path) || /^src\/content\/sections\/[a-z0-9][a-z0-9-]*\.md$/.test(path)) return 'page';
   if (path === 'src/data/site.json') return 'site';
   return null;
 }
@@ -18,11 +19,13 @@ export function kindOf(path: string): Kind | null {
 export const IMAGE_TYPES: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp' };
 export function previewablePath(path: string): boolean {
   if (path.includes('..')) return false;
-  return path === 'src/assets/headshot.jpg' || /^src\/assets\/(work|timeline|about)\/[A-Za-z0-9][A-Za-z0-9._-]*\.(jpe?g|png|webp)$/i.test(path);
+  return path === 'src/assets/headshot.jpg' || /^src\/assets\/(work|timeline|about|pages|consulting|digital-humanities)\/[A-Za-z0-9][A-Za-z0-9._-]*\.(jpe?g|png|webp)$/i.test(path);
 }
-export const canCreate = (path: string) => ['work', 'timeline'].includes(kindOf(path) ?? '');
+export const canCreate = (path: string) => kindOf(path) === 'work';   // new entries only; pages are not created here
 
 export const TRACKS = ['learning-design', 'teaching', 'engineering', 'design-ux'];
+/** The section pages an entry can be shown on (the Card Grid block's sources, minus hand-picked). */
+export const SECTIONS = CARD_SOURCES.filter((x) => x !== 'picks') as string[];
 
 export function splitFrontMatter(text: string): { fm: string; body: string } | null {
   const m = text.replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -94,6 +97,9 @@ export async function validateMarkdown(path: string, text: string): Promise<stri
       errors.push(`"tracks" may only contain: ${TRACKS.join(', ')}.`);
     if (d.order !== undefined && typeof d.order !== 'number') errors.push('"order" must be a number.');
     if (d.draft !== undefined && typeof d.draft !== 'boolean') errors.push('"draft" must be true or false.');
+    if (d.confidential !== undefined && typeof d.confidential !== 'boolean') errors.push('"confidential" must be true or false.');
+    if (d.sections !== undefined && (!Array.isArray(d.sections) || d.sections.some((x: unknown) => !SECTIONS.includes(x as string))))
+      errors.push(`"sections" may only contain: ${SECTIONS.join(', ')}.`);
     pairList('artifacts'); pairList('links');
     await checkMedia(d.media);   // pictures and YouTube videos shown in the popup
     if (d.images !== undefined) {
@@ -110,17 +116,89 @@ export async function validateMarkdown(path: string, text: string): Promise<stri
     if (d.skills !== undefined && (!Array.isArray(d.skills) || d.skills.some((s: unknown) => typeof s !== 'string'))) errors.push('"skills" must be a list of words or phrases.');
     if (d.link !== undefined && !(isObj(d.link) && typeof d.link.label === 'string' && typeof d.link.url === 'string')) errors.push('"link" needs a label and a url.');
     await checkMedia(d.media);
-  } else if (kind === 'about') {
-    need('title');
-    const d = data as any;
-    if (d.tagline !== undefined && !isStr(d.tagline)) errors.push('"tagline" must be a line of text.');
-    if (d.headshot !== undefined && !(isStr(d.headshot) && (await assetExists(path, d.headshot)))) errors.push('The headshot file has not been uploaded.');
-    if (d.photos !== undefined) {
-      if (!Array.isArray(d.photos)) errors.push('"photos" must be a list.');
-      else for (const [i, p] of d.photos.entries()) {
-        if (!isObj(p) || !isStr(p.src) || !isStr(p.alt)) errors.push(`photos item ${i + 1} needs a src and an alt.`);
-        else if (!(await assetExists(path, p.src))) errors.push(`photos item ${i + 1}: the picture "${p.src}" has not been uploaded.`);
-      }
+  }
+  return errors;
+}
+
+// ---- Pages (home, about and the section pages): an ordered list of blocks ----
+const urlOk = (u: string) => /^(\/|#|https?:\/\/|mailto:)\S*$/.test(u);
+
+/** Plain-language problems with a page's data (empty = fine to save). `data` is the page's front matter as an object. */
+export async function validatePage(path: string, data: any): Promise<string[]> {
+  const errors: string[] = [];
+  if (!isObj(data)) return ['That page is not formatted correctly.'];
+  const isSection = path.startsWith('src/content/sections/');
+  if (isSection ? !isStr(data.navLabel) : !isStr(data.title)) errors.push(isSection ? 'The menu name is required.' : 'The page name is required.');
+  if (data.description !== undefined && typeof data.description !== 'string') errors.push('The search description must be text.');
+  if (data.draft !== undefined && typeof data.draft !== 'boolean') errors.push('"draft" must be true or false.');
+  if (!Array.isArray(data.blocks)) return [...errors, 'The page needs a list of blocks.'];
+  if (data.blocks.length > 30) errors.push('A page can have at most 30 blocks.');
+
+  const pic = async (where: string, src: unknown, alt: unknown) => {
+    if (!isStr(src)) return;
+    if (!(await assetExists(path, src))) errors.push(`${where}: the picture "${src}" has not been uploaded.`);
+    if (!isStr(alt)) errors.push(`${where}: describe the picture in a few words (the alt text).`);
+  };
+  const button = (where: string, b: any) => {
+    if (b === undefined) return;
+    if (!isObj(b) || !isStr(b.label) || !isStr(b.url)) errors.push(`${where}: a button needs both its words and its address.`);
+    else if (!urlOk(b.url)) errors.push(`${where}: the address must start with /, #, http://, https:// or mailto:.`);
+  };
+
+  for (const [i, b] of (data.blocks as any[]).entries()) {
+    const at = `Block ${i + 1}`;
+    if (!isObj(b)) { errors.push(`${at} is not formatted correctly.`); continue; }
+    const strs = (keys: string[]) => keys.forEach((k) => { if (b[k] !== undefined && typeof b[k] !== 'string') errors.push(`${at}: "${k}" must be text.`); });
+    switch (b.type) {
+      case 'hero':
+        if (!isStr(b.headline)) errors.push(`${at} (Hero): the headline is required.`);
+        strs(['intro', 'imageAlt', 'imagePosition']);
+        button(`${at} (Hero) main button`, b.cta);
+        if (b.showCv !== undefined && typeof b.showCv !== 'boolean') errors.push(`${at}: the CV button must be on or off.`);
+        if (b.featured !== undefined && typeof b.featured !== 'boolean') errors.push(`${at}: the big style must be on or off.`);
+        if (b.imagePosition && !/^\d{1,3}%\s+\d{1,3}%$/.test(b.imagePosition)) errors.push(`${at}: the crop position looks like "46% 30%" (left/right, then top/bottom).`);
+        await pic(`${at} (Hero) picture`, b.image, b.imageAlt);
+        if (b.logo !== undefined) {
+          if (!isObj(b.logo) || !isStr(b.logo.src)) errors.push(`${at}: the logo needs a picture.`);
+          else {
+            await pic(`${at} (Hero) logo`, b.logo.src, b.logo.alt);
+            if (b.logo.url && !/^https?:\/\/\S+$/.test(b.logo.url)) errors.push(`${at}: the logo's link must start with http:// or https://.`);
+          }
+        }
+        if (isStr(b.intro) && /<\s*(script|iframe|object|embed)\b/i.test(b.intro)) errors.push(`${at}: the text may not contain <script>, <iframe>, <object> or <embed>.`);
+        break;
+      case 'overview':
+        strs(['title']);
+        if (!Array.isArray(b.items)) { errors.push(`${at} (Overview list): the items must be a list.`); break; }
+        if (b.items.length > 40) errors.push(`${at}: at most 40 items.`);
+        b.items.forEach((it: any, n: number) => {
+          if (!isObj(it) || !isStr(it.title)) errors.push(`${at} (Overview list) item ${n + 1}: the title is required.`);
+          else if (typeof it.text !== 'string') errors.push(`${at} item ${n + 1}: the text must be text.`);
+          else if (/<\s*(script|iframe|object|embed)\b/i.test(it.text)) errors.push(`${at} item ${n + 1}: the text may not contain <script>, <iframe>, <object> or <embed>.`);
+        });
+        break;
+      case 'cards':
+        strs(['title']);
+        if (!CARD_SOURCES.includes(b.source)) errors.push(`${at} (Card grid): choose where the cards come from.`);
+        if (b.groupByOrg !== undefined && typeof b.groupByOrg !== 'boolean') errors.push(`${at}: grouping must be on or off.`);
+        if (b.source === 'picks') {
+          if (!Array.isArray(b.entries) || b.entries.length === 0) errors.push(`${at} (Card grid): pick at least one entry.`);
+          else for (const id of b.entries) if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(id) || (await shaOf(`src/content/work/${id}.md`)) === null) errors.push(`${at}: the entry "${id}" does not exist.`);
+        }
+        break;
+      case 'text':
+        strs(['title', 'body']);
+        if (typeof b.body === 'string' && /<\s*(script|iframe|object|embed)\b/i.test(b.body)) errors.push(`${at}: the text may not contain <script>, <iframe>, <object> or <embed>.`);
+        if (b.photos !== undefined) {
+          if (!Array.isArray(b.photos)) errors.push(`${at}: the pictures must be a list.`);
+          else for (const [n, p] of b.photos.entries()) {
+            if (!isObj(p) || !isStr(p.src)) errors.push(`${at} picture ${n + 1}: choose a picture.`);
+            else await pic(`${at} picture ${n + 1}`, p.src, p.alt);
+          }
+        }
+        break;
+      default:
+        errors.push(`${at}: unknown block type.`);
     }
   }
   return errors;
@@ -145,7 +223,7 @@ export function validateSite(text: string, current: string | null): { errors: st
 }
 
 // ---- Uploads ----
-export type UploadTarget = 'work-image' | 'timeline-image' | 'headshot' | 'artifact' | 'resume';
+export type UploadTarget = 'work-image' | 'timeline-image' | 'page-image' | 'headshot' | 'artifact' | 'resume';
 
 const IMAGE_EXT = ['jpg', 'jpeg', 'png', 'webp'];
 const FILE_EXT = ['pdf', 'docx', 'pptx', 'xlsx', ...IMAGE_EXT];
@@ -179,6 +257,7 @@ export function planUpload(target: UploadTarget, fileName: string, bytes: Buffer
   switch (target) {
     case 'work-image': bad = check(IMAGE_EXT); return bad ? { error: bad } : { path: `src/assets/work/${base}.${ext}`, reference: `../../assets/work/${base}.${ext}` };
     case 'timeline-image': bad = check(IMAGE_EXT); return bad ? { error: bad } : { path: `src/assets/timeline/${base}.${ext}`, reference: `../../assets/timeline/${base}.${ext}` };
+    case 'page-image': bad = check(IMAGE_EXT); return bad ? { error: bad } : { path: `src/assets/pages/${base}.${ext}`, reference: `../../assets/pages/${base}.${ext}` };
     case 'headshot': bad = check(['jpg', 'jpeg']); return bad ? { error: bad } : { path: 'src/assets/headshot.jpg', reference: '../../assets/headshot.jpg' };
     case 'artifact': bad = check(FILE_EXT); return bad ? { error: bad } : { path: `public/artifacts/${base}.${ext}`, reference: `/artifacts/${base}.${ext}` };
     case 'resume': {

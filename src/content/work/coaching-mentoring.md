@@ -1,30 +1,31 @@
 ---
-title: "Coaching & Mentoring"
-outcome: "Developed an annual coaching and mentoring system where teammates were encouraged to assess and explore their professional goals with their managers."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Coaching & Mentoring
+outcome: Developed an annual coaching and mentoring system where teammates were encouraged to assess and explore their professional goals with their managers.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "coaching-mentoring-1.png"
-    alt: "Picture 1 of 5 from Coaching & Mentoring"
+    src: coaching-mentoring-1.png
+    alt: Picture 1 of 5 from Coaching & Mentoring
     fit: contain
   - type: image
-    src: "coaching-mentoring-2.png"
-    alt: "Picture 2 of 5 from Coaching & Mentoring"
+    src: coaching-mentoring-2.png
+    alt: Picture 2 of 5 from Coaching & Mentoring
     fit: contain
   - type: image
-    src: "coaching-mentoring-3.png"
-    alt: "Picture 3 of 5 from Coaching & Mentoring"
+    src: coaching-mentoring-3.png
+    alt: Picture 3 of 5 from Coaching & Mentoring
     fit: contain
   - type: image
-    src: "coaching-mentoring-4.png"
-    alt: "Picture 4 of 5 from Coaching & Mentoring"
+    src: coaching-mentoring-4.png
+    alt: Picture 4 of 5 from Coaching & Mentoring
     fit: contain
   - type: image
-    src: "coaching-mentoring-5.png"
-    alt: "Picture 5 of 5 from Coaching & Mentoring"
+    src: coaching-mentoring-5.png
+    alt: Picture 5 of 5 from Coaching & Mentoring
     fit: contain
 ---
 

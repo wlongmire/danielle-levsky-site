@@ -1,18 +1,19 @@
 ---
-title: "Webinars"
-outcome: "Wrote, developed, and presented webinars as a thought leader in the field of educational technology."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Webinars
+outcome: Wrote, developed, and presented webinars as a thought leader in the field of educational technology.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "benchprep-webinar-1.jpg"
-    alt: "Picture 1 of 2 from Webinars"
+    src: benchprep-webinar-1.jpg
+    alt: Picture 1 of 2 from Webinars
     fit: contain
   - type: image
-    src: "benchprep-webinar-2.jpg"
-    alt: "Picture 2 of 2 from Webinars"
+    src: benchprep-webinar-2.jpg
+    alt: Picture 2 of 2 from Webinars
     fit: contain
 ---
 

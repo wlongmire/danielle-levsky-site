@@ -1,13 +1,19 @@
 ---
-// The /edit page: a password-protected place to change the site's CONTENT (text, pictures, files).
-// It cannot change layouts or code. Saves become commits on GitHub, which redeploy the site.
-import { isAuthed, passwordConfigured } from '../../lib/editor/auth';
+// The /edit page: a password-protected place to change the site's CONTENT (never layouts or code).
+// The sidebar lists every page (each is an ordered list of blocks you can edit, add, remove and reorder), every entry
+// (the cards and their popups) and the site details. Saves become commits on GitHub, which redeploy the site; on your own
+// computer, with no GitHub token, they write straight to the local files. The forms are drawn from src/lib/editor/forms.ts.
+import '../../styles/tokens.css';
+import { devBypass, isAuthed, passwordConfigured } from '../../lib/editor/auth';
 import { storageMode } from '../../lib/editor/storage';
+import { BLOCK_FORMS, ENTRY_FIELDS, SITE_FIELDS } from '../../lib/editor/forms';
 
 export const prerender = false;
 
 const authed = isAuthed(Astro.request);
-const setupNeeded = !passwordConfigured();
+const setupNeeded = !passwordConfigured() && !devBypass(Astro.request);
+const SPEC = { blocks: BLOCK_FORMS, entry: ENTRY_FIELDS, site: SITE_FIELDS };
+const MODE = storageMode();
 Astro.response.headers.set('Cache-Control', 'no-store');
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
 ---
@@ -20,958 +26,541 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   <title>Edit the site</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet" />
   <style is:global>
-    /* Same night-studio palette as the public site. */
-    :root { color-scheme: dark; --bg: #0b1426; --card: #12203a; --raised: #1a2d50; --ink: #f4ecd8; --muted: #b9b3a3; --line: #24365a; --accent: #f0b34a; --accent-ink: #0b1426; --bad: #ff9a9f; --ok: #8fd9a3; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.55 'Inter', system-ui, sans-serif; }
-    h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; line-height: 1.2; margin: 0 0 .5em; }
-    code { background: var(--bg); border: 1px solid var(--line); padding: 0 5px; border-radius: 4px; font-size: .92em; }
-    a { color: inherit; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 400 15px/1.5 var(--font-body); }
     button, input, select, textarea { font: inherit; color: inherit; }
-    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-    .btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: 9px 18px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
-    .btn:hover:not(:disabled) { filter: brightness(1.08); }
-    .btn:disabled { opacity: .55; cursor: default; }
-    .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
-    .btn.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); filter: none; }
-    .btn.small { padding: 5px 12px; font-size: 14px; }
-    input[type='text'], input[type='email'], input[type='password'], input[type='url'], select, textarea { width: 100%; border: 1.5px solid var(--line); border-radius: 6px; padding: 9px 11px; background: var(--bg); color: var(--ink); }
-    select option { background: var(--bg); }
-    textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 14.5px; line-height: 1.65; resize: vertical; tab-size: 2; }
-    label { display: block; font-weight: 600; margin: 0 0 6px; }
-    .hint { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
-    .status { min-height: 1.5em; font-weight: 600; margin: 0; }
-    .status.error { color: var(--bad); }
-    .status.ok { color: var(--ok); }
-    .problems { margin: 6px 0 0; padding-left: 20px; font-weight: 400; }
-
-    .login { max-width: 400px; margin: 12vh auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 30px; }
-    .login .field { margin: 18px 0; }
-
-    .top { display: flex; align-items: center; gap: 12px; padding: 14px 24px; background: color-mix(in srgb, var(--bg) 90%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
-    .top h1 { font-size: 20px; margin: 0 auto 0 0; }
-    .mode { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; }
-    .layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 22px; padding: 24px; max-width: 1320px; margin: 0 auto; }
-    @media (max-width: 880px) { .layout { grid-template-columns: 1fr; } }
-
-    .side { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 12px; align-self: start; position: sticky; top: 78px; max-height: calc(100vh - 100px); overflow: auto; }
-    @media (max-width: 880px) { .side { position: static; max-height: none; } }
-    /* Section titles are the big headings; the items under each one are smaller and indented. */
-    .side h2 { font: 600 19px/1.25 'Fraunces', Georgia, serif; color: var(--accent); margin: 24px 0 6px 4px; padding-bottom: 7px; border-bottom: 1px solid var(--line); }
-    .side h2:first-child { margin-top: 2px; }
-    .side ul { list-style: none; margin: 0 0 0 12px; padding: 0 0 0 10px; border-left: 1px solid var(--line); }
-    .side li button { width: 100%; text-align: left; background: transparent; border: 0; border-radius: 6px; padding: 6px 10px; font-size: 14px; line-height: 1.35; cursor: pointer; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .side li button:hover { background: var(--raised); color: var(--ink); }
-    .side li button[aria-current='true'] { background: var(--raised); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; color: var(--ink); }
-    .newbtn { margin: 8px 0 0 22px; font-size: 13px; }
-    /* Drag and drop: the handle on the left of each item moves it. */
-    .side ul.sortable li { display: flex; align-items: center; gap: 2px; border-radius: 6px; }
-    .side ul.sortable li button.grip { flex: none; width: 22px; padding: 6px 0; text-align: center; cursor: grab; touch-action: none; color: var(--muted); font-size: 15px; letter-spacing: -2px; }
-    .side ul.sortable li button.grip:hover { color: var(--accent); background: transparent; }
-    .side ul.sortable li button.itembtn { flex: 1; width: auto; min-width: 0; }
-    .side ul.sortable li.dragging { position: relative; z-index: 3; background: var(--raised); box-shadow: 0 8px 22px rgba(0,0,0,.5); }
-    .side ul.sortable li.dragging button.grip { cursor: grabbing; color: var(--accent); }
-    #side-msg { min-height: 0; margin: 0 0 4px 4px; font-size: 14px; }
-    #side-msg:not(:empty) { margin-bottom: 12px; }
-
-    .main { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 0 22px 22px; min-height: 380px; }
-    .bar { position: sticky; top: 56px; z-index: 5; background: var(--card); padding: 18px 0 10px; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
-    .bar h2 { font-size: 24px; margin: 0; }
-    .path { font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); margin-top: 2px; }
-    .help { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 0 0 14px; font-size: 14.5px; }
-    .help summary { cursor: pointer; font-weight: 600; color: var(--accent); }
-    .help p { margin: 8px 0 0; }
-    .tpl { margin: 10px 0 12px; padding: 12px 14px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--muted); white-space: pre-wrap; overflow: auto; max-height: 340px; }
-    .field { margin: 0 0 16px; }
-    .prevwrap { margin-top: 16px; border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; }
-    .prevwrap summary { cursor: pointer; font-weight: 600; color: var(--accent); }
-    .preview { padding-top: 8px; }
-    .preview h3 { font-size: 18px; color: var(--accent); margin: 16px 0 6px; }
-    .preview p, .preview ul { margin: 0 0 10px; }
-    .preview a { color: var(--accent); }
-    .main:focus { outline: none; }
-    .addpic { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 16px 0 4px; }
-    .addpic label { margin-top: 10px; }
-    .addpic label:first-child { margin-top: 0; }
-    .addpic input[type='file'] { padding: 7px; }
-    .addpic #ap-details label:first-child { margin-top: 10px; }
-    .addpic .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
-    .pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 12px; padding-top: 10px; }
-    .pic { position: relative; margin: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-    .pic .picx { position: absolute; top: 6px; right: 6px; z-index: 2; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,.35); background: rgba(8, 14, 28, .78); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; padding: 0; }
-    .pic .picx:hover { background: var(--bad); border-color: var(--bad); color: #0b1426; }
-    #pic-msg { margin-top: 12px; }
-    #pic-msg .btn { margin-left: 8px; }
-    .pics.mediabox { display: block; }
-    .mprev { background: #000; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-    .mprev .picbtn { display: block; width: 100%; padding: 0; border: 0; background: #000; cursor: zoom-in; }
-    #mtop { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 4px 16px; align-items: start; }
-    @media (max-width: 640px) { #mtop { grid-template-columns: 1fr; } }
-    .mprev img { display: block; width: 100%; height: 150px; object-fit: contain; background: #000; }
-    .mvideo { position: relative; aspect-ratio: 16 / 9; width: 100%; background: #000; }
-    .mvideo iframe, .mvideo .mplay { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-    .mvideo .mplay { padding: 0; background: #000; cursor: pointer; }
-    .mvideo .mplay img { height: 100%; opacity: .85; object-fit: cover; }
-    .mvideo .mplay span { position: absolute; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px 0 0 -20px; display: grid; place-items: center; padding-left: 5px; box-sizing: border-box; border-radius: 50%; background: var(--accent); color: #0b1426; font-size: 16px; }
-    .mfields { margin: 0 0 4px; }
-    .mfields label:first-child { margin-top: 0; }
-    .mhint { margin: 10px 0 6px; color: var(--muted); font-size: 14px; }
-    .mlist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
-    .mitem { display: grid; grid-template-columns: 30px 1fr 30px; align-items: stretch; font-size: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-    .mitem.sel { border-color: var(--accent); }
-    .mitem.dragging { position: relative; z-index: 3; background: var(--raised); box-shadow: 0 8px 22px rgba(0,0,0,.5); }
-    .mitem button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font: inherit; }
-    .mitem .mgrip { cursor: grab; touch-action: none; font-size: 18px; }
-    .mitem.dragging .mgrip { cursor: grabbing; color: var(--accent); }
-    .mitem .mpick { display: flex; align-items: center; gap: 10px; text-align: left; padding: 4px 8px 4px 0; color: var(--text); min-width: 0; }
-    .mitem .mpick img { width: 48px; height: 30px; object-fit: cover; background: #000; border-radius: 4px; flex: none; }
-    .mitem .mname { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .mitem .mname b { color: var(--accent); font-weight: 600; margin-right: 6px; }
-    .mitem .mx { font-size: 20px; }
-    .mitem .mx:hover { background: var(--bad); color: #0b1426; }
-    .pic .vidlink { display: block; width: 100%; background: #000; }
-    .pic .picbtn { display: block; width: 100%; padding: 0; border: 0; background: #000; cursor: zoom-in; }
-    .pic img { display: block; width: 100%; height: 190px; object-fit: contain; background: #000; }
-    .pic figcaption { padding: 6px 8px; font: 12px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); word-break: break-all; }
-    .pic.missing { padding: 14px 10px; color: var(--bad); font-size: 14px; }
-    .pic.missing figcaption { padding: 6px 0 0; }
-    .uppic { display: block; max-width: min(100%, 320px); max-height: 240px; margin-top: 10px; border-radius: 6px; background: #000; border: 1px solid var(--line); cursor: zoom-in; }
-    .lightbox { padding: 0; border: 1px solid var(--line); border-radius: 12px; background: #000; color: var(--ink); max-width: 96vw; max-height: 96vh; min-width: min(280px, 96vw); overflow: hidden; }
-    .lightbox::backdrop { background: rgba(5, 10, 20, .82); }
-    /* The script sizes the picture to the largest size that still fits the window (it can also enlarge small ones). */
-    .lightbox img { display: block; max-width: 96vw; max-height: calc(96vh - 46px); object-fit: contain; margin: 0 auto; }
-    .lightbox .lb-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; background: var(--card); font: 13px ui-monospace, Menlo, Consolas, monospace; color: var(--muted); }
-    .result { background: var(--bg); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 10px 14px; margin-top: 14px; }
-    .result code { word-break: break-all; }
-    .main > h2 { margin-top: 22px; }
+    h1, h2, h3 { font-family: var(--font-display); margin: 0; }
+    .top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; padding: 10px 20px; background: var(--card); border-bottom: 1px solid var(--rule); }
+    .top h1 { font-size: 24px; color: var(--amber); margin-right: auto; }
+    .badge { font-size: 12px; padding: 3px 10px; border: 1px solid var(--rule); border-radius: 999px; color: var(--muted); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; min-height: 40px; border-radius: 6px; border: 1.5px solid var(--amber); background: transparent; color: var(--amber); font-weight: 600; cursor: pointer; text-decoration: none; }
+    .btn:hover { background: color-mix(in srgb, var(--amber) 10%, transparent); }
+    .btn.primary { background: var(--amber); color: var(--on-amber); }
+    .btn.primary:hover { filter: brightness(1.15); }
+    .btn.small { min-height: 32px; padding: 3px 10px; font-size: 13px; }
+    .btn.danger { border-color: #9b2c2c; color: #9b2c2c; }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+    .shell { display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: start; gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; }
+    .side { position: sticky; top: 70px; max-height: calc(100vh - 90px); overflow: auto; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 14px; }
+    .side h2 { font-size: 20px; margin: 14px 0 6px; color: var(--amber); }
+    .side h2:first-child { margin-top: 0; }
+    .side ul { list-style: none; margin: 0; padding: 0; }
+    .row { display: flex; align-items: center; gap: 4px; border-radius: 6px; }
+    .row .open { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 7px 8px; border-radius: 6px; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row .open:hover { background: color-mix(in srgb, var(--amber) 8%, transparent); }
+    .row.on .open { background: color-mix(in srgb, var(--amber) 14%, transparent); font-weight: 600; }
+    .row .mv { visibility: hidden; border: 0; background: none; cursor: pointer; padding: 2px 5px; color: var(--muted); border-radius: 4px; }
+    .row:hover .mv, .row:focus-within .mv { visibility: visible; }
+    .row .mv:hover { background: var(--rule); }
+    .tag { font-size: 11px; color: var(--muted); border: 1px solid var(--rule); border-radius: 999px; padding: 0 7px; }
+    .filter { width: 100%; padding: 7px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--bg); margin: 4px 0 6px; }
+    .main { min-width: 0; background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 0; }
+    .bar { position: sticky; top: 56px; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px 20px; background: var(--card); border-bottom: 1px solid var(--rule); border-radius: 10px 10px 0 0; }
+    .bar h2 { font-size: 26px; margin-right: auto; }
+    .status { font-size: 13px; color: var(--muted); }
+    .status.bad { color: #9b2c2c; font-weight: 600; }
+    .body { padding: 20px; display: grid; gap: 18px; }
+    .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
+    .problems { margin: 0; padding: 12px 16px 12px 34px; background: #fbeaea; border: 1px solid #e3b4b4; border-radius: 8px; color: #6b1d1d; }
+    .field { display: grid; gap: 4px; }
+    .field > label, .field > .lbl { font-weight: 600; font-size: 14px; }
+    .hint { font-size: 12.5px; color: var(--muted); }
+    .field input[type='text'], .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--bg); }
+    .field textarea { resize: vertical; line-height: 1.5; }
+    .field textarea.md { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13.5px; }
+    .check { display: flex; align-items: flex-start; gap: 8px; }
+    .check input { margin-top: 4px; width: 18px; height: 18px; flex: none; }
+    .checks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .grp { display: grid; gap: 14px; }
+    fieldset.obj { border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; margin: 0; }
+    fieldset.obj legend { font-weight: 600; font-size: 14px; padding: 0 6px; }
+    details.card { border: 1px solid var(--rule); border-radius: 8px; background: var(--card); }
+    details.card > summary { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; list-style: none; font-weight: 600; }
+    details.card > summary::-webkit-details-marker { display: none; }
+    details.card > summary::before { content: '▸'; color: var(--amber); }
+    details.card[open] > summary::before { content: '▾'; }
+    details.card > summary .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    details.card > summary .k { font-weight: 500; font-size: 12px; color: var(--amber); border: 1px solid var(--amber); border-radius: 999px; padding: 0 8px; }
+    details.card > .in { padding: 4px 14px 14px; display: grid; gap: 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
+    details.block { border-color: var(--amber); border-width: 1.5px; }
+    .ctl { display: inline-flex; gap: 2px; }
+    .ctl button { border: 1px solid var(--rule); background: var(--bg); border-radius: 5px; min-width: 28px; height: 28px; cursor: pointer; }
+    .ctl button:hover { background: var(--rule); }
+    .adder { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .adder select { padding: 7px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--bg); }
+    .pic { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; }
+    .pic .thumb { width: 110px; height: 80px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg) center / contain no-repeat; display: grid; place-items: center; font-size: 11px; color: var(--muted); text-align: center; }
+    .pic .path { font-size: 12px; color: var(--muted); word-break: break-all; }
+    .pic .acts { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; align-items: center; }
+    .addbar { padding: 14px; border: 2px dashed var(--rule); border-radius: 10px; }
+    .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 8px; z-index: 50; max-width: 90vw; }
+    .toast[hidden] { display: none; }
+    dialog { border: 1px solid var(--rule); border-radius: 12px; padding: 22px; width: min(480px, calc(100vw - 32px)); background: var(--card); color: var(--text); }
+    dialog::backdrop { background: var(--scrim); }
+    dialog form { display: grid; gap: 14px; }
+    .login { max-width: 420px; margin: 80px auto; padding: 24px; background: var(--card); border: 1px solid var(--rule); border-radius: 12px; display: grid; gap: 14px; }
+    .login input { padding: 10px; border: 1.5px solid var(--rule); border-radius: 6px; width: 100%; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (max-width: 900px) { .shell { grid-template-columns: 1fr; padding: 12px; } .side { position: static; max-height: 320px; } .pair { grid-template-columns: 1fr; } .bar { top: 56px; } }
   </style>
 </head>
 <body>
-  {setupNeeded ? (
+  <header class="top">
+    <h1>Edit the site</h1>
+    {authed && <span class="badge" id="mode"></span>}
+    <a class="btn small" href="/" target="_blank" rel="noopener">View site</a>
+    {authed && !devBypass(Astro.request) && <button class="btn small" id="logout" type="button">Sign out</button>}
+  </header>
+
+  {setupNeeded && (
     <main class="login">
-      <h1>Editing isn't set up yet</h1>
-      <p>Add a password in the site's settings so this page can be protected: a variable named <code>EDIT_PASSWORD</code>. Then reload this page.</p>
+      <h2>One-time setup needed</h2>
+      <p>No password has been set for this page yet. Add <code>EDIT_PASSWORD</code> (and <code>GITHUB_TOKEN</code>) in the site settings, as described in <code>EDITING.md</code>, then reload this page.</p>
     </main>
-  ) : !authed ? (
-    <main class="login">
-      <h1>Edit the site</h1>
-      <p class="hint">Enter the editing password to continue.</p>
-      <form id="login-form" novalidate>
-        <div class="field">
-          <label for="pw">Password</label>
-          <input id="pw" type="password" autocomplete="current-password" required />
-        </div>
-        <button class="btn" type="submit">Sign in</button>
-        <p id="login-status" class="status error" role="alert" style="margin-top:12px"></p>
+  )}
+
+  {!setupNeeded && !authed && (
+    <main>
+      <form class="login" id="login">
+        <h2>Sign in</h2>
+        <label for="pw">Password</label>
+        <input id="pw" type="password" autocomplete="current-password" required />
+        <p class="status bad" id="login-msg" role="alert"></p>
+        <button class="btn primary" type="submit">Sign in</button>
       </form>
     </main>
-  ) : (
-    <div id="app" data-mode={storageMode()}>
-      <header class="top">
-        <h1>Edit the site</h1>
-        <span class="mode" id="mode"></span>
-        <a class="btn ghost small" href="/" target="_blank" rel="noopener">View site</a>
-        <button class="btn ghost small" id="logout" type="button">Sign out</button>
-      </header>
-      <div class="layout">
-        <nav class="side" aria-label="Things you can edit, in the order they appear on the site" id="side">Loading…</nav>
-        <dialog class="lightbox" id="lightbox" aria-label="Picture viewer"><div class="lb-bar"><span id="lb-name"></span><button class="btn ghost small" id="lb-close" type="button">Close</button></div><img id="lb-img" alt="" /></dialog>
-        <main class="main" id="main" tabindex="-1">
-          <h2>Choose something to edit</h2>
-          <p>The list on the left follows the page from top to bottom, the same order visitors see it.</p>
-          <p class="hint">Your changes go live on the site about a minute after you press Save.</p>
-        </main>
-      </div>
+  )}
+
+  {authed && (
+    <div class="shell">
+      <nav class="side" aria-label="What to edit" id="side"><p class="status">Loading…</p></nav>
+      <main class="main" id="main">
+        <div class="empty">Choose a page, an entry or the site details on the left.</div>
+      </main>
     </div>
   )}
 
-  <script is:inline>
-    (function () {
-      var $ = function (s, r) { return (r || document).querySelector(s); };
-      var HEAD = { 'x-edit': '1' };
-      var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  <dialog id="new-entry">
+    <form method="dialog" id="new-entry-form">
+      <h2>New entry</h2>
+      <div class="field"><label for="ne-title">Title</label><input id="ne-title" type="text" required /></div>
+      <div class="field"><label for="ne-outcome">One-line summary</label><textarea id="ne-outcome" rows="3" required></textarea></div>
+      <p class="hint">The entry starts hidden from the site. Fill in the rest, then untick "Hide this entry from the site".</p>
+      <p class="status bad" id="ne-msg" role="alert"></p>
+      <div class="adder"><button class="btn primary" type="submit">Create</button><button class="btn" type="button" id="ne-cancel">Cancel</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-      function api(url, opts) {
-        opts = opts || {};
-        opts.headers = Object.assign({}, HEAD, opts.headers || {});
-        return fetch(url, opts).then(function (r) {
-          return r.json().catch(function () { return {}; }).then(function (data) { return { ok: r.ok, status: r.status, data: data }; });
-        });
+  <script is:inline define:vars={{ SPEC, MODE, AUTHED: authed }}>
+    const $ = (s, r = document) => r.querySelector(s);
+    const el = (tag, attrs = {}, ...kids) => {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) {
+        if (v === false || v == null) continue;
+        if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+        else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v === true ? '' : v);
       }
+      for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid.nodeType ? kid : document.createTextNode(kid));
+      return n;
+    };
+    let toastTimer;
+    const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 5000); };
+    let uid = 0; const nextId = () => 'f' + ++uid;
 
-      /* ---------- Login ---------- */
-      var lf = $('#login-form');
-      if (lf) {
-        lf.addEventListener('submit', function (e) {
-          e.preventDefault();
-          var st = $('#login-status'); st.className = 'status'; st.textContent = 'Checking…';
-          api('/api/edit/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: $('#pw').value }) })
-            .then(function (r) {
-              if (r.ok) location.reload();
-              else { st.className = 'status error'; st.textContent = r.data.error || 'Could not sign in.'; }
-            });
-        });
-        return;
-      }
-      var app = $('#app');
-      if (!app) return;
-
-      /* ---------- Editor ---------- */
-      var side = $('#side'), main = $('#main');
-      var files = null, current = null, dirty = false, mode = app.dataset.mode;
-      $('#mode').textContent = mode === 'GitHub' ? 'Saving to the live site' : 'Test mode: saving to local files';
-
-      $('#logout').addEventListener('click', function () {
-        api('/api/edit/logout', { method: 'POST' }).then(function () { location.reload(); });
+    async function api(path, { method = 'GET', body, form } = {}) {
+      const res = await fetch(path, {
+        method, headers: { ...(method !== 'GET' ? { 'x-edit': '1' } : {}), ...(body ? { 'content-type': 'application/json' } : {}) },
+        body: form ?? (body ? JSON.stringify(body) : undefined),
       });
-      /* Unsaved edits are kept in this browser tab, so a page reload (the local dev server reloads the page when a new
-         picture file appears) does not lose them. */
-      function readDraft() { try { return JSON.parse(sessionStorage.getItem('edit-draft') || 'null'); } catch (e) { return null; } }
-      function keepDraft(text) { try { sessionStorage.setItem('edit-draft', JSON.stringify({ path: current.path, sha: current.sha, text: text })); } catch (e) {} }
-      function clearDraft() { try { sessionStorage.removeItem('edit-draft'); } catch (e) {} }
-      var localHost = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-      window.addEventListener('beforeunload', function (e) { if (dirty && !localHost) { e.preventDefault(); e.returnValue = ''; } });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, status: res.status, data };
+    }
 
-      function setStatus(el, msg, kind, problems) {
-        el.className = 'status' + (kind ? ' ' + kind : '');
-        el.textContent = msg;
-        if (problems && problems.length) {
-          var ul = document.createElement('ul'); ul.className = 'problems';
-          problems.forEach(function (p) { var li = document.createElement('li'); li.textContent = p; ul.appendChild(li); });
-          el.appendChild(ul);
+    // ---- sign in / out ----
+    $('#login')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const r = await api('/api/edit/login', { method: 'POST', body: { password: $('#pw').value } });
+      if (r.ok) location.reload(); else $('#login-msg').textContent = r.data.error || 'Could not sign in.';
+    });
+    $('#logout')?.addEventListener('click', async () => { await api('/api/edit/logout', { method: 'POST', body: {} }); location.reload(); });
+
+    if (AUTHED) start();
+
+    // ---- state ----
+    let files = null;          // what the sidebar lists
+    let cur = null;            // the open document: { path, kind, id, data, body, sha }
+    let dirty = false;
+    const touch = () => { dirty = true; setStatus('Unsaved changes'); };
+    const setStatus = (msg, bad = false) => { const s = $('#status'); if (s) { s.textContent = msg; s.classList.toggle('bad', bad); } };
+    window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+    document.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 's' && cur) { e.preventDefault(); save(); } });
+
+    async function start() {
+      $('#mode').textContent = MODE === 'local files' ? 'Test mode: saving to local files' : 'Saving to ' + MODE;
+      await loadFiles();
+      const first = location.hash.slice(1);
+      const hit = first && [...files.pages, ...files.entries].find((f) => f.path === decodeURIComponent(first));
+      if (hit) openDoc(hit.path, hit.kind || 'work', hit.id);
+    }
+
+    async function loadFiles() {
+      const r = await api('/api/edit/files');
+      if (!r.ok) { $('#side').replaceChildren(el('p', { class: 'status bad', text: r.data.error || 'Could not load the list.' })); return; }
+      files = r.data; drawSide();
+    }
+
+    // ---- sidebar ----
+    let filterText = '';
+    function drawSide() {
+      const side = $('#side');
+      const mk = (path, label, kind, id, extra, move) => el('li', {},
+        el('div', { class: 'row' + (cur && cur.path === path ? ' on' : '') },
+          el('button', { class: 'open', type: 'button', onclick: () => openDoc(path, kind, id), 'aria-current': cur && cur.path === path ? 'true' : false }, label),
+          extra,
+          move ? el('span', { class: 'ctl' }, el('button', { class: 'mv', type: 'button', 'aria-label': 'Move up', onclick: () => move(-1) }, '↑'), el('button', { class: 'mv', type: 'button', 'aria-label': 'Move down', onclick: () => move(1) }, '↓')) : null));
+      const menu = files.pages.filter((p) => p.kind === 'section');
+      side.replaceChildren(
+        el('h2', { text: 'Pages' }),
+        el('ul', {}, files.pages.map((p) => mk(p.path, p.label, p.kind, p.id, p.draft ? el('span', { class: 'tag', text: 'hidden' }) : null,
+          p.kind === 'section' ? (d) => moveInList('sections', menu, p.id, d) : null))),
+        el('h2', { text: 'Entries' }),
+        el('p', { class: 'hint', text: 'The cards and their popups. Their order here is their order on every card grid.' }),
+        el('input', { class: 'filter', type: 'search', placeholder: 'Find an entry…', 'aria-label': 'Find an entry', value: filterText, oninput: (e) => { filterText = e.target.value; drawEntries(); } }),
+        el('button', { class: 'btn small', type: 'button', onclick: newEntry }, '+ New entry'),
+        el('ul', { id: 'entries' }),
+        el('h2', { text: 'Site' }),
+        el('ul', {}, mk(files.site.path, files.site.label, 'site', 'site')),
+      );
+      drawEntries();
+    }
+    function drawEntries() {
+      const ul = $('#entries'); if (!ul) return;
+      const q = filterText.trim().toLowerCase();
+      ul.replaceChildren(...files.entries.filter((e) => !q || (e.title + ' ' + e.org).toLowerCase().includes(q)).map((e) =>
+        el('li', {}, el('div', { class: 'row' + (cur && cur.path === e.path ? ' on' : '') },
+          el('button', { class: 'open', type: 'button', title: e.org ? e.title + ' (' + e.org + ')' : e.title, onclick: () => openDoc(e.path, 'work', e.id) }, e.title),
+          e.draft ? el('span', { class: 'tag', text: 'hidden' }) : null,
+          q ? null : el('span', { class: 'ctl' }, el('button', { class: 'mv', type: 'button', 'aria-label': 'Move up', onclick: () => moveInList('work', files.entries, e.id, -1) }, '↑'), el('button', { class: 'mv', type: 'button', 'aria-label': 'Move down', onclick: () => moveInList('work', files.entries, e.id, 1) }, '↓'))))));
+    }
+    async function moveInList(kind, list, id, d) {
+      const i = list.findIndex((x) => x.id === id), j = i + d;
+      if (j < 0 || j >= list.length) return;
+      [list[i], list[j]] = [list[j], list[i]];
+      if (kind === 'sections') { const rest = files.pages.filter((p) => p.kind !== 'section'); files.pages = [...rest, ...list]; }
+      drawSide();
+      const r = await api('/api/edit/order', { method: 'PUT', body: { kind, ids: list.map((x) => x.id) } });
+      toast(r.ok ? 'Order saved.' : r.data.error || 'Could not save the order.');
+      if (!r.ok) loadFiles();
+    }
+
+    // ---- open a document ----
+    async function openDoc(path, kind, id) {
+      if (dirty && !confirm('You have unsaved changes. Leave without saving?')) return;
+      const r = await api('/api/edit/doc?path=' + encodeURIComponent(path));
+      if (!r.ok) { toast(r.data.error || 'Could not open that.'); return; }
+      dirty = false;
+      cur = { ...r.data, kind: r.data.kind === 'page' ? 'page:' + kind : r.data.kind, id };
+      history.replaceState(null, '', '#' + encodeURIComponent(path));
+      drawSide(); drawEditor();
+    }
+
+    const viewUrl = () => {
+      if (cur.kind === 'page:home') return '/';
+      if (cur.kind === 'page:about') return '/about';
+      if (cur.kind === 'page:section') return '/projects/' + cur.id;
+      if (cur.kind === 'work') { const s = (cur.data.sections || [])[0]; return s ? '/projects/' + s + '#' + cur.id : null; }
+      return null;
+    };
+
+    function drawEditor() {
+      const main = $('#main');
+      const titles = { 'page:home': 'Home', 'page:about': 'About', 'page:section': cur.data.navLabel, work: cur.data.title || 'Entry', site: 'Site details' };
+      const url = viewUrl();
+      const body = el('div', { class: 'body', id: 'form' });
+      if (cur.kind.startsWith('page:')) body.append(pageForm());
+      else if (cur.kind === 'work') body.append(entryForm());
+      else body.append(group(SPEC.site, cur.data, { target: 'page-image' }));
+      body.addEventListener('input', touch); body.addEventListener('change', touch);
+      main.replaceChildren(
+        el('div', { class: 'bar' },
+          el('h2', { text: titles[cur.kind] }),
+          el('span', { class: 'status', id: 'status', role: 'status' }, 'Saved version'),
+          url ? el('a', { class: 'btn small', href: url, target: '_blank', rel: 'noopener' }, 'View on site') : null,
+          el('button', { class: 'btn primary', type: 'button', id: 'save', onclick: save }, 'Save')),
+        el('div', { class: 'body', id: 'problems-box', hidden: true }),
+        body);
+    }
+
+    // ---- forms, drawn from the field descriptions in SPEC ----
+    function group(fields, obj, ctx) {
+      const box = el('div', { class: 'grp' });
+      const draw = () => {
+        box.replaceChildren();
+        for (const f of fields) {
+          if (f.showIf && obj[f.showIf.key] !== f.showIf.is) continue;
+          box.append(field(f, obj, ctx, draw));
         }
-      }
-      function confirmLeave() { return !dirty || confirm('You have changes that are not saved. Leave without saving?'); }
-
-      function loadList() {
-        return api('/api/edit/files').then(function (r) {
-          if (r.status === 401) { location.reload(); return; }
-          if (!r.ok) { side.textContent = r.data.error || 'Could not load the list.'; return; }
-          files = r.data; renderSide();
-          if (!current) openFile((readDraft() || {}).path || files.about.path); // start on the home page intro (or where an unsaved edit was)
-        });
-      }
-
-      /* The list follows the page from top to bottom, the same order visitors see it. */
-      function item(label, attrs, path) {
-        var on = current && current.path === path ? ' aria-current="true"' : '';
-        return '<li><button type="button" ' + attrs + on + '>' + esc(label) + '</button></li>';
-      }
-      function head(title) { return '<h2>' + esc(title) + '</h2>'; }
-      /* My Journey and Work History: each item has a handle to drag (or use the up/down arrow keys on it). */
-      function sortableList(kind, arr) {
-        return '<ul class="sortable" data-kind="' + kind + '">' + arr.map(function (f) {
-          var on = current && current.path === f.path ? ' aria-current="true"' : '';
-          return '<li data-id="' + esc(f.name.replace(/\.md$/, '')) + '"><button type="button" class="grip" title="Drag to reorder" aria-label="Move ' + esc(f.label) + '. Drag it, or use the up and down arrow keys.">⠿</button>' +
-            '<button type="button" class="itembtn" title="' + esc(f.title || f.label) + '" data-open="' + esc(f.path) + '"' + on + '>' + esc(f.label) + '</button></li>';
-        }).join('') + '</ul>';
-      }
-      function renderSide() {
-        var h = '<p id="side-msg" class="status' + (sideMsg && sideMsg.kind ? ' ' + sideMsg.kind : '') + '" role="status" aria-live="polite">' + (sideMsg ? esc(sideMsg.text) : '') + '</p>';
-        h += head('Top of the page');
-        h += '<ul>' + item(files.about.label, 'data-open="' + esc(files.about.path) + '"', files.about.path) + '</ul>';
-        h += head('My Journey');
-        h += sortableList('timeline', files.timeline);
-        h += '<button class="btn ghost small newbtn" type="button" data-new="timeline">+ New step</button>';
-        h += head('Work History');
-        h += sortableList('work', files.work);
-        h += '<button class="btn ghost small newbtn" type="button" data-new="work">+ New case study</button>';
-        h += head('Resumes');
-        h += '<ul>' + item('Replace a resume PDF', 'data-resume="1"', 'uploads:resume') + '</ul>';
-        h += head('Footer & contact form');
-        h += '<ul>' + item(files.site.label, 'data-open="' + esc(files.site.path) + '"', files.site.path) + '</ul>';
-        side.innerHTML = h;
-      }
-      side.addEventListener('click', function (e) {
-        var b = e.target.closest('button'); if (!b || b.classList.contains('grip')) return;
-        if (!confirmLeave()) return;
-        if (b.dataset.open) openFile(b.dataset.open);
-        else if (b.dataset.resume) openResume();
-        else if (b.dataset.new) newFile(b.dataset.new);
-      });
-
-      /* ---------- One continuous file ---------- */
-      var TEMPLATES = {
-        work: [
-        '---',
-        'title: "Name of the project"',
-        'outcome: "One line that sums up the project (shown on the card)."',
-        'role: "Your role"',
-        'org: "Organization"',
-        'dates: "2023–Present"',
-        'tools: []',
-        'tracks: [learning-design, teaching]   # learning-design, teaching, engineering, design-ux',
-        'draft: false                          # true hides it from the site',
-        '# Optional extras for the popup (delete what you do not need):',
-        'media:                                         # pictures and videos, shown as a slideshow in this order',
-        '  - type: image',
-        '    src: "your-picture.jpg"                      # upload it first, then type its file name',
-        '    alt: "Describe the picture in a short phrase"',
-        '    fit: contain                                # or cover',
-        '  - type: video',
-        '    url: "https://youtu.be/XXXXXXXXXXX"',
-        '    title: "The title of the video"',
-        'artifacts:',
-        '  - label: "Name of a file"',
-        '    url: "/artifacts/your-file.pdf"',
-        'links:',
-        '  - label: "Name of a link"',
-        '    url: "https://example.com"',
-        '---',
-        '',
-        '### Context',
-        '',
-        'Why this project existed, in a few plain sentences.',
-        '',
-        '### Approach',
-        '',
-        'What you did and why.',
-        '',
-        '### What I built',
-        '',
-        '- First thing',
-        '- Second thing',
-        '',
-        '### Outcome',
-        '',
-        'What changed as a result.'
-      ].join('\n'),
-        timeline: [
-        '---',
-        'label: "Design"                 # the short tag shown first',
-        'period: "2004 – 2009"           # the dates',
-        'title: "Name of this stretch of your career"',
-        'skills: ["Skill one", "Skill two", "Skill three"]   # the small pills',
-        '# Optional pictures and videos, shown as a slideshow in this order:',
-        'media:',
-        '  - type: image',
-        '    src: "your-picture.jpg"                         # upload it first, then type its file name',
-        '    alt: "Describe the picture in a short phrase"',
-        '    fit: contain                                    # or cover',
-        '  - type: video',
-        '    url: "https://youtu.be/XXXXXXXXXXX"',
-        '    title: "The title of the video"',
-        '---',
-        '',
-        'A few plain sentences about this stretch of your career: what you did and what changed.'
-      ].join('\n'),
-        about: [
-        '---',
-        'title: "About"',
-        'tagline: "The big line at the top of the home page."',
-        'headshot: "../../assets/headshot.jpg"',
-        'headshotAlt: "A short description of your photo"',
-        '---',
-        '',
-        'The paragraph that appears in the About me box on the home page.'
-      ].join('\n'),
-        site: [
-        'name: Your Name',
-        'email: you@example.com',
-        'links:                     # a link with an empty url is hidden',
-        '  - label: LinkedIn',
-        '    url: https://www.linkedin.com/in/your-name/',
-        '  - label: GitHub',
-        '    url: ""',
-        'contactReasons:            # choices in the contact form dropdown (up to 12)',
-        '  - Hiring opportunity',
-        '  - Just saying hello'
-      ].join('\n')
       };
+      draw();
+      return box;
+    }
 
-      function bodyOf(text) {
-        var m = text.replace(/\r\n/g, '\n').match(/^---\n[\s\S]*?\n---\n?([\s\S]*)$/);
-        return m ? m[1].replace(/^\n+/, '') : '';
-      }
-      function inline(s) {
-        return esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/\[(.+?)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
-      }
-      function md(src) {
-        var out = '', list = false;
-        src.replace(/\r\n/g, '\n').split(/\n/).forEach(function (line) {
-          var li = line.match(/^\s*[-*]\s+(.*)$/);
-          if (li) { if (!list) { out += '<ul>'; list = true; } out += '<li>' + inline(li[1]) + '</li>'; return; }
-          if (list) { out += '</ul>'; list = false; }
-          var h = line.match(/^#{1,6}\s+(.*)$/);
-          if (h) out += '<h3>' + inline(h[1]) + '</h3>';
-          else if (line.trim()) out += '<p>' + inline(line) + '</p>';
-        });
-        return out + (list ? '</ul>' : '');
-      }
-
-      /* ---------- Add a picture right here, inside the section you are editing ---------- */
-      function addVideoBox() {
-        if (current.kind === 'about') return '';
-        return '<div class="addpic">' +
-          '<label for="av-url">Add a YouTube video to this ' + (current.kind === 'work' ? 'case study' : 'step') + '</label>' +
-          '<input id="av-url" type="url" placeholder="https://youtu.be/…" />' +
-          '<div class="row"><button class="btn" id="av-add" type="button">Add video</button></div>' +
-        '</div>';
-      }
-      function addPicBox() {
-        var about = current.kind === 'about';
-        return '<div class="addpic">' +
-          '<label for="ap-file">' + (about ? 'Replace the headshot photo' : 'Add a picture to this ' + (current.kind === 'work' ? 'case study' : 'step')) + '</label>' +
-          '<input id="ap-file" type="file" accept="image/jpeg,image/png,image/webp" />' +
-          '<div class="row"><button class="btn" id="ap-add" type="button">' + (about ? 'Upload and replace' : 'Add Photo') + '</button></div>' +
-        '</div>';
-      }
-      function yq(s) { return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
-      /* Edits the block between the two --- lines at the top: sets one line, or adds an item to a list. */
-      function frontBounds(lines) {
-        if (lines[0] !== '---') return null;
-        for (var i = 1; i < lines.length; i++) if (lines[i] === '---') return i;
-        return null;
-      }
-      function setLine(lines, key, value) {
-        var end = frontBounds(lines); if (end === null) return lines;
-        var re = new RegExp('^' + key + ':');
-        for (var i = 1; i < end; i++) if (re.test(lines[i])) { lines[i] = key + ': ' + value; return lines; }
-        lines.splice(end, 0, key + ': ' + value); return lines;
-      }
-      function addListItem(lines, key, item) {
-        var end = frontBounds(lines); if (end === null) return lines;
-        var re = new RegExp('^' + key + ':\\s*(#.*|\\[\\s*\\]\\s*)?$');
-        for (var i = 1; i < end; i++) {
-          if (re.test(lines[i])) {
-            // "images: []" or a trailing note becomes a plain "images:" line (a note on that line is kept)
-            lines[i] = key + ':' + (/#/.test(lines[i]) ? ' ' + lines[i].slice(lines[i].indexOf('#')) : '');
-            // The list runs while lines are indented or start with "-". Notes (# ...) and blank lines inside it are skipped over.
-            var last = i;
-            for (var j = i + 1; j < end; j++) {
-              if (/^\s+\S/.test(lines[j]) || /^-/.test(lines[j])) last = j;
-              else if (lines[j].trim() === '' || /^#/.test(lines[j])) continue;
-              else break;
-            }
-            lines.splice.apply(lines, [last + 1, 0].concat(item)); return lines;
-          }
+    function field(f, obj, ctx, redraw) {
+      const id = nextId();
+      const hint = f.hint ? el('div', { class: 'hint', id: id + 'h', text: f.hint }) : null;
+      const describe = f.hint ? { 'aria-describedby': id + 'h' } : {};
+      switch (f.type) {
+        case 'text':
+          return el('div', { class: 'field' }, el('label', { for: id, text: f.label }), el('input', { id, type: 'text', value: obj[f.key] ?? '', ...describe, oninput: (e) => (obj[f.key] = e.target.value) }), hint);
+        case 'textarea': case 'markdown':
+          return el('div', { class: 'field' }, el('label', { for: id, text: f.label }), el('textarea', { id, rows: f.rows || 4, class: f.type === 'markdown' ? 'md' : '', ...describe, oninput: (e) => (obj[f.key] = e.target.value) }, obj[f.key] ?? ''), hint);
+        case 'bool':
+          return el('div', { class: 'field' }, el('div', { class: 'check' }, el('input', { id, type: 'checkbox', checked: !!obj[f.key], onchange: (e) => { obj[f.key] = e.target.checked; } }), el('label', { for: id, text: f.label })), hint);
+        case 'select': {
+          const sel = el('select', { id, ...describe, onchange: (e) => { obj[f.key] = e.target.value; redraw && redraw(); } }, f.options.map(([v, l]) => el('option', { value: v, selected: (obj[f.key] ?? f.options[0][0]) === v }, l)));
+          if (obj[f.key] === undefined) obj[f.key] = f.options[0][0];
+          return el('div', { class: 'field' }, el('label', { for: id, text: f.label }), sel, hint);
         }
-        lines.splice.apply(lines, [end, 0, key + ':'].concat(item)); return lines;
-      }
-      function insertPicture(text, kind, ref, alt, fit) {
-        var lines = text.replace(/\r\n/g, '\n').split('\n');
-        if (kind === 'about') {
-          lines = setLine(lines, 'headshot', yq(ref));
-          if (alt) lines = setLine(lines, 'headshotAlt', yq(alt));
-        } else {
-          // just the file name: the site looks in the right folder for this kind of page
-          lines = addListItem(lines, 'media', ['  - type: image', '    src: ' + yq(ref.split('/').pop()), '    alt: ' + yq(alt), '    fit: ' + fit]);
+        case 'checks': {
+          const arr = obj[f.key] || (obj[f.key] = []);
+          return el('div', { class: 'field', role: 'group', 'aria-label': f.label }, el('span', { class: 'lbl', text: f.label }),
+            el('div', { class: 'checks' }, f.options.map(([v, l]) => { const cid = nextId(); return el('div', { class: 'check' }, el('input', { id: cid, type: 'checkbox', checked: arr.includes(v), onchange: (e) => { const i = arr.indexOf(v); if (e.target.checked && i < 0) arr.push(v); if (!e.target.checked && i >= 0) arr.splice(i, 1); } }), el('label', { for: cid, text: l })); })), hint);
         }
-        return lines.join('\n');
-      }
-      function insertVideo(text, url) {
-        var lines = text.replace(/\r\n/g, '\n').split('\n');
-        return addListItem(lines, 'media', ['  - type: video', '    url: ' + yq(url)]).join('\n');
-      }
-      function youtubeId(u) {
-        var m = String(u).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
-        return m ? m[1] : null;
-      }
-      /* The videos listed in the file: items whose type is video. */
-      function videosIn(text) {
-        var lines = text.replace(/\r\n/g, '\n').split('\n'), end = frontBounds(lines), out = [];
-        if (end === null) return out;
-        for (var i = 1; i < end; i++) {
-          if (!/^\s*(-\s+)?type:\s*"?video"?\s*(#.*)?$/.test(lines[i])) continue;
-          var s = i; while (s > 1 && !/^\s*-\s/.test(lines[s])) s--;
-          var indent = lines[s].match(/^\s*/)[0].length, e = s + 1;
-          while (e < end && lines[e].trim() !== '' && lines[e].match(/^\s*/)[0].length > indent) e++;
-          var url = '', title = '';
-          for (var k = s; k < e; k++) {
-            var um = lines[k].match(/^\s*(?:-\s+)?url:\s*"?([^"#\n]*?)"?\s*(#.*)?$/); if (um) url = um[1];
-            var tm = lines[k].match(/^\s*(?:-\s+)?title:\s*"?([^"#\n]*?)"?\s*(#.*)?$/); if (tm) title = tm[1];
-          }
-          if (url) out.push({ url: url, title: title });
+        case 'button': {
+          const b = obj[f.key] || {};
+          const set = (k, v) => { const cur2 = obj[f.key] || {}; cur2[k] = v; obj[f.key] = cur2; };
+          return el('div', { class: 'field', role: 'group', 'aria-label': f.label }, el('span', { class: 'lbl', text: f.label }),
+            el('div', { class: 'pair' },
+              el('input', { type: 'text', placeholder: 'Words on the button', 'aria-label': f.label + ': words', value: b.label ?? '', oninput: (e) => set('label', e.target.value) }),
+              el('input', { type: 'text', placeholder: 'Address, e.g. /about or https://…', 'aria-label': f.label + ': address', value: b.url ?? '', oninput: (e) => set('url', e.target.value) })), hint);
         }
-        return out;
-      }
-      /* Takes one picture out of the file's list (the uploaded file itself stays in storage). */
-      function removePicture(text, ref) {
-        var lines = text.replace(/\r\n/g, '\n').split('\n');
-        var end = frontBounds(lines); if (end === null) return text;
-        for (var guard = 0, found = true; found && guard < 20; guard++) {
-          found = false;
-          for (var i = 1; i < end; i++) {
-            var vm = lines[i].match(/^\s*(?:-\s+)?(?:src|url):\s*"?([^"#\n]*?)"?\s*(?:#.*)?$/);
-            if (!vm || (vm[1] !== ref && !(ref.indexOf('../../assets/') === 0 && vm[1] === ref.split('/').pop()))) continue;
-            var s = i; while (s > 1 && !/^\s*-\s/.test(lines[s])) s--;
-            if (!/^\s*-\s/.test(lines[s])) break;
-            var indent = lines[s].match(/^\s*/)[0].length, e = s + 1;
-            while (e < end && lines[e].trim() !== '' && lines[e].match(/^\s*/)[0].length > indent) e++;
-            if (/^\s*(-\s+)?url:/.test(lines[i]) && !lines.slice(s, e).some(function (l) { return /type:\s*"?video/.test(l); })) continue;   // a link, not a video
-            lines.splice(s, e - s); end -= (e - s); found = true;
-            // if that was the last picture, the list becomes an empty list ("images: []")
-            var k = s - 1; while (k > 0 && (lines[k].trim() === '' || /^#/.test(lines[k]))) k--;
-            var more = false; for (var m = s; m < end; m++) { if (/^\s*-\s/.test(lines[m])) { more = true; break; } if (/^[^\s#]/.test(lines[m])) break; }
-            if (/^(images|media):/.test(lines[k]) && !more) lines[k] = lines[k].split(':')[0] + ': []';
-            break;
-          }
+        case 'object': {
+          const sub = obj[f.key] || (obj[f.key] = {});
+          return el('fieldset', { class: 'obj' }, el('legend', { text: f.label }), group(f.fields, sub, ctx));
         }
-        return lines.join('\n');
+        case 'image': return imageField(f, obj, ctx);
+        case 'list': return listField(f, obj, ctx);
+        case 'strings': return stringsField(f, obj);
+        case 'picks': return picksField(f, obj);
       }
-      function dropPicture(p) {
-        var doc = $('#doc'), msg = $('#pic-msg'), before = doc.value, ref = '../../' + p.slice(4);
-        var after = removePicture(before, ref);
-        if (after === before) { setStatus(msg, 'That picture is not in the picture list, so there is nothing to remove.', 'error'); return; }
-        doc.value = after; dirty = true; doc.dispatchEvent(new Event('input')); refreshPics(after);
-        setStatus(msg, 'Picture removed from this section. Press Save to publish it.', 'ok');
-        var undo = document.createElement('button'); undo.type = 'button'; undo.className = 'btn ghost small'; undo.textContent = 'Undo';
-        undo.addEventListener('click', function () { doc.value = before; doc.dispatchEvent(new Event('input')); refreshPics(before); setStatus(msg, 'Put back.', 'ok'); });
-        msg.appendChild(undo);
-      }
-      function dropVideo(url) {
-        var doc = $('#doc'), msg = $('#pic-msg'), before = doc.value, after = removePicture(before, url);
-        if (after === before) { setStatus(msg, 'That video is not in the list, so there is nothing to remove.', 'error'); return; }
-        doc.value = after; dirty = true; doc.dispatchEvent(new Event('input')); refreshPics(after);
-        setStatus(msg, 'Video removed from this section. Press Save to publish it.', 'ok');
-        var undo = document.createElement('button'); undo.type = 'button'; undo.className = 'btn ghost small'; undo.textContent = 'Undo';
-        undo.addEventListener('click', function () { doc.value = before; doc.dispatchEvent(new Event('input')); refreshPics(before); setStatus(msg, 'Put back.', 'ok'); });
-        msg.appendChild(undo);
-      }
-      function addVideo() {
-        var url = $('#av-url').value.trim(), msg = $('#pic-msg');
-        if (!youtubeId(url)) { setStatus(msg, 'Paste a YouTube link (like https://youtu.be/XXXXXXXXXXX).', 'error'); $('#av-url').focus(); return; }
-        var doc = $('#doc'); mediaSel = 1e6; doc.value = insertVideo(doc.value, url);
-        dirty = true; doc.dispatchEvent(new Event('input')); refreshPics(doc.value);
-        $('#av-url').value = '';
-        setStatus(msg, 'Video added below. Press Save to publish it.', 'ok');
-      }
-      /* ---------- Pictures and videos as a list you can drag, click to preview, and edit without touching the text ---------- */
-      var mediaSel = 0, mdrag = null;
-      function indentOf(l) { return l.match(/^\s*/)[0].length; }
-      function yval(v) {
-        v = v.trim(); var m;
-        if (v.charAt(0) === '"') { m = v.match(/^"((?:[^"\\]|\\.)*)"/); return m ? m[1].replace(/\\(["\\])/g, '$1') : v; }
-        if (v.charAt(0) === "'") { m = v.match(/^'((?:[^']|'')*)'/); return m ? m[1].replace(/''/g, "'") : v; }
-        return v.replace(/\s+#.*$/, '');
-      }
-      /* The media list at the top of the file, as items (each with the range of lines it occupies). */
-      function mediaModel(text) {
-        var lines = text.replace(/\r\n/g, '\n').split('\n'), end = frontBounds(lines);
-        if (end === null) return null;
-        var key = -1; for (var i = 1; i < end; i++) if (/^media:\s*(#.*|\[\s*\]\s*)?$/.test(lines[i])) { key = i; break; }
-        var model = { lines: lines, end: end, key: key, items: [] };
-        if (key < 0) return model;
-        var starts = [], last = key, base = -1;
-        for (var j = key + 1; j < end; j++) {
-          var l = lines[j];
-          if (/^\s*-\s/.test(l) || /^\s+\S/.test(l)) {
-            if (/^\s*-\s/.test(l) && (base < 0 || indentOf(l) === base)) { if (base < 0) base = indentOf(l); starts.push(j); }
-            last = j;
-          } else if (l.trim() === '' || /^#/.test(l)) continue;
-          else break;
+      return el('div');
+    }
+
+    const refPath = (ref) => (ref.startsWith('../../assets/') ? 'src/assets/' + ref.slice('../../assets/'.length) : 'src/assets/work/' + ref);
+
+    function imageField(f, obj, ctx) {
+      const id = nextId();
+      const box = el('div', { class: 'field' });
+      const draw = () => {
+        const src = obj[f.key];
+        const thumb = el('div', { class: 'thumb' }, src ? 'Loading…' : 'No picture');
+        if (src) {
+          const probe = new Image();
+          probe.onload = () => { thumb.textContent = ''; thumb.style.backgroundImage = 'url("' + probe.src + '")'; };
+          probe.onerror = () => { thumb.textContent = 'No preview'; };
+          probe.src = '/api/edit/image?path=' + encodeURIComponent(refPath(src));
         }
-        starts.forEach(function (st, k) {
-          var e = k + 1 < starts.length ? starts[k + 1] : last + 1, it = { s: st, e: e, type: 'image' };
-          for (var q = st; q < e; q++) {
-            var fm = lines[q].match(/^\s*(?:-\s+)?(\w+):\s*(.*)$/); if (fm) it[fm[1]] = yval(fm[2]);
-          }
-          model.items.push(it);
+        const file = el('input', { id, type: 'file', accept: 'image/png,image/jpeg,image/webp', class: 'sr', onchange: async (e) => {
+          const picked = e.target.files[0]; if (!picked) return;
+          toast('Uploading…');
+          try {
+            const small = await shrink(picked);
+            const form = new FormData(); form.append('file', small); form.append('target', ctx.target || 'page-image');
+            const r = await api('/api/edit/upload', { method: 'POST', form });
+            if (!r.ok) { toast(r.data.error || 'Upload failed.'); return; }
+            obj[f.key] = r.data.reference; touch(); draw(); toast('Picture added. Describe it below, then Save.');
+          } catch (err) { toast('Could not read that picture.'); }
+        } });
+        box.replaceChildren(
+          el('span', { class: 'lbl', text: f.label }),
+          el('div', { class: 'pic' }, thumb, el('div', {},
+            el('div', { class: 'acts' },
+              el('label', { class: 'btn small', for: id }, src ? 'Replace picture' : 'Choose picture'), file,
+              src ? el('button', { class: 'btn small danger', type: 'button', onclick: () => { delete obj[f.key]; if (f.altKey) delete obj[f.altKey]; touch(); draw(); } }, 'Remove') : null),
+            src ? el('div', { class: 'path', text: src }) : null,
+            src && f.altKey ? el('div', { class: 'field' }, el('label', { for: id + 'a', text: 'Describe the picture in a few words (for people who cannot see it)' }),
+              el('textarea', { id: id + 'a', rows: 2, oninput: (e) => (obj[f.altKey] = e.target.value) }, obj[f.altKey] ?? '')) : null)),
+          f.hint ? el('div', { class: 'hint', text: f.hint }) : null);
+      };
+      draw();
+      return box;
+    }
+
+    // Big pictures are shrunk in the browser first (the server accepts up to 4 MB).
+    async function shrink(file) {
+      if (file.size < 1_200_000) return file;
+      const bmp = await createImageBitmap(file);
+      const scale = Math.min(1, 2400 / bmp.width);
+      const c = document.createElement('canvas'); c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+      c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+      const asPng = file.type === 'image/png';
+      let blob = await new Promise((r) => c.toBlob(r, asPng ? 'image/png' : 'image/jpeg', 0.86));
+      let name = file.name;
+      if (blob.size > 3_800_000) { blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.82)); name = name.replace(/\.[^.]+$/, '') + '.jpg'; }
+      return new File([blob], name, { type: blob.type });
+    }
+
+    function listField(f, obj, ctx) {
+      const arr = obj[f.key] || (obj[f.key] = []);
+      const wrap = el('div', { class: 'field' });
+      let openIndex = -1;
+      const draw = () => {
+        wrap.replaceChildren(el('span', { class: 'lbl', text: f.label }), f.hint ? el('div', { class: 'hint', text: f.hint }) : null);
+        arr.forEach((item, i) => {
+          const name = () => (f.itemTitle && item[f.itemTitle]) || (f.itemName || 'item') + ' ' + (i + 1);
+          const t = el('span', { class: 't', text: name() });
+          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); openIndex = j; draw(); };
+          const d = el('details', { class: 'card', open: i === openIndex },
+            el('summary', {}, t,
+              el('span', { class: 'ctl' },
+                el('button', { type: 'button', 'aria-label': 'Move up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
+                el('button', { type: 'button', 'aria-label': 'Move down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
+                el('button', { type: 'button', 'aria-label': 'Remove', onclick: (e) => { e.preventDefault(); if (confirm('Remove this ' + (f.itemName || 'item') + '?')) { arr.splice(i, 1); touch(); openIndex = -1; draw(); } } }, '×'))),
+            el('div', { class: 'in' }, group(f.fields, item, ctx)));
+          d.addEventListener('input', () => { t.textContent = name(); });
+          wrap.append(d);
         });
-        return model;
-      }
-      function moveMedia(text, from, to) {
-        var m = mediaModel(text); if (!m || from === to || !m.items[from] || to < 0 || to >= m.items.length) return text;
-        var blocks = m.items.map(function (it) { return m.lines.slice(it.s, it.e); });
-        var first = m.items[0].s, lastE = m.items[m.items.length - 1].e;
-        blocks.splice(to, 0, blocks.splice(from, 1)[0]);
-        var flat = []; blocks.forEach(function (b) { flat = flat.concat(b); });
-        m.lines.splice.apply(m.lines, [first, lastE - first].concat(flat));
-        return m.lines.join('\n');
-      }
-      function removeMedia(text, i) {
-        var m = mediaModel(text); if (!m || !m.items[i]) return text;
-        var it = m.items[i]; m.lines.splice(it.s, it.e - it.s);
-        if (m.items.length === 1) m.lines[m.key] = 'media: []';
-        return m.lines.join('\n');
-      }
-      function setMediaField(text, i, key, value) {
-        var m = mediaModel(text); if (!m || !m.items[i]) return text;
-        var it = m.items[i], re = new RegExp('^(\\s*(?:-\\s+)?)' + key + ':.*$'), shown = key === 'fit' ? value : yq(value);
-        for (var q = it.s; q < it.e; q++) if (re.test(m.lines[q])) { m.lines[q] = m.lines[q].replace(re, '$1' + key + ': ' + shown.replace(/\$/g, '$$$$')); return m.lines.join('\n'); }
-        var at = it.e - 1; while (at > it.s && (m.lines[at].trim() === '' || /^\s*#/.test(m.lines[at]))) at--;
-        m.lines.splice(at + 1, 0, m.lines[it.s].match(/^\s*/)[0] + '  ' + key + ': ' + shown);
-        return m.lines.join('\n');
-      }
-      function mediaImgPath(src) { return /^\.\.\/\.\.\/assets\//.test(src) ? 'src/' + src.slice(6) : 'src/assets/' + (current.kind === 'timeline' ? 'timeline' : 'work') + '/' + src; }
-      function mediaImgUrl(src) { var p = mediaImgPath(src); return '/api/edit/image?path=' + encodeURIComponent(p) + (bust[p] ? '&v=' + bust[p] : ''); }
-      function mediaName(it) { return it.type === 'video' ? (it.title || 'YouTube video') : String(it.src || '').split('/').pop(); }
-      function mediaThumb(it, big) { var id = it.type === 'video' ? youtubeId(it.url || '') : null; return it.type === 'video' ? (id ? 'https://i.ytimg.com/vi/' + id + '/' + (big ? 'hqdefault' : 'mqdefault') + '.jpg' : '') : mediaImgUrl(it.src || ''); }
-      function setMediaText(after, msgText, before) {
-        var doc = $('#doc'), msg = $('#pic-msg');
-        doc.value = after; dirty = true; doc.dispatchEvent(new Event('input')); refreshPics(after);
-        if (!msgText) return;
-        setStatus(msg, msgText, 'ok');
-        if (before === undefined) return;
-        var undo = document.createElement('button'); undo.type = 'button'; undo.className = 'btn ghost small'; undo.textContent = 'Undo';
-        undo.addEventListener('click', function () { doc.value = before; doc.dispatchEvent(new Event('input')); refreshPics(before); setStatus(msg, 'Put back.', 'ok'); });
-        msg.appendChild(undo);
-      }
-      function dropMedia(i) {
-        var doc = $('#doc'), before = doc.value, m = mediaModel(before), it = m && m.items[i]; if (!it) return;
-        if (mediaSel >= i && mediaSel > 0) mediaSel--;
-        setMediaText(removeMedia(before, i), (it.type === 'video' ? 'Video' : 'Picture') + ' removed from this section. Press Save to publish it.', before);
-      }
-      function renderMedia(text) {
-        var box = $('#pics'), m = mediaModel(text), items = m ? m.items : [];
-        box.classList.add('mediabox');
-        if (!items.length) { box.innerHTML = '<p class="hint">No pictures or videos yet. Use the boxes below to add one.</p>'; return; }
-        if (mediaSel >= items.length) mediaSel = items.length - 1; if (mediaSel < 0) mediaSel = 0;
-        var typing = document.activeElement && document.activeElement.closest && document.activeElement.closest('#mfields');
-        if (!$('#mtop', box)) box.innerHTML = '<div id="mtop"></div><p class="mhint">Drag ⠿ (or use the up and down arrow keys on it) to change the order. Click one to preview it.</p><ol class="mlist" id="mlist"></ol>';
-        if (!typing) {
-          var it = items[mediaSel], top = '';
-          if (it.type === 'video') {
-            top = '<div class="mprev"><div class="mvideo" id="mvideo"><button type="button" class="mplay" id="mplay" aria-label="Play the video"><img alt="" src="' + esc(mediaThumb(it, true)) + '" /><span>▶</span></button></div></div>' +
-              '<div class="mfields" id="mfields"><div><label for="mf-title">Title of the video (read aloud by screen readers)</label><input id="mf-title" type="text" value="' + esc(it.title || '') + '" /></div><div><label>Link</label><p class="hint" style="margin:8px 0 0;word-break:break-all">' + esc(it.url || '') + '</p></div></div>';
-          } else {
-            top = '<div class="mprev"><button type="button" class="picbtn" aria-label="View ' + esc(mediaName(it)) + ' larger"><img alt="Preview of ' + esc(mediaName(it)) + '" src="' + esc(mediaImgUrl(it.src || '')) + '" /></button></div>' +
-              '<div class="mfields" id="mfields"><div><label for="mf-alt">Description (read aloud by screen readers)</label><input id="mf-alt" type="text" value="' + esc(it.alt || '') + '" /></div>' +
-              '<div><label for="mf-fit">How should it show?</label><select id="mf-fit"><option value="contain"' + (it.fit === 'cover' ? '' : ' selected') + '>Show the whole picture</option><option value="cover"' + (it.fit === 'cover' ? ' selected' : '') + '>Fill the frame (may crop the edges)</option></select></div></div>';
-          }
-          $('#mtop', box).innerHTML = top;
-        }
-        $('#mlist', box).innerHTML = items.map(function (x, i) {
-          var n = esc(mediaName(x));
-          return '<li class="mitem' + (i === mediaSel ? ' sel' : '') + '" data-i="' + i + '"><button type="button" class="mgrip" aria-label="Move ' + n + '. Drag it, or use the up and down arrow keys.">⠿</button>' +
-            '<button type="button" class="mpick" data-i="' + i + '" aria-label="Preview ' + n + '"' + (i === mediaSel ? ' aria-current="true"' : '') + '><img alt="" loading="lazy" src="' + esc(mediaThumb(x, false)) + '" /><span class="mname"><b>' + (x.type === 'video' ? 'Video' : 'Picture') + '</b>' + n + '</span></button>' +
-            '<button type="button" class="mx" data-i="' + i + '" aria-label="Remove ' + n + ' from this section">×</button></li>';
-        }).join('');
-        wireMedia(box);
-      }
-      function wireMedia(box) {
-        var doc = $('#doc');
-        box.onclick = function (e) {
-          var pick = e.target.closest('.mpick'); if (pick) { mediaSel = +pick.dataset.i; renderMedia(doc.value); return; }
-          var x = e.target.closest('.mx'); if (x) { dropMedia(+x.dataset.i); return; }
-          if (e.target.closest('#mplay')) {
-            var m = mediaModel(doc.value), it = m && m.items[mediaSel], id = it && youtubeId(it.url || ''); if (!id) return;
-            $('#mvideo').innerHTML = '<iframe src="https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0&playsinline=1" title="' + esc(it.title || 'Video') + '" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
-          }
-        };
-        var edit = function (e) {
-          var map = { 'mf-alt': 'alt', 'mf-title': 'title', 'mf-fit': 'fit' }, k = map[e.target.id]; if (!k) return;
-          doc.value = setMediaField(doc.value, mediaSel, k, e.target.value); dirty = true; doc.dispatchEvent(new Event('input'));
-        };
-        box.oninput = edit; box.onchange = edit;
-        box.onpointerdown = function (e) {
-          var grip = e.target.closest('.mgrip'); if (!grip || (e.pointerType === 'mouse' && e.button !== 0)) return;
-          var li = grip.closest('li'); e.preventDefault(); grip.setPointerCapture(e.pointerId);
-          mdrag = { li: li, ul: li.parentNode, from: +li.dataset.i }; li.classList.add('dragging'); document.body.style.cursor = 'grabbing';
-        };
-        box.onpointermove = function (e) {
-          if (!mdrag) return;
-          var others = Array.prototype.filter.call(mdrag.ul.children, function (x) { return x !== mdrag.li; }), next = null;
-          for (var k = 0; k < others.length; k++) { var r = others[k].getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { next = others[k]; break; } }
-          if (next !== mdrag.li.nextElementSibling) mdrag.ul.insertBefore(mdrag.li, next);
-          if (e.clientY < 40) window.scrollBy(0, -10); else if (e.clientY > window.innerHeight - 40) window.scrollBy(0, 10);
-        };
-        var endMove = function () {
-          if (!mdrag) return;
-          var d = mdrag; mdrag = null; d.li.classList.remove('dragging'); document.body.style.cursor = '';
-          var to = Array.prototype.indexOf.call(d.ul.children, d.li);
-          if (to === d.from) return;
-          var before = doc.value;
-          mediaSel = mediaSel === d.from ? to : (d.from < mediaSel && to >= mediaSel ? mediaSel - 1 : (d.from > mediaSel && to <= mediaSel ? mediaSel + 1 : mediaSel));
-          setMediaText(moveMedia(before, d.from, to), 'Order changed. Press Save to publish it.', before);
-        };
-        box.onpointerup = endMove; box.onpointercancel = endMove;
-        box.onkeydown = function (e) {
-          var grip = e.target.closest && e.target.closest('.mgrip');
-          if (!grip || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
-          e.preventDefault();
-          var from = +grip.closest('li').dataset.i, to = from + (e.key === 'ArrowUp' ? -1 : 1), before = doc.value, count = $('#mlist', box).children.length;
-          if (to < 0 || to >= count) return;
-          if (mediaSel === from) mediaSel = to; else if (mediaSel === to) mediaSel = from;
-          setMediaText(moveMedia(before, from, to), 'Moved to position ' + (to + 1) + ' of ' + count + '. Press Save to publish it.', before);
-          var g = $('#mlist', box).children[to].querySelector('.mgrip'); if (g) g.focus();
-        };
-      }
-      function wireAddPic() {
-        var av = $('#av-add'); if (av) av.addEventListener('click', addVideo);
-        var f = $('#ap-file'); if (!f) return;
-        $('#ap-add').addEventListener('click', addPicture);
-      }
-      /* The picture's description is its file name, without the extension ("my-picture.jpg" becomes "my picture"). */
-      function altFromName(ref) { return ref.split('/').pop().replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim(); }
-      function addPicture() {
-        var about = current.kind === 'about', f = $('#ap-file').files[0], msg = $('#pic-msg'), kind = current.kind, btn = $('#ap-add');
-        if (!f) { setStatus(msg, 'Choose a picture first.', 'error'); return; }
-        var target = kind === 'work' ? 'work-image' : kind === 'timeline' ? 'timeline-image' : 'headshot';
-        btn.disabled = true; setStatus(msg, 'Uploading…');
-        prepare(f, target).then(function (file) {
-          var fd = new FormData(); fd.append('file', file); fd.append('target', target); fd.append('resumeId', '');
-          return api('/api/edit/upload', { method: 'POST', body: fd });
-        }).then(function (r) {
-          btn.disabled = false;
-          if (r.status === 401) { location.reload(); return; }
-          if (!r.ok) { setStatus(msg, r.data.error || 'Upload failed.', 'error'); return; }
-          var doc = $('#doc'), fit = 'contain', alt = about ? '' : altFromName(r.data.reference);
-          mediaSel = 1e6; doc.value = insertPicture(doc.value, kind, r.data.reference, alt, fit);
-          dirty = true; doc.dispatchEvent(new Event('input'));
-          var p = 'src/' + r.data.reference.slice(6); delete picNodes[p]; bust[p] = Date.now();
-          refreshPics(doc.value);
-          $('#ap-file').value = '';
-          setStatus(msg, kind === 'about' ? 'Headshot replaced. Press Save to publish it.' : 'Picture added below. Press Save to publish it.', 'ok');
-          msg.scrollIntoView({ block: 'nearest' });
+        wrap.append(el('div', {}, el('button', { class: 'btn small', type: 'button', onclick: () => { arr.push(structuredClone(f.defaults || {})); touch(); openIndex = arr.length - 1; draw(); } }, '+ Add ' + (/^[aeiou]/i.test(f.itemName || '') ? 'an ' : 'a ') + (f.itemName || 'item'))));
+      };
+      draw();
+      return wrap;
+    }
+
+    function stringsField(f, obj) {
+      const arr = obj[f.key] || (obj[f.key] = []);
+      const wrap = el('div', { class: 'field' });
+      const draw = () => {
+        wrap.replaceChildren(el('span', { class: 'lbl', text: f.label }));
+        arr.forEach((s, i) => wrap.append(el('div', { class: 'adder' },
+          el('input', { type: 'text', 'aria-label': f.label + ' ' + (i + 1), value: s, style: 'flex:1;padding:8px 10px;border:1.5px solid var(--rule);border-radius:6px;background:var(--bg)', oninput: (e) => (arr[i] = e.target.value) }),
+          el('button', { class: 'btn small', type: 'button', 'aria-label': 'Remove', onclick: () => { arr.splice(i, 1); touch(); draw(); } }, '×'))));
+        wrap.append(el('div', {}, el('button', { class: 'btn small', type: 'button', onclick: () => { arr.push(''); touch(); draw(); } }, '+ Add')));
+      };
+      draw();
+      return wrap;
+    }
+
+    function picksField(f, obj) {
+      const arr = obj[f.key] || (obj[f.key] = []);
+      const wrap = el('div', { class: 'field' });
+      const titleOf = (id) => (files.entries.find((e) => e.id === id) || { title: id + ' (not found)' }).title;
+      const draw = () => {
+        wrap.replaceChildren(el('span', { class: 'lbl', text: f.label }));
+        arr.forEach((id, i) => {
+          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); draw(); };
+          wrap.append(el('div', { class: 'adder' }, el('span', { style: 'flex:1', text: titleOf(id) }),
+            el('span', { class: 'ctl' }, el('button', { type: 'button', 'aria-label': 'Move up', onclick: () => move(-1) }, '↑'), el('button', { type: 'button', 'aria-label': 'Move down', onclick: () => move(1) }, '↓'), el('button', { type: 'button', 'aria-label': 'Remove', onclick: () => { arr.splice(i, 1); touch(); draw(); } }, '×'))));
         });
-      }
+        const sel = el('select', { 'aria-label': 'Add an entry' }, el('option', { value: '' }, 'Add an entry…'), files.entries.filter((e) => !arr.includes(e.id)).map((e) => el('option', { value: e.id }, e.title)));
+        sel.addEventListener('change', () => { if (sel.value) { arr.push(sel.value); touch(); draw(); } });
+        wrap.append(el('div', { class: 'adder' }, sel));
+      };
+      draw();
+      return wrap;
+    }
 
-      /* Shows every picture the file mentions (the ../../assets/... paths), read from the site's own folders. */
-      var picNodes = {}, picTimer = 0, bust = {};
-      function refreshPics(text) {
-        var box = $('#pics'); if (!box) return;
-        if (current.kind !== 'about') { renderMedia(text); return; }
-        var found = [], re = /\.\.\/\.\.\/assets\/[A-Za-z0-9._\/-]+\.(?:jpe?g|png|webp)/gi, m;
-        while ((m = re.exec(text))) { var p = 'src/' + m[0].slice(6); if (found.indexOf(p) < 0) found.push(p); }
-        // pictures written as just a file name live in this kind of page's own folder
-        var bare = /^\s*(?:-\s+)?src:\s*"?([A-Za-z0-9][A-Za-z0-9._-]*\.(?:jpe?g|png|webp))"?\s*(?:#.*)?$/gim;
-        while ((m = bare.exec(text))) { var bp = 'src/assets/' + (current.kind === 'timeline' ? 'timeline' : 'work') + '/' + m[1]; if (found.indexOf(bp) < 0) found.push(bp); }
-        var vids = videosIn(text);
-        box.innerHTML = '';
-        if (!found.length && !vids.length) { box.innerHTML = '<p class="hint" style="grid-column:1/-1">No pictures in this file yet. Upload one and it is added for you.</p>'; return; }
-        found.forEach(function (p) {
-          if (!picNodes[p]) {
-            var fig = document.createElement('figure'); fig.className = 'pic';
-            var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'picbtn'; btn.setAttribute('aria-label', 'View ' + p.split('/').pop() + ' larger');
-            var img = document.createElement('img'); img.alt = 'Preview of ' + p.split('/').pop(); img.loading = 'lazy';
-            var cap = document.createElement('figcaption'); cap.textContent = p.replace(/^src\/assets\//, '');
-            img.addEventListener('error', function () { fig.classList.add('missing'); fig.innerHTML = 'Not uploaded yet'; var c = document.createElement('figcaption'); c.textContent = cap.textContent; fig.appendChild(c); if (fig._x) fig.appendChild(fig._x); });
-            img.src = '/api/edit/image?path=' + encodeURIComponent(p) + (bust[p] ? '&v=' + bust[p] : '');
-            btn.appendChild(img); fig.appendChild(btn); fig.appendChild(cap);
-            if (current.kind !== 'about') {
-              var x = document.createElement('button'); x.type = 'button'; x.className = 'picx'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + p.split('/').pop() + ' from this section');
-              x.addEventListener('click', function () { dropPicture(p); });
-              fig.appendChild(x); fig._x = x;
-            }
-            picNodes[p] = fig;
-          }
-          box.appendChild(picNodes[p]);
+    // ---- a page: its details, then its blocks in order ----
+    function pageForm() {
+      const isSection = cur.kind === 'page:section';
+      const top = [
+        { key: isSection ? 'navLabel' : 'title', label: isSection ? 'Name in the menu and browser tab' : 'Page name (browser tab)', type: 'text' },
+        { key: 'description', label: 'Search-result description (optional)', type: 'textarea', rows: 2, hint: 'Leave empty to use the first paragraph on the page.' },
+        ...(isSection ? [{ key: 'draft', label: 'Hide this page from the site and menu', type: 'bool' }] : []),
+      ];
+      const wrap = el('div', { class: 'grp' }, group(top, cur.data, {}), el('h3', { text: 'Blocks, top to bottom' }));
+      const list = el('div', { class: 'grp' });
+      const blocks = cur.data.blocks || (cur.data.blocks = []);
+      let openIndex = -1;
+      const drawBlocks = () => {
+        list.replaceChildren();
+        if (!blocks.length) list.append(el('p', { class: 'hint', text: 'This page has no blocks yet. Add one below.' }));
+        blocks.forEach((b, i) => {
+          const spec = SPEC.blocks[b.type]; if (!spec) return;
+          const t = el('span', { class: 't', text: b.headline || b.title || spec.label });
+          const move = (d) => { const j = i + d; if (j < 0 || j >= blocks.length) return; [blocks[i], blocks[j]] = [blocks[j], blocks[i]]; touch(); openIndex = j; drawBlocks(); };
+          const d = el('details', { class: 'card block', open: i === openIndex || blocks.length === 1 },
+            el('summary', {}, el('span', { class: 'k', text: spec.label }), t,
+              el('span', { class: 'ctl' },
+                el('button', { type: 'button', 'aria-label': 'Move block up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
+                el('button', { type: 'button', 'aria-label': 'Move block down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
+                el('button', { type: 'button', 'aria-label': 'Remove block', onclick: (e) => { e.preventDefault(); if (confirm('Remove this ' + spec.label + ' block from the page?')) { blocks.splice(i, 1); touch(); openIndex = -1; drawBlocks(); } } }, '×'))),
+            el('div', { class: 'in' }, el('p', { class: 'hint', text: spec.hint }), group(spec.fields, b, { target: 'page-image' })));
+          d.addEventListener('input', () => { t.textContent = b.headline || b.title || spec.label; });
+          list.append(d);
         });
-        vids.forEach(function (v) {
-          var id = youtubeId(v.url), fig = document.createElement('figure'); fig.className = 'pic';
-          var img = document.createElement('img'); img.alt = 'Thumbnail of the video ' + v.title; img.loading = 'lazy';
-          if (id) img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
-          var cap = document.createElement('figcaption'); cap.textContent = 'Video: ' + (v.title || v.url);
-          var a = document.createElement('a'); a.href = v.url; a.target = '_blank'; a.rel = 'noopener'; a.className = 'vidlink'; a.setAttribute('aria-label', 'Open the video ' + v.title + ' on YouTube'); a.appendChild(img);
-          var x = document.createElement('button'); x.type = 'button'; x.className = 'picx'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove the video ' + v.title + ' from this section');
-          x.addEventListener('click', function () { dropVideo(v.url); });
-          fig.appendChild(a); fig.appendChild(cap); fig.appendChild(x); box.appendChild(fig);
-        });
-      }
+      };
+      drawBlocks();
+      const typeSel = el('select', { id: 'new-block-type', 'aria-label': 'Kind of block to add' }, Object.entries(SPEC.blocks).map(([k, v]) => el('option', { value: k }, v.label)));
+      wrap.append(list, el('div', { class: 'addbar' },
+        el('div', { class: 'adder' }, el('label', { for: 'new-block-type', class: 'lbl', text: 'Add a block at the bottom:' }), typeSel,
+          el('button', { class: 'btn', type: 'button', onclick: () => { blocks.push(structuredClone(SPEC.blocks[typeSel.value].defaults)); touch(); openIndex = blocks.length - 1; drawBlocks(); } }, '+ Add block')),
+        el('p', { class: 'hint', text: 'Use the arrows on a block to move it up or down the page.' })));
+      return wrap;
+    }
 
-      function openFile(path) {
-        main.innerHTML = '<h2>Loading…</h2>';
-        api('/api/edit/file?path=' + encodeURIComponent(path)).then(function (r) {
-          if (r.status === 401) { location.reload(); return; }
-          if (!r.ok) { main.textContent = r.data.error || 'Could not open that file.'; return; }
-          current = { path: path, kind: r.data.kind, sha: r.data.sha };
-          dirty = false; renderSide();
-          renderDoc(r.data.text);
-          var d = readDraft();
-          if (d && d.path === path && d.sha === r.data.sha && d.text !== r.data.text) {
-            $('#doc').value = d.text; dirty = true; if ($('#prev')) { refreshPics(d.text); $('#prev').innerHTML = md(bodyOf(d.text)); }
-            setStatus($('#msg'), 'Your unsaved changes were restored. Press Save to publish them.', 'ok');
-          } else if (d && d.path === path) clearDraft();
-          main.focus();
-        });
-      }
+    // ---- an entry: its fields, then its write-up ----
+    function entryForm() {
+      const writeUp = el('div', { class: 'field' }, el('label', { for: 'writeup', text: 'Write-up (shown in the popup, under the summary)' }),
+        el('textarea', { id: 'writeup', class: 'md', rows: 22, oninput: (e) => (cur.body = e.target.value) }, cur.body || ''),
+        el('div', { class: 'hint', text: 'A line starting with ### makes a subheading. A blank line starts a new paragraph. [words](address) makes a link.' }));
+      return el('div', { class: 'grp' }, group(SPEC.entry, cur.data, { target: 'work-image' }), writeUp);
+    }
 
-      function renderDoc(text) {
-        var isMd = current.kind !== 'site';
-        var title = current.kind === 'site' ? files.site.label : current.kind === 'about' ? files.about.label : ((/^title:\s*"?(.*?)"?\s*$/m.exec(text) || [])[1] || current.path);
-        main.innerHTML =
-          '<div class="bar"><div><h2 id="fname"></h2><div class="path"></div></div><button class="btn" id="save" type="button">Save</button></div>' +
-          '<p id="msg" class="status" role="status" aria-live="polite"></p>' +
-          '<details class="help"><summary>Example text template</summary><p>Compare your file with this example, or copy it to start from. Lines starting with <code>#</code> are notes to you.</p><pre class="tpl" id="tpl" tabindex="0"></pre><button class="btn ghost small" id="copytpl" type="button">Copy the template</button></details>' +
-          '<div class="field"><label for="doc">' + (isMd ? 'The page file' : 'The settings file') + '</label><textarea id="doc" rows="30" spellcheck="false"></textarea></div>' +
-          (isMd ? '<details class="prevwrap" open><summary>Preview of the text</summary><div class="preview" id="prev"></div></details>' +
-            '<details class="prevwrap" open><summary>' + (current.kind === 'about' ? 'Pictures in this file' : 'Pictures &amp; videos (drag to reorder)') + '</summary>' + '<div class="pics" id="pics"></div><p id="pic-msg" class="status" role="status" aria-live="polite"></p>' + addPicBox() + addVideoBox() + '</details>' : '');
-        $('#tpl').textContent = TEMPLATES[current.kind] || '';
-        $('#copytpl').addEventListener('click', function () { navigator.clipboard && navigator.clipboard.writeText(TEMPLATES[current.kind] || ''); $('#copytpl').textContent = 'Copied'; });
-        $('#fname').textContent = title;
-        $('.path', main).textContent = current.path;
-        var doc = $('#doc'); doc.value = text;
-        picNodes = {};
-        if (isMd) { $('#prev').innerHTML = md(bodyOf(text)); refreshPics(text); }
-        doc.addEventListener('input', function () {
-          dirty = true; keepDraft(doc.value);
-          if (isMd) { $('#prev').innerHTML = md(bodyOf(doc.value)); clearTimeout(picTimer); picTimer = setTimeout(function () { refreshPics(doc.value); }, 350); }
-        });
-        $('#save').addEventListener('click', saveDoc);
-        if (isMd) wireAddPic();
+    // ---- save ----
+    // Empty optional values are dropped so files stay tidy; the few that the site needs even when empty are kept.
+    const KEEP = new Set(['role', 'org', 'dates', 'text']);
+    const KEEP_LISTS = new Set(['blocks', 'items']);
+    function prune(v, key) {
+      if (Array.isArray(v)) { const out = v.map((x) => prune(x)).filter((x) => x !== undefined); return out.length || KEEP_LISTS.has(key) ? out : undefined; }
+      if (v && typeof v === 'object') {
+        const out = {};
+        for (const [k, x] of Object.entries(v)) { const p = prune(x, k); if (p !== undefined) out[k] = p; }
+        return Object.keys(out).length ? out : undefined;
       }
+      if (v === '' || v === null || v === undefined || v === false) return KEEP.has(key) && v === '' ? '' : undefined;
+      return v;
+    }
 
-      function saveDoc() {
-        var msg = $('#msg'), btn = $('#save');
-        btn.disabled = true; setStatus(msg, 'Saving…');
-        api('/api/edit/file', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path: current.path, text: $('#doc').value, sha: current.sha }) })
-          .then(function (r) {
-            btn.disabled = false;
-            if (r.status === 401) { location.reload(); return; }
-            if (r.ok) { current.sha = r.data.sha; dirty = false; clearDraft(); setStatus(msg, mode === 'GitHub' ? 'Saved. The live site updates in about a minute.' : 'Saved to the local files.', 'ok'); }
-            else setStatus(msg, r.data.error || 'Could not save.', 'error', r.data.problems);
-          });
+    async function save() {
+      if (!cur) return;
+      const btn = $('#save'); btn.disabled = true; setStatus('Saving…');
+      const data = prune(cur.data) || {};
+      if (cur.kind.startsWith('page:')) data.blocks = data.blocks || [];
+      const r = await api('/api/edit/doc', { method: 'PUT', body: { path: cur.path, data, body: cur.body || '', sha: cur.sha } });
+      btn.disabled = false;
+      const box = $('#problems-box');
+      if (r.ok) {
+        cur.sha = r.data.sha; dirty = false; box.hidden = true; box.replaceChildren();
+        setStatus('Saved');
+        toast(MODE === 'local files' ? 'Saved to your local files.' : 'Saved. The live site updates in about a minute.');
+        await loadFiles();
+      } else {
+        setStatus(r.data.error || 'Not saved.', true);
+        box.hidden = false;
+        box.replaceChildren(el('ul', { class: 'problems', role: 'alert' }, [r.data.error ? el('li', { text: r.data.error }) : null, ...(r.data.problems || []).map((p) => el('li', { text: p }))]));
+        box.scrollIntoView({ block: 'nearest' });
       }
+    }
 
-      /* ---------- New files ---------- */
-      function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60); }
-      function newFile(kind) {
-        var title = prompt(kind === 'work' ? 'Name of the new case study:' : 'Title of the new journey step:');
-        if (!title || !slug(title)) return;
-        var list = files[kind], n = list.length + 1;
-        var name = ('0' + n).slice(-2) + '-' + slug(title);
-        var path = 'src/content/' + kind + '/' + name + '.md';
-        var t = title.replace(/"/g, "'");
-        var text = kind === 'work'
-          ? '---\ntitle: "' + t + '"\noutcome: "One line that sums up the project."\nrole: "Your role"\norg: "Organization"\ndates: "2024"\ntools: []\ntracks: [learning-design]\ndraft: true\n---\n\n### Context\n\nWrite the description here.\n'
-          : '---\nlabel: "Tag"\nperiod: "2024 – Present"\ntitle: "' + t + '"\nskills: ["Skill one", "Skill two"]\n---\n\nWrite a few sentences about this stretch of your career.\n';
-        api('/api/edit/file', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path: path, text: text }) }).then(function (r) {
-          if (r.ok) { loadList().then(function () { openFile(path); }); }
-          else alert((r.data.error || 'Could not create it.') + ((r.data.problems || []).length ? '\n- ' + r.data.problems.join('\n- ') : ''));
-        });
-      }
-
-      /* ---------- Uploads ---------- */
-      function openResume() {
-        current = { path: 'uploads:resume' }; dirty = false; renderSide();
-        var resumes = files.resumes.map(function (r) { return '<option value="' + esc(r.id) + '">' + esc(r.title) + '</option>'; }).join('');
-        main.innerHTML = '<h2>Replace a resume</h2>' +
-          '<p class="hint">Choose which resume to replace, then pick the new PDF. The file name stays the same, so the card on the site just updates. PDFs can be up to 4 MB.</p>' +
-          '<form id="up" novalidate><input type="hidden" id="u-target" value="resume" />' +
-          '<div class="field"><label for="u-resume">Which resume?</label><select id="u-resume">' + resumes + '</select></div>' +
-          '<div class="field"><label for="u-file">Choose the PDF</label><input id="u-file" type="file" accept="application/pdf" /></div>' +
-          '<button class="btn" type="submit">Upload</button><p id="u-msg" class="status" role="status" aria-live="polite" style="margin-top:12px"></p><div id="u-result"></div></form>';
-        $('#up').addEventListener('submit', doUpload);
-      }
-
-      // Shrinks big photos in the browser so they upload quickly (and fixes sideways phone photos).
-      function prepare(file, target) {
-        var isImg = /^image\/(jpeg|png|webp)$/.test(file.type);
-        if (!isImg || !/image|headshot/.test(target)) return Promise.resolve(file);
-        return createImageBitmap(file, { imageOrientation: 'from-image' }).then(function (bmp) {
-          var max = 2000, s = Math.min(1, max / Math.max(bmp.width, bmp.height));
-          if (s === 1 && file.size < 1500000 && target !== 'headshot') return file;
-          var c = document.createElement('canvas'); c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
-          c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
-          var type = target === 'headshot' || file.type === 'image/jpeg' ? 'image/jpeg' : file.type;
-          return new Promise(function (res) {
-            c.toBlob(function (b) {
-              var ext = type === 'image/jpeg' ? 'jpg' : type === 'image/png' ? 'png' : 'webp';
-              res(new File([b], file.name.replace(/\.[^.]+$/, '') + '.' + ext, { type: type }));
-            }, type, 0.86);
-          });
-        }).catch(function () { return file; });
-      }
-
-      function doUpload(e) {
-        e.preventDefault();
-        var msg = $('#u-msg'), out = $('#u-result'), f = $('#u-file').files[0], target = $('#u-target').value;
-        out.innerHTML = '';
-        if (!f) { setStatus(msg, 'Choose a file first.', 'error'); return; }
-        setStatus(msg, 'Uploading…');
-        var sent = null;
-        prepare(f, target).then(function (file) {
-          sent = file;
-          var fd = new FormData(); fd.append('file', file); fd.append('target', target); fd.append('resumeId', $('#u-resume').value);
-          return api('/api/edit/upload', { method: 'POST', body: fd });
-        }).then(function (r) {
-          if (r.status === 401) { location.reload(); return; }
-          if (!r.ok) { setStatus(msg, r.data.error || 'Upload failed.', 'error'); return; }
-          setStatus(msg, (r.data.replaced ? 'Replaced. ' : 'Uploaded. ') + (mode === 'GitHub' ? 'It appears on the live site in about a minute.' : ''), 'ok');
-          var ref = r.data.reference;
-          var use = target === 'work-image' || target === 'timeline-image' ? 'Paste this as the <code>src:</code> of a picture in the file you are editing (at the top, between the <code>---</code> lines).'
-            : target === 'artifact' ? 'Paste this as the <code>url:</code> of an artifact in the case study file.'
-            : target === 'headshot' ? 'Your headshot is replaced. Nothing else to do.' : 'That resume is replaced. Nothing else to do.';
-          if (target === 'resume') { out.innerHTML = '<div class="result"><p>' + use + '</p></div>'; return; }  // nothing to copy for a resume
-          out.innerHTML = '<div class="result"><p>' + use + '</p><p><code id="ref">' + esc(ref) + '</code> <button class="btn ghost small" id="copy" type="button">Copy</button></p>' + (sent && /^image\//.test(sent.type) ? '<img class="uppic" alt="Preview of the uploaded picture" src="' + URL.createObjectURL(sent) + '" />' : '') + '</div>';
-          $('#copy').addEventListener('click', function () { navigator.clipboard && navigator.clipboard.writeText(ref); $('#copy').textContent = 'Copied'; });
-        });
-      }
-
-      /* ---------- Reordering: drag a handle (mouse or touch), or focus it and use the up/down arrow keys ---------- */
-      var sideMsg = null, drag = null, kbPrev = null, orderTimer = 0;
-      function showSideMsg(text, kind) {
-        sideMsg = text ? { text: text, kind: kind || '' } : null;
-        var el = $('#side-msg'); if (el) { el.className = 'status' + (kind ? ' ' + kind : ''); el.textContent = text || ''; }
-      }
-      function idsOf(ul) { return Array.prototype.map.call(ul.children, function (li) { return li.dataset.id; }); }
-      function applyOrder(kind, ids) {
-        var id = function (f) { return f.name.replace(/\.md$/, ''); };
-        files[kind].sort(function (a, b) { return ids.indexOf(id(a)) - ids.indexOf(id(b)); });
-      }
-      function saveOrder(kind, ids, previous) {
-        applyOrder(kind, ids); showSideMsg('Saving the new order…');
-        api('/api/edit/order', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ kind: kind, ids: ids }) }).then(function (r) {
-          if (r.status === 401) { location.reload(); return; }
-          if (r.ok) showSideMsg(mode === 'GitHub' ? 'Order saved. The live site updates in about a minute.' : 'Order saved to the local files.', 'ok');
-          else { applyOrder(kind, previous); renderSide(); showSideMsg(r.data.error || 'Could not save the order.', 'error'); }
-        });
-      }
-      side.addEventListener('pointerdown', function (e) {
-        var grip = e.target.closest('.grip'); if (!grip || (e.pointerType === 'mouse' && e.button !== 0)) return;
-        var li = grip.closest('li'), ul = li.parentNode;
-        e.preventDefault(); grip.setPointerCapture(e.pointerId);
-        drag = { li: li, ul: ul, kind: ul.dataset.kind, before: idsOf(ul) };
-        li.classList.add('dragging'); document.body.style.cursor = 'grabbing';
-      });
-      side.addEventListener('pointermove', function (e) {
-        if (!drag) return;
-        var others = Array.prototype.filter.call(drag.ul.children, function (x) { return x !== drag.li; }), next = null;
-        for (var k = 0; k < others.length; k++) { var r = others[k].getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { next = others[k]; break; } }
-        if (next !== drag.li.nextElementSibling) drag.ul.insertBefore(drag.li, next);
-        var sr = side.getBoundingClientRect();   // scroll the list when dragging near its top or bottom edge
-        if (e.clientY < sr.top + 36) side.scrollTop -= 8; else if (e.clientY > sr.bottom - 36) side.scrollTop += 8;
-      });
-      function endDrag() {
-        if (!drag) return;
-        var d = drag; drag = null; d.li.classList.remove('dragging'); document.body.style.cursor = '';
-        var now = idsOf(d.ul); if (now.join() !== d.before.join()) saveOrder(d.kind, now, d.before);
-      }
-      side.addEventListener('pointerup', endDrag);
-      side.addEventListener('pointercancel', endDrag);
-      side.addEventListener('keydown', function (e) {
-        var grip = e.target.closest && e.target.closest('.grip');
-        if (!grip || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
-        e.preventDefault();
-        var li = grip.closest('li'), ul = li.parentNode, before = idsOf(ul);
-        if (e.key === 'ArrowUp' && li.previousElementSibling) ul.insertBefore(li, li.previousElementSibling);
-        else if (e.key === 'ArrowDown' && li.nextElementSibling) ul.insertBefore(li.nextElementSibling, li);
-        else return;
-        grip.focus();
-        showSideMsg('Moved "' + li.querySelector('.itembtn').textContent + '" to position ' + (idsOf(ul).indexOf(li.dataset.id) + 1) + ' of ' + ul.children.length + '.');
-        if (!kbPrev) kbPrev = before;
-        var kind = ul.dataset.kind; clearTimeout(orderTimer);
-        orderTimer = setTimeout(function () { var now = idsOf(ul), prev = kbPrev; kbPrev = null; if (now.join() !== prev.join()) saveOrder(kind, now, prev); }, 700);
-      });
-
-      /* Click a picture to see it as large as the window allows, never bigger than the screen. */
-      var lb = $('#lightbox');
-      function fitViewer() {
-        var img = $('#lb-img'); if (!img.naturalWidth) return;
-        var bar = $('.lb-bar', lb).offsetHeight || 46;
-        var maxW = window.innerWidth * 0.96 - 2, maxH = window.innerHeight * 0.96 - bar - 2;
-        var s = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight); // as big as the window allows
-        img.style.width = Math.floor(img.naturalWidth * s) + 'px';
-        img.style.height = Math.floor(img.naturalHeight * s) + 'px';
-      }
-      $('#lb-img').addEventListener('load', fitViewer);
-      window.addEventListener('resize', function () { if (lb.open) fitViewer(); });
-      function zoom(src, name) {
-        var img = $('#lb-img'); img.style.width = ''; img.style.height = '';
-        img.src = src; $('#lb-name').textContent = name; lb.showModal(); fitViewer();
-      }
-      $('#lb-close').addEventListener('click', function () { lb.close(); });
-      lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
-      main.addEventListener('click', function (e) {
-        var img = e.target.closest('.picbtn img, .uppic'); if (!img) return;
-        zoom(img.src, img.alt.replace(/^Preview of /, ''));
-      });
-
-      loadList();
-    })();
+    // ---- a new entry ----
+    const dlg = $('#new-entry');
+    function newEntry() { if (dirty && !confirm('You have unsaved changes. Leave without saving?')) return; $('#new-entry-form').reset(); $('#ne-msg').textContent = ''; dlg.showModal(); $('#ne-title').focus(); }
+    $('#ne-cancel')?.addEventListener('click', () => dlg.close());
+    $('#new-entry-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = $('#ne-title').value.trim();
+      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
+      if (!id) { $('#ne-msg').textContent = 'Give it a title with some letters or numbers.'; return; }
+      const data = { title, outcome: $('#ne-outcome').value.trim(), role: '', org: '', dates: '', sections: [], draft: true };
+      const r = await api('/api/edit/doc', { method: 'POST', body: { path: `src/content/work/${id}.md`, data, body: '' } });
+      if (!r.ok) { $('#ne-msg').textContent = [r.data.error, ...(r.data.problems || [])].filter(Boolean).join(' '); return; }
+      dlg.close(); dirty = false; await loadFiles(); openDoc(`src/content/work/${id}.md`, 'work', id);
+    });
   </script>
 </body>
 </html>

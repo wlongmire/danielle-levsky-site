@@ -1,0 +1,58 @@
+---
+// Page block: Free Text / Image. The text on one side, a stack of pictures on the other (pictures above the text on phones).
+// The text is Markdown: a line starting with ## makes a subheading, [words](address) makes a link.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import { markdown } from '../lib/markdown';
+
+interface Props {
+  title?: string;
+  body: string;
+  photos: { src: ImageMetadata; alt: string }[];
+  h1?: boolean;   // the page's main title (the first block on a page)
+}
+const { title, body, photos, h1 = false } = Astro.props;
+const Tag = h1 ? 'h1' : 'h2';
+const html = markdown(body);
+---
+<article class="about">
+  <div class="about-text">
+    {title && <Tag class="about-title">{title}</Tag>}
+    <div set:html={html} />
+  </div>
+  {photos.length > 0 && (
+    <div class="about-pics">
+      {photos.map((p, i) => (
+        <div class="about-img"><Image src={p.src} alt={p.alt} width={720} loading={i === 0 ? 'eager' : 'lazy'} /></div>
+      ))}
+    </div>
+  )}
+</article>
+
+<style>
+  .about { display: flex; flex-wrap: wrap; gap: 48px; padding: 72px 0 96px; }
+  .about-text { flex: 2 1 380px; min-width: 0; max-width: 44em; }
+  .about-title { margin: 0 0 24px; font: 500 clamp(40px, 5vw, 60px)/1.05 var(--font-display); color: var(--amber); }
+  .about-text :global(p) { margin: 0 0 1.1em; font-size: 18px; line-height: 1.65; }
+  .about-text :global(p:first-of-type) { font: 500 clamp(24px, 3vw, 32px)/1.25 var(--font-display); color: var(--text); }
+  /* Subheadings (a line starting with ## in the text) break up the long text. */
+  .about-text :global(h2) { margin: 1.8em 0 0.5em; font: 500 clamp(26px, 3vw, 34px)/1.15 var(--font-display); color: var(--amber); }
+  .about-text :global(a) { color: var(--amber); text-underline-offset: 3px; }
+  .about-text :global(a:hover) { text-decoration-thickness: 2px; }
+  /* The picture column is as tall as the text beside it, with the pictures spaced down it (top, middle, bottom). */
+  .about-pics { flex: 1 1 240px; max-width: 360px; align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; gap: 24px; }
+  .about-img { border-radius: 4px 40px 4px 4px; overflow: hidden; background: var(--rule); }
+  .about-img:nth-child(even) { border-radius: 4px 4px 40px 4px; }
+  .about-img :global(img) { width: 100%; height: auto; display: block; }
+  /* Phones: the first two pictures sit side by side above the text, cropped to the same shape so they line up;
+     a third (wide) one runs full width beneath them. */
+  @media (max-width: 769px) {
+    .about { padding: 20px 0 64px; gap: 28px; }
+    .about-pics { order: -1; flex: 1 1 100%; max-width: none; align-self: auto; justify-content: normal; flex-direction: row; flex-wrap: wrap; gap: 12px; }
+    .about-img { flex: 1 1 calc(50% - 6px); min-width: 0; border-radius: 4px 24px 4px 4px; }
+    .about-img:nth-child(even) { border-radius: 4px 4px 24px 4px; }
+    .about-img:nth-child(n + 3) { flex-basis: 100%; }
+    .about-img :global(img) { aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 38%; }
+    .about-img:nth-child(n + 3) :global(img) { aspect-ratio: 16 / 9; object-position: 50% 40%; }
+  }
+</style>

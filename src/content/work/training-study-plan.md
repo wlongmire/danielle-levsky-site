@@ -1,22 +1,23 @@
 ---
-title: "Training Study Plan"
-outcome: "Developed BenchPrep’s first-ever study plan on our proprietary content management system."
-role: ""
-org: "BenchPrep"
-dates: ""
-sections: [ld-portfolio]
+title: Training Study Plan
+outcome: Developed BenchPrep’s first-ever study plan on our proprietary content management system.
+role: ''
+org: BenchPrep
+dates: ''
+sections:
+  - ld-portfolio
 media:
   - type: image
-    src: "training-study-plan-1.png"
-    alt: "Snippet 1 of 3 from the study plan"
+    src: training-study-plan-1.png
+    alt: Snippet 1 of 3 from the study plan
     fit: contain
   - type: image
-    src: "training-study-plan-2.png"
-    alt: "Snippet 2 of 3 from the study plan"
+    src: training-study-plan-2.png
+    alt: Snippet 2 of 3 from the study plan
     fit: contain
   - type: image
-    src: "training-study-plan-3.png"
-    alt: "Snippet 3 of 3 from the study plan"
+    src: training-study-plan-3.png
+    alt: Snippet 3 of 3 from the study plan
     fit: contain
 ---
 

@@ -1,10 +1,11 @@
 ---
-title: "Quick Start Onboarding Experience"
-outcome: "Created an MVP onboarding program for full time employees"
-role: ""
-org: "eighty2i"
-dates: ""
-sections: [ld-portfolio]
+title: Quick Start Onboarding Experience
+outcome: Created an MVP onboarding program for full time employees
+role: ''
+org: eighty2i
+dates: ''
+sections:
+  - ld-portfolio
 ---
 
 Spearheaded a complete revamp of eighty2i's onboarding system to accelerate new hire integration and improve the employee experience from day one.

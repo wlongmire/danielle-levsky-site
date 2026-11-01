@@ -1,10 +1,11 @@
 ---
-title: "Regulatory Requirements Translation"
-outcome: "Organized complex trade-related requirements into scoped, testable, implementation-ready language for business and engineering alignment."
-role: ""
-org: "Baker Tilly"
-dates: ""
-sections: [ld-portfolio]
+title: Regulatory Requirements Translation
+outcome: Organized complex trade-related requirements into scoped, testable, implementation-ready language for business and engineering alignment.
+role: ''
+org: Baker Tilly
+dates: ''
+sections:
+  - ld-portfolio
 confidential: true
 ---
 
