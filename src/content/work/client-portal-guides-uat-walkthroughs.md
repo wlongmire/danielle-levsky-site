@@ -4,8 +4,6 @@ outcome: Developed practical internal and client-facing documentation to explain
 role: ''
 org: Baker Tilly
 dates: ''
-sections:
-  - ld-portfolio
 confidential: true
 ---
 

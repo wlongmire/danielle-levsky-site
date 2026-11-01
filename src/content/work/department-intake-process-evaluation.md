@@ -4,8 +4,6 @@ outcome: Facilitated working sessions and created proposals with phased enhancem
 role: ''
 org: Meta
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Led evaluation and redesign initiative for the Enterprise Learning Operations (ELO) department's customer intake process, addressing partner feedback and developing innovative service delivery concepts.

@@ -4,8 +4,6 @@ outcome: Used pedagogical and technological expertise to assess clients’ portf
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: course-program-improvements-and-management-1.png

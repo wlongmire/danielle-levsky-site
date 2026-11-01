@@ -1,37 +1,23 @@
 // What each form on /edit asks for. One description per block type and per kind of document; the page draws the forms
 // from these, so teaching the editor a new field means adding a line here (and, if it is a new field in the content
 // itself, in src/lib/blocks.ts or src/content.config.ts and the checks in rules.ts).
-import { BLOCK_TYPES, CARD_SOURCES } from '../blocks';
+import { BLOCK_TYPES, CROPS } from '../blocks';
 
 export type Field = {
   key: string;
   label: string;
-  type: 'text' | 'textarea' | 'markdown' | 'bool' | 'select' | 'checks' | 'image' | 'button' | 'object' | 'list' | 'strings' | 'picks';
+  type: 'text' | 'textarea' | 'markdown' | 'bool' | 'select' | 'checks' | 'image' | 'button' | 'object' | 'group' | 'list' | 'strings' | 'cards';
   hint?: string;
   rows?: number;
   options?: [value: string, label: string][];
   altKey?: string;                    // image: where its description (alt text) is stored, next to the picture
-  fields?: Field[];                   // object and list: the fields of the object / of each item
+  fields?: Field[];                   // object, group and list: the fields of the object / of the group / of each item (a group draws its fields in a titled box but stores them beside its siblings)
   itemTitle?: string;                 // list: which field names an item in the list
   itemName?: string;                  // list: "Add a ..." wording
   showIf?: { key: string; is: string }; // only shown while a sibling field has this value
   defaults?: Record<string, unknown>; // list: values a new item starts with
 };
 
-const sourceLabels: Record<string, string> = {
-  'ld-portfolio': 'Every entry marked for L&D Portfolio',
-  'dei': 'Every entry marked for DEI',
-  'digital-humanities': 'Every entry marked for Digital Humanities',
-  'picks': 'A hand-picked list of entries',
-};
-
-export const SECTION_OPTIONS: [string, string][] = [
-  ['ld-portfolio', 'L&D Portfolio'],
-  ['dei', 'DEI'],
-  ['digital-humanities', 'Digital Humanities'],
-];
-
-const button = (key: string, label: string, hint: string): Field => ({ key, label, type: 'button', hint });
 
 export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: Field[]; defaults: Record<string, unknown> }> = {
   hero: {
@@ -40,15 +26,15 @@ export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: 
     fields: [
       { key: 'headline', label: 'Headline', type: 'text' },
       { key: 'intro', label: 'Paragraph', type: 'textarea', rows: 5, hint: 'Leave a blank line between paragraphs.' },
-      button('cta', 'Main button', 'Leave both empty for no button. An address of #contact opens the contact popup.'),
-      { key: 'showCv', label: 'Show the CV button beside it (uses the CV link in Site details)', type: 'bool' },
-      { key: 'image', label: 'Picture', type: 'image', altKey: 'imageAlt', hint: 'Shown beside the text.' },
-      { key: 'imagePosition', label: 'Where the picture is cropped to', type: 'text', hint: 'For example 46% 30% (left/right, then top/bottom). Leave empty for the default.' },
-      { key: 'logo', label: 'Logo (shown whole, beside the text)', type: 'object', fields: [
-        { key: 'src', label: 'Logo picture', type: 'image', altKey: 'alt' },
-        { key: 'url', label: 'Link when clicked (optional)', type: 'text', hint: 'A web address starting with https://' },
+      { key: 'buttons', label: 'Buttons', type: 'list', itemTitle: 'label', itemName: 'button', defaults: { label: '', url: '' }, hint: 'The first button is the main one; the others are outlined. An address of #contact opens the contact popup.', fields: [
+        { key: 'label', label: 'Title', type: 'text' },
+        { key: 'url', label: 'URL', type: 'text' },
       ] },
-      { key: 'featured', label: 'Big home-page look (taller, on a panel, with a picture slot)', type: 'bool' },
+      { key: 'image', label: 'Picture', type: 'image', altKey: 'imageAlt' },
+      { key: 'style', label: 'Style', type: 'group', fields: [
+        { key: 'featured', label: 'Home Page Look', type: 'bool' },
+        { key: 'imageCrop', label: 'Picture cropping', type: 'select', options: Object.entries(CROPS).map(([v, c]) => [v, c.label] as [string, string]) },
+      ] },
     ],
   },
   overview: {
@@ -64,12 +50,11 @@ export const BLOCK_FORMS: Record<string, { label: string; hint: string; fields: 
   },
   cards: {
     ...BLOCK_TYPES.cards,
-    defaults: { type: 'cards', title: '', source: 'picks', entries: [] },
+    defaults: { type: 'cards', title: '', entries: [] },
     fields: [
       { key: 'title', label: 'Heading (optional)', type: 'text' },
-      { key: 'source', label: 'Which entries', type: 'select', options: CARD_SOURCES.map((s) => [s, sourceLabels[s]] as [string, string]) },
-      { key: 'entries', label: 'The entries, in the order shown', type: 'picks', showIf: { key: 'source', is: 'picks' } },
-      { key: 'groupByOrg', label: 'Group the cards under a heading for each entry\'s "Group heading"', type: 'bool' },
+      { key: 'entries', label: 'Cards', type: 'cards' },
+      { key: 'groupByOrg', label: 'Group the cards under a heading for each card\'s "Group heading"', type: 'bool' },
     ],
   },
   text: {
@@ -92,9 +77,8 @@ export const ENTRY_FIELDS: Field[] = [
   { key: 'org', label: 'Group heading', type: 'text', hint: 'The heading the card sits under on a grouped card grid (a position, a program, "DEI Projects"). Cards with the same words sit together.' },
   { key: 'role', label: 'Role (optional)', type: 'text' },
   { key: 'dates', label: 'Dates (optional)', type: 'text' },
-  { key: 'sections', label: 'Show on these pages\' card grids', type: 'checks', options: SECTION_OPTIONS },
   { key: 'confidential', label: 'Described or recreated, not the original (confidential work)', type: 'bool' },
-  { key: 'draft', label: 'Hide this entry from the site', type: 'bool' },
+  { key: 'draft', label: 'Hide this card from the site', type: 'bool' },
   { key: 'media', label: 'Pictures and videos in the popup', type: 'list', itemName: 'picture or video', defaults: { type: 'image', fit: 'contain' }, fields: [
     { key: 'type', label: 'Kind', type: 'select', options: [['image', 'Picture'], ['video', 'YouTube video']] },
     { key: 'src', label: 'Picture', type: 'image', altKey: 'alt', showIf: { key: 'type', is: 'image' } },
@@ -117,8 +101,14 @@ export const SITE_FIELDS: Field[] = [
   { key: 'name', label: 'Name (header and footer)', type: 'text' },
   { key: 'email', label: 'Email address', type: 'text' },
   { key: 'links', label: 'Footer links', type: 'list', itemTitle: 'label', itemName: 'link', defaults: { label: '', url: '' }, fields: [
-    { key: 'label', label: 'Words', type: 'text', hint: 'A link with "CV" in its words is the one the home page CV button uses.' },
-    { key: 'url', label: 'Address', type: 'text', hint: 'Leave empty to hide the link.' },
+    { key: 'label', label: 'Title', type: 'text' },
+    { key: 'url', label: 'URL', type: 'text' },
   ] },
-  { key: 'contactReasons', label: 'Choices in the contact form\'s "reason" list', type: 'strings' },
+];
+
+/** The contact popup (the Contact Page section on /edit). These live in the same file as the site details. */
+export const CONTACT_FIELDS: Field[] = [
+  { key: 'contactTitle', label: 'Popup heading', type: 'text' },
+  { key: 'contactReasons', label: 'Choices in the "What\'s this about?" list', type: 'strings' },
+  { key: 'contactThanks', label: 'Line shown after a message is sent', type: 'textarea', rows: 2 },
 ];

@@ -4,8 +4,6 @@ outcome: Developed BenchPrep’s first-ever study plan on our proprietary conten
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: training-study-plan-1.png

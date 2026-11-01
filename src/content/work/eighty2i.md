@@ -4,8 +4,6 @@ outcome: 'Built and managed the Teammate Success team: learning programs, the pe
 role: Head of Teammate Success
 org: DEI Projects
 dates: ''
-sections:
-  - dei
 tools:
   - Lattice
   - Notion

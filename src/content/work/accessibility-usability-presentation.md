@@ -4,8 +4,6 @@ outcome: For my class, I led a presentation on Accessibility from a Digital Huma
 role: Graduate project
 org: Digital Humanities Projects
 dates: ''
-sections:
-  - digital-humanities
 tools: []
 tracks: []
 media:

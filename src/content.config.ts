@@ -11,8 +11,6 @@ const work = defineCollection({
     role: z.string(),
     org: z.string(),
     dates: z.string(),
-    // Which section pages show this entry as a card. An entry in two sections is still one file.
-    sections: z.array(z.enum(['ld-portfolio', 'dei', 'digital-humanities'])).default([]),
     audience: z.string().optional(),
     tools: z.array(z.string()).default([]),
     tracks: z.array(z.enum(['learning-design', 'teaching', 'engineering', 'design-ux'])).default([]),

@@ -6,19 +6,15 @@ import OverviewList from './OverviewList.astro';
 import CardGrid from './CardGrid.astro';
 import TextBlock from './TextBlock.astro';
 import CaseDialog from './CaseDialog.astro';
-import { loadCases, loadPicks } from '../lib/cases';
-import { site } from '../data/site';
-import type { Block } from '../lib/blocks';
+import { loadPicks } from '../lib/cases';
+import { CROPS, type Block } from '../lib/blocks';
 
 interface Props { blocks: Block[]; }
 const { blocks } = Astro.props;
 
-// The CV button reads the "CV" link in site.json (editable on /edit); with no link or an empty one, no button shows.
-const cv = site.links.find((l) => /\bcv\b/i.test(l.label) && l.url);
-
 // The entries behind every Card Grid block, loaded up front so one popup serves them all.
 const casesFor = await Promise.all(
-  blocks.map((b) => (b.type !== 'cards' ? [] : b.source === 'picks' ? loadPicks(b.entries) : loadCases(b.source))),
+  blocks.map((b) => (b.type !== 'cards' ? [] : loadPicks(b.entries))),
 );
 const popupCases = [...new Map(casesFor.flat().map((c) => [c.entry.id, c])).values()];
 // The first block with a headline holds the page's main title (h1); the rest step down to h2.
@@ -32,12 +28,10 @@ const firstTitled = blocks.findIndex((b) => b.type === 'hero' || (b.type === 'te
         <Hero
           headline={b.headline}
           intro={b.intro}
-          cta={b.cta}
-          secondary={b.showCv ? cv : undefined}
+          buttons={b.buttons}
           image={b.image}
           imageAlt={b.imageAlt}
-          imagePosition={b.imagePosition}
-          mark={b.logo}
+          imagePosition={b.imageCrop ? CROPS[b.imageCrop as keyof typeof CROPS].position : undefined}
           imageSlot={b.featured}
           large={b.featured}
           h1={i === firstTitled}

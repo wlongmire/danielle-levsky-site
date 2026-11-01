@@ -4,8 +4,6 @@ outcome: Developed an annual coaching and mentoring system where teammates were 
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: coaching-mentoring-1.png

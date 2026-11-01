@@ -3,15 +3,21 @@
   "email": "dlevsky13@gmail.com",
   "links": [
     {
+      "label": "Full Professional CV",
+      "url": "https://docs.google.com/document/d/1Wh16Ay-riyENebQFrqQEAXUej8VKVcTK/edit?usp=sharing&ouid=108571554759087736753&rtpof=true&sd=true"
+    },
+    {
       "label": "LinkedIn",
       "url": "https://www.linkedin.com/in/daniellelevsky/"
     },
     {
-      "label": "Full Professional CV",
-      "url": "https://docs.google.com/document/d/1Wh16Ay-riyENebQFrqQEAXUej8VKVcTK/edit?usp=sharing&ouid=108571554759087736753&rtpof=true&sd=true"
+      "label": "Test Link",
+      "url": "https://www.google.com/search?sca_esv=5aa3b2d4e9827584&sxsrf=AKL5yDhXb1ccWTESvXkC6qjLZRNIaJSr3g:1793568783140&q=rebecca+kutler+msnbc&sa=X&ved=2ahUKEwi90Mux3OeXAxXLOWIAHdZ0KsUQ7xYoAHoECBEQAQ&biw=756&bih=828&dpr=2"
     }
   ],
   "contactEndpoint": "",
+  "contactTitle": "Get in touch",
+  "contactThanks": "I read every message and will reply to the email you gave me.",
   "contactReasons": [
     "Hiring opportunity",
     "L&D project or consulting",

@@ -4,8 +4,6 @@ outcome: Created communication guidelines across different platforms (Slack, Ema
 role: ''
 org: eighty2i
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Led comprehensive communication infrastructure improvement to enhance team collaboration and reduce friction in daily operations.

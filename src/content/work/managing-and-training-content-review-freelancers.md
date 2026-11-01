@@ -4,6 +4,4 @@ outcome: Oversaw the BenchPrep freelance content conversion reviewer network pla
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 ---

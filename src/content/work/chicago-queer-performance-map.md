@@ -4,8 +4,6 @@ outcome: Along with three other graduate students in Loyola University’s Digit
 role: Graduate project
 org: Digital Humanities Projects
 dates: Fall 2019–Spring 2020
-sections:
-  - digital-humanities
 tools: []
 tracks: []
 media:

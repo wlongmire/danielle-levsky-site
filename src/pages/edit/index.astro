@@ -6,13 +6,13 @@
 import '../../styles/tokens.css';
 import { devBypass, isAuthed, passwordConfigured } from '../../lib/editor/auth';
 import { storageMode } from '../../lib/editor/storage';
-import { BLOCK_FORMS, ENTRY_FIELDS, SITE_FIELDS } from '../../lib/editor/forms';
+import { BLOCK_FORMS, CONTACT_FIELDS, ENTRY_FIELDS, SITE_FIELDS } from '../../lib/editor/forms';
 
 export const prerender = false;
 
 const authed = isAuthed(Astro.request);
 const setupNeeded = !passwordConfigured() && !devBypass(Astro.request);
-const SPEC = { blocks: BLOCK_FORMS, entry: ENTRY_FIELDS, site: SITE_FIELDS };
+const SPEC = { blocks: BLOCK_FORMS, entry: ENTRY_FIELDS, site: SITE_FIELDS, contact: CONTACT_FIELDS };
 const MODE = storageMode();
 Astro.response.headers.set('Cache-Control', 'no-store');
 Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
@@ -62,10 +62,10 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     .bar h2 { font-size: 26px; margin-right: auto; }
     .status { font-size: 13px; color: var(--muted); }
     .status.bad { color: #9b2c2c; font-weight: 600; }
-    .body { padding: 20px; display: grid; gap: 18px; }
+    .body { padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
     .empty { padding: 60px 20px; text-align: center; color: var(--muted); }
     .problems { margin: 0; padding: 12px 16px 12px 34px; background: #fbeaea; border: 1px solid #e3b4b4; border-radius: 8px; color: #6b1d1d; }
-    .field { display: grid; gap: 4px; }
+    .field { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; }
     .field > label, .field > .lbl { font-weight: 600; font-size: 14px; }
     .hint { font-size: 12.5px; color: var(--muted); }
     .field input[type='text'], .field select, .field textarea { width: 100%; padding: 8px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--bg); }
@@ -75,7 +75,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     .check input { margin-top: 4px; width: 18px; height: 18px; flex: none; }
     .checks { display: flex; flex-wrap: wrap; gap: 6px 18px; }
     .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .grp { display: grid; gap: 14px; }
+    .grp { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
     fieldset.obj { border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; margin: 0; }
     fieldset.obj legend { font-weight: 600; font-size: 14px; padding: 0 6px; }
     details.card { border: 1px solid var(--rule); border-radius: 8px; background: var(--card); }
@@ -85,18 +85,26 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     details.card[open] > summary::before { content: '▾'; }
     details.card > summary .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     details.card > summary .k { font-weight: 500; font-size: 12px; color: var(--amber); border: 1px solid var(--amber); border-radius: 999px; padding: 0 8px; }
-    details.card > .in { padding: 4px 14px 14px; display: grid; gap: 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
+    details.card > .in { padding: 4px 14px 14px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; border-top: 1px solid var(--rule); padding-top: 14px; }
     details.block { border-color: var(--amber); border-width: 1.5px; }
     .ctl { display: inline-flex; gap: 2px; }
     .ctl button { border: 1px solid var(--rule); background: var(--bg); border-radius: 5px; min-width: 28px; height: 28px; cursor: pointer; }
     .ctl button:hover { background: var(--rule); }
     .adder { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
     .adder select { padding: 7px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--bg); }
-    .pic { display: grid; grid-template-columns: 110px 1fr; gap: 12px; align-items: start; }
-    .pic .thumb { width: 110px; height: 80px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg) center / contain no-repeat; display: grid; place-items: center; font-size: 11px; color: var(--muted); text-align: center; }
+    .pic { display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: stretch; }
+    .pic .thumb { width: 140px; min-height: 80px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg) center / contain no-repeat; display: grid; place-items: center; font-size: 11px; color: var(--muted); text-align: center; }
     .pic .path { font-size: 12px; color: var(--muted); word-break: break-all; }
     .pic .acts { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; align-items: center; }
-    .addbar { padding: 14px; border: 2px dashed var(--rule); border-radius: 10px; }
+    .block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+    .block-head .lbl { font-weight: 600; font-size: 14px; }
+    .bar-add { display: flex; align-items: stretch; margin-left: auto; max-width: 100%; }
+    .bar-add select { max-width: 230px; text-overflow: ellipsis; }
+    .bar-add .btn { white-space: nowrap; }
+    .bar-add select { min-height: 36px; padding: 0 34px 0 10px; border-radius: 6px 0 0 6px; border-right-width: 0; appearance: none; -webkit-appearance: none;
+      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231b2733' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 14px center; }
+    .bar-add .btn { min-height: 36px; border-radius: 0 6px 6px 0; }
+    .bar-add select:focus-visible, .bar-add .btn:focus-visible { position: relative; z-index: 1; }
     .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: #fff; padding: 10px 18px; border-radius: 8px; z-index: 50; max-width: 90vw; }
     .toast[hidden] { display: none; }
     dialog { border: 1px solid var(--rule); border-radius: 12px; padding: 22px; width: min(480px, calc(100vw - 32px)); background: var(--card); color: var(--text); }
@@ -139,21 +147,11 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     <div class="shell">
       <nav class="side" aria-label="What to edit" id="side"><p class="status">Loading…</p></nav>
       <main class="main" id="main">
-        <div class="empty">Choose a page, an entry or the site details on the left.</div>
+        <div class="empty">Choose a page, a card or the site details on the left.</div>
       </main>
     </div>
   )}
 
-  <dialog id="new-entry">
-    <form method="dialog" id="new-entry-form">
-      <h2>New entry</h2>
-      <div class="field"><label for="ne-title">Title</label><input id="ne-title" type="text" required /></div>
-      <div class="field"><label for="ne-outcome">One-line summary</label><textarea id="ne-outcome" rows="3" required></textarea></div>
-      <p class="hint">The entry starts hidden from the site. Fill in the rest, then untick "Hide this entry from the site".</p>
-      <p class="status bad" id="ne-msg" role="alert"></p>
-      <div class="adder"><button class="btn primary" type="submit">Create</button><button class="btn" type="button" id="ne-cancel">Cancel</button></div>
-    </form>
-  </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
   <script is:inline define:vars={{ SPEC, MODE, AUTHED: authed }}>
@@ -168,6 +166,8 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       for (const kid of kids.flat()) if (kid != null && kid !== false) n.append(kid.nodeType ? kid : document.createTextNode(kid));
       return n;
     };
+    // like replaceChildren, but a missing piece (null/false) is skipped instead of being written out as the word "null"
+    const fill = (node, ...kids) => node.replaceChildren(...kids.flat().filter((k) => k != null && k !== false));
     let toastTimer;
     const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 5000); };
     let uid = 0; const nextId = () => 'f' + ++uid;
@@ -204,8 +204,10 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       $('#mode').textContent = MODE === 'local files' ? 'Test mode: saving to local files' : 'Saving to ' + MODE;
       await loadFiles();
       const first = location.hash.slice(1);
-      const hit = first && [...files.pages, ...files.entries].find((f) => f.path === decodeURIComponent(first));
-      if (hit) openDoc(hit.path, hit.kind || 'work', hit.id);
+      const wantsContact = first.endsWith('~contact');
+      const want = decodeURIComponent(wantsContact ? first.slice(0, -8) : first);
+      const hit = wantsContact ? files.contact : first && [...files.pages, files.site].find((f) => f.path === want);
+      if (hit) openDoc(hit.path, wantsContact ? 'contact' : hit.kind, hit.id);
     }
 
     async function loadFiles() {
@@ -215,37 +217,23 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     }
 
     // ---- sidebar ----
-    let filterText = '';
+    // The Site details and the Contact Page are two forms on the same file, so a path alone does not say which is open.
+    const isOpen = (path, kind) => !!cur && cur.path === path && (cur.kind === 'contact') === (kind === 'contact');
     function drawSide() {
       const side = $('#side');
       const mk = (path, label, kind, id, extra, move) => el('li', {},
-        el('div', { class: 'row' + (cur && cur.path === path ? ' on' : '') },
-          el('button', { class: 'open', type: 'button', onclick: () => openDoc(path, kind, id), 'aria-current': cur && cur.path === path ? 'true' : false }, label),
+        el('div', { class: 'row' + (isOpen(path, kind) ? ' on' : '') },
+          el('button', { class: 'open', type: 'button', onclick: () => openDoc(path, kind, id), 'aria-current': isOpen(path, kind) ? 'true' : false }, label),
           extra,
           move ? el('span', { class: 'ctl' }, el('button', { class: 'mv', type: 'button', 'aria-label': 'Move up', onclick: () => move(-1) }, '↑'), el('button', { class: 'mv', type: 'button', 'aria-label': 'Move down', onclick: () => move(1) }, '↓')) : null));
       const menu = files.pages.filter((p) => p.kind === 'section');
       side.replaceChildren(
+        el('h2', { text: 'Site' }),
+        el('ul', {}, mk(files.site.path, files.site.label, 'site', 'site'), mk(files.contact.path, files.contact.label, 'contact', 'contact')),
         el('h2', { text: 'Pages' }),
         el('ul', {}, files.pages.map((p) => mk(p.path, p.label, p.kind, p.id, p.draft ? el('span', { class: 'tag', text: 'hidden' }) : null,
           p.kind === 'section' ? (d) => moveInList('sections', menu, p.id, d) : null))),
-        el('h2', { text: 'Entries' }),
-        el('p', { class: 'hint', text: 'The cards and their popups. Their order here is their order on every card grid.' }),
-        el('input', { class: 'filter', type: 'search', placeholder: 'Find an entry…', 'aria-label': 'Find an entry', value: filterText, oninput: (e) => { filterText = e.target.value; drawEntries(); } }),
-        el('button', { class: 'btn small', type: 'button', onclick: newEntry }, '+ New entry'),
-        el('ul', { id: 'entries' }),
-        el('h2', { text: 'Site' }),
-        el('ul', {}, mk(files.site.path, files.site.label, 'site', 'site')),
       );
-      drawEntries();
-    }
-    function drawEntries() {
-      const ul = $('#entries'); if (!ul) return;
-      const q = filterText.trim().toLowerCase();
-      ul.replaceChildren(...files.entries.filter((e) => !q || (e.title + ' ' + e.org).toLowerCase().includes(q)).map((e) =>
-        el('li', {}, el('div', { class: 'row' + (cur && cur.path === e.path ? ' on' : '') },
-          el('button', { class: 'open', type: 'button', title: e.org ? e.title + ' (' + e.org + ')' : e.title, onclick: () => openDoc(e.path, 'work', e.id) }, e.title),
-          e.draft ? el('span', { class: 'tag', text: 'hidden' }) : null,
-          q ? null : el('span', { class: 'ctl' }, el('button', { class: 'mv', type: 'button', 'aria-label': 'Move up', onclick: () => moveInList('work', files.entries, e.id, -1) }, '↑'), el('button', { class: 'mv', type: 'button', 'aria-label': 'Move down', onclick: () => moveInList('work', files.entries, e.id, 1) }, '↓'))))));
     }
     async function moveInList(kind, list, id, d) {
       const i = list.findIndex((x) => x.id === id), j = i + d;
@@ -263,28 +251,26 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       if (dirty && !confirm('You have unsaved changes. Leave without saving?')) return;
       const r = await api('/api/edit/doc?path=' + encodeURIComponent(path));
       if (!r.ok) { toast(r.data.error || 'Could not open that.'); return; }
-      dirty = false;
-      cur = { ...r.data, kind: r.data.kind === 'page' ? 'page:' + kind : r.data.kind, id };
-      history.replaceState(null, '', '#' + encodeURIComponent(path));
-      drawSide(); drawEditor();
+      dirty = false; cardStore.clear();
+      cur = { ...r.data, kind: r.data.kind === 'page' ? 'page:' + kind : kind === 'contact' ? 'contact' : r.data.kind, id };
+      history.replaceState(null, '', '#' + encodeURIComponent(path) + (kind === 'contact' ? '~contact' : ''));
+      drawSide(); drawEditor(); restoreView();
     }
 
     const viewUrl = () => {
       if (cur.kind === 'page:home') return '/';
       if (cur.kind === 'page:about') return '/about';
       if (cur.kind === 'page:section') return '/projects/' + cur.id;
-      if (cur.kind === 'work') { const s = (cur.data.sections || [])[0]; return s ? '/projects/' + s + '#' + cur.id : null; }
       return null;
     };
 
     function drawEditor() {
       const main = $('#main');
-      const titles = { 'page:home': 'Home', 'page:about': 'About', 'page:section': cur.data.navLabel, work: cur.data.title || 'Entry', site: 'Site details' };
+      const titles = { 'page:home': 'Home', 'page:about': 'About', 'page:section': cur.data.navLabel, site: 'Site details', contact: 'Contact Page' };
       const url = viewUrl();
       const body = el('div', { class: 'body', id: 'form' });
       if (cur.kind.startsWith('page:')) body.append(pageForm());
-      else if (cur.kind === 'work') body.append(entryForm());
-      else body.append(group(SPEC.site, cur.data, { target: 'page-image' }));
+      else body.append(group(cur.kind === 'contact' ? SPEC.contact : SPEC.site, cur.data, { target: 'page-image' }));
       body.addEventListener('input', touch); body.addEventListener('change', touch);
       main.replaceChildren(
         el('div', { class: 'bar' },
@@ -343,10 +329,12 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
           const sub = obj[f.key] || (obj[f.key] = {});
           return el('fieldset', { class: 'obj' }, el('legend', { text: f.label }), group(f.fields, sub, ctx));
         }
+        case 'group':
+          return el('fieldset', { class: 'obj' }, el('legend', { text: f.label }), group(f.fields, obj, ctx));
         case 'image': return imageField(f, obj, ctx);
         case 'list': return listField(f, obj, ctx);
         case 'strings': return stringsField(f, obj);
-        case 'picks': return picksField(f, obj);
+        case 'cards': return cardsField(f, obj);
       }
       return el('div');
     }
@@ -376,15 +364,14 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
             obj[f.key] = r.data.reference; touch(); draw(); toast('Picture added. Describe it below, then Save.');
           } catch (err) { toast('Could not read that picture.'); }
         } });
-        box.replaceChildren(
+        fill(box, 
           el('span', { class: 'lbl', text: f.label }),
           el('div', { class: 'pic' }, thumb, el('div', {},
             el('div', { class: 'acts' },
               el('label', { class: 'btn small', for: id }, src ? 'Replace picture' : 'Choose picture'), file,
               src ? el('button', { class: 'btn small danger', type: 'button', onclick: () => { delete obj[f.key]; if (f.altKey) delete obj[f.altKey]; touch(); draw(); } }, 'Remove') : null),
-            src ? el('div', { class: 'path', text: src }) : null,
-            src && f.altKey ? el('div', { class: 'field' }, el('label', { for: id + 'a', text: 'Describe the picture in a few words (for people who cannot see it)' }),
-              el('textarea', { id: id + 'a', rows: 2, oninput: (e) => (obj[f.altKey] = e.target.value) }, obj[f.altKey] ?? '')) : null)),
+            src && f.altKey ? el('div', { class: 'field' }, el('label', { for: id + 'a', text: 'Alt text' }),
+              el('input', { id: id + 'a', type: 'text', value: obj[f.altKey] ?? '', oninput: (e) => (obj[f.altKey] = e.target.value) })) : null)),
           f.hint ? el('div', { class: 'hint', text: f.hint }) : null);
       };
       draw();
@@ -410,7 +397,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       const wrap = el('div', { class: 'field' });
       let openIndex = -1;
       const draw = () => {
-        wrap.replaceChildren(el('span', { class: 'lbl', text: f.label }), f.hint ? el('div', { class: 'hint', text: f.hint }) : null);
+        fill(wrap, el('span', { class: 'lbl', text: f.label }), f.hint ? el('div', { class: 'hint', text: f.hint }) : null);
         arr.forEach((item, i) => {
           const name = () => (f.itemTitle && item[f.itemTitle]) || (f.itemName || 'item') + ' ' + (i + 1);
           const t = el('span', { class: 't', text: name() });
@@ -445,20 +432,83 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       return wrap;
     }
 
-    function picksField(f, obj) {
+    // ---- cards live inside the Card Grid that lists them ----
+    // A card is its own file, so one card can be listed in several grids (and changes show everywhere), but it is added,
+    // opened, edited and reordered right here in the grid. Save writes the changed cards first, then the page.
+    const cardStore = new Map();   // card id -> { id, path, data, body, sha, loaded, isNew, dirty, title }
+    let newCardCount = 0;
+    const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
+    function cardState(id) {
+      let st = cardStore.get(id);
+      if (!st) {
+        const info = files.entries.find((e) => e.id === id);
+        st = { id, path: 'src/content/work/' + id + '.md', title: info ? info.title : id, loaded: false, isNew: false, dirty: false, data: null, body: '', sha: null };
+        cardStore.set(id, st);
+      }
+      return st;
+    }
+    const thisPageLabel = () => (files.pages.find((p) => p.path === cur.path) || {}).label;
+
+    function cardBody(st) {
+      const others = ((files.entries.find((e) => e.id === st.id) || {}).usedOn || []).filter((l) => l !== thisPageLabel());
+      const wid = nextId();
+      return el('div', { class: 'grp' },
+        others.length ? el('p', { class: 'hint', text: 'This card is also shown on ' + others.join(' and ') + ', so changes here appear there too.' }) : null,
+        group(SPEC.entry, st.data, { target: 'work-image' }),
+        el('div', { class: 'field' }, el('label', { for: wid, text: 'Write-up (shown in the popup, under the summary)' }),
+          el('textarea', { id: wid, class: 'md', rows: 18, oninput: (e) => (st.body = e.target.value) }, st.body || ''),
+          el('div', { class: 'hint', text: 'A line starting with ### makes a subheading. A blank line starts a new paragraph. [words](address) makes a link.' })));
+    }
+
+    function cardsField(f, obj) {
       const arr = obj[f.key] || (obj[f.key] = []);
       const wrap = el('div', { class: 'field' });
-      const titleOf = (id) => (files.entries.find((e) => e.id === id) || { title: id + ' (not found)' }).title;
+      let openId = null;
       const draw = () => {
-        wrap.replaceChildren(el('span', { class: 'lbl', text: f.label }));
-        arr.forEach((id, i) => {
-          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); draw(); };
-          wrap.append(el('div', { class: 'adder' }, el('span', { style: 'flex:1', text: titleOf(id) }),
-            el('span', { class: 'ctl' }, el('button', { type: 'button', 'aria-label': 'Move up', onclick: () => move(-1) }, '↑'), el('button', { type: 'button', 'aria-label': 'Move down', onclick: () => move(1) }, '↓'), el('button', { type: 'button', 'aria-label': 'Remove', onclick: () => { arr.splice(i, 1); touch(); draw(); } }, '×'))));
+        const sel = el('select', { 'aria-label': 'Add an existing card' }, el('option', { value: '' }, 'Add an existing card…'),
+          files.entries.filter((e) => !arr.includes(e.id)).map((e) => el('option', { value: e.id }, e.title)));
+        sel.addEventListener('change', () => { if (sel.value) { arr.push(sel.value); openId = null; touch(); draw(); } });
+        const head = el('div', { class: 'block-head' }, el('span', { class: 'lbl', text: f.label }),
+          el('div', { class: 'bar-add' }, sel, el('button', { class: 'btn small', type: 'button', onclick: () => {
+            const id = 'new-card-' + ++newCardCount;
+            cardStore.set(id, { id, path: '', title: '', loaded: true, isNew: true, dirty: true, data: { title: '', outcome: '', role: '', org: '', dates: '' }, body: '', sha: null });
+            arr.push(id); openId = id; touch(); draw();
+          } }, '+ New card')));
+        const items = arr.map((id, i) => {
+          const st = cardState(id);
+          const name = () => ((st.data ? st.data.title : st.title) || '').trim() || 'New card';
+          const t = el('span', { class: 't', text: name() });
+          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); openId = id; draw(); };
+          const remove = () => {
+            if (!confirm('Take "' + name() + '" out of this grid? The card itself is kept, and you can add it again from the menu.')) return;
+            arr.splice(i, 1); if (st.isNew) cardStore.delete(id); touch(); openId = null; draw();
+          };
+          const inner = el('div', { class: 'in' });
+          const d = el('details', { class: 'card', open: id === openId },
+            el('summary', {}, t,
+              el('span', { class: 'ctl' },
+                el('button', { type: 'button', 'aria-label': 'Move card up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
+                el('button', { type: 'button', 'aria-label': 'Move card down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
+                el('button', { type: 'button', 'aria-label': 'Take card out of this grid', onclick: (e) => { e.preventDefault(); remove(); } }, '×'))),
+            inner);
+          const show = async () => {
+            if (inner.firstChild) return;
+            if (!st.loaded) {
+              inner.textContent = 'Loading…';
+              const r = await api('/api/edit/doc?path=' + encodeURIComponent(st.path));
+              if (!r.ok) { inner.textContent = r.data.error || 'Could not open this card.'; return; }
+              st.data = r.data.data; st.body = r.data.body; st.sha = r.data.sha; st.loaded = true;
+            }
+            inner.replaceChildren(cardBody(st));
+            t.textContent = name();
+          };
+          d.addEventListener('toggle', () => { if (d.open) show(); });
+          if (d.open) show();
+          const mark = () => { st.dirty = true; t.textContent = name(); };
+          inner.addEventListener('input', mark); inner.addEventListener('change', mark);
+          return d;
         });
-        const sel = el('select', { 'aria-label': 'Add an entry' }, el('option', { value: '' }, 'Add an entry…'), files.entries.filter((e) => !arr.includes(e.id)).map((e) => el('option', { value: e.id }, e.title)));
-        sel.addEventListener('change', () => { if (sel.value) { arr.push(sel.value); touch(); draw(); } });
-        wrap.append(el('div', { class: 'adder' }, sel));
+        fill(wrap, head, items.length ? items : el('p', { class: 'hint', text: 'No cards yet. Add an existing card or make a new one.' }));
       };
       draw();
       return wrap;
@@ -468,17 +518,16 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     function pageForm() {
       const isSection = cur.kind === 'page:section';
       const top = [
-        { key: isSection ? 'navLabel' : 'title', label: isSection ? 'Name in the menu and browser tab' : 'Page name (browser tab)', type: 'text' },
-        { key: 'description', label: 'Search-result description (optional)', type: 'textarea', rows: 2, hint: 'Leave empty to use the first paragraph on the page.' },
+        { key: isSection ? 'navLabel' : 'title', label: isSection ? 'Page Title (also the menu name)' : 'Page Title', type: 'text' },
         ...(isSection ? [{ key: 'draft', label: 'Hide this page from the site and menu', type: 'bool' }] : []),
       ];
-      const wrap = el('div', { class: 'grp' }, group(top, cur.data, {}), el('h3', { text: 'Blocks, top to bottom' }));
+      const wrap = el('div', { class: 'grp' }, group(top, cur.data, {}));
       const list = el('div', { class: 'grp' });
       const blocks = cur.data.blocks || (cur.data.blocks = []);
       let openIndex = -1;
       const drawBlocks = () => {
         list.replaceChildren();
-        if (!blocks.length) list.append(el('p', { class: 'hint', text: 'This page has no blocks yet. Add one below.' }));
+        if (!blocks.length) list.append(el('p', { class: 'hint', text: 'This page has no blocks yet. Add one with the menu beside Block List.' }));
         blocks.forEach((b, i) => {
           const spec = SPEC.blocks[b.type]; if (!spec) return;
           const t = el('span', { class: 't', text: b.headline || b.title || spec.label });
@@ -496,19 +545,30 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       };
       drawBlocks();
       const typeSel = el('select', { id: 'new-block-type', 'aria-label': 'Kind of block to add' }, Object.entries(SPEC.blocks).map(([k, v]) => el('option', { value: k }, v.label)));
-      wrap.append(list, el('div', { class: 'addbar' },
-        el('div', { class: 'adder' }, el('label', { for: 'new-block-type', class: 'lbl', text: 'Add a block at the bottom:' }), typeSel,
-          el('button', { class: 'btn', type: 'button', onclick: () => { blocks.push(structuredClone(SPEC.blocks[typeSel.value].defaults)); touch(); openIndex = blocks.length - 1; drawBlocks(); } }, '+ Add block')),
-        el('p', { class: 'hint', text: 'Use the arrows on a block to move it up or down the page.' })));
+      // The heading looks like the other field labels; the add-a-block controls sit beside it.
+      const head = el('div', { class: 'block-head' }, el('span', { class: 'lbl', text: 'Block List' }),
+        el('div', { class: 'bar-add' }, typeSel,
+          el('button', { class: 'btn small', type: 'button', onclick: () => { blocks.push(structuredClone(SPEC.blocks[typeSel.value].defaults)); touch(); openIndex = blocks.length - 1; drawBlocks(); } }, '+ Add block')));
+      wrap.append(head, list);
       return wrap;
     }
 
-    // ---- an entry: its fields, then its write-up ----
-    function entryForm() {
-      const writeUp = el('div', { class: 'field' }, el('label', { for: 'writeup', text: 'Write-up (shown in the popup, under the summary)' }),
-        el('textarea', { id: 'writeup', class: 'md', rows: 22, oninput: (e) => (cur.body = e.target.value) }, cur.body || ''),
-        el('div', { class: 'hint', text: 'A line starting with ### makes a subheading. A blank line starts a new paragraph. [words](address) makes a link.' }));
-      return el('div', { class: 'grp' }, group(SPEC.entry, cur.data, { target: 'work-image' }), writeUp);
+    // On the dev server the page reloads after a save. Remember which blocks were open and how far down you were, so you land
+    // back in the same place (and still see the "Saved" message).
+    const VIEW = 'edit-view';
+    function rememberView() {
+      try {
+        const open = [...document.querySelectorAll('#form details')].map((d, i) => (d.open ? i : -1)).filter((i) => i >= 0);
+        sessionStorage.setItem(VIEW, JSON.stringify({ path: cur.path, open, y: window.scrollY, at: Date.now(), msg: $('#toast').textContent }));
+      } catch {}
+    }
+    function restoreView() {
+      try {
+        const v = JSON.parse(sessionStorage.getItem(VIEW) || 'null'); sessionStorage.removeItem(VIEW);
+        if (!v || v.path !== cur.path || Date.now() - v.at > 20000) return;
+        const all = document.querySelectorAll('#form details'); v.open.forEach((i) => { if (all[i]) all[i].open = true; });
+        window.scrollTo(0, v.y); setStatus('Saved'); if (v.msg) toast(v.msg);
+      } catch {}
     }
 
     // ---- save ----
@@ -526,9 +586,48 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       return v;
     }
 
+    const showProblems = (list) => {
+      const box = $('#problems-box');
+      setStatus('Not saved.', true);
+      box.hidden = false;
+      box.replaceChildren(el('ul', { class: 'problems', role: 'alert' }, list.map((p) => el('li', { text: p }))));
+      box.scrollIntoView({ block: 'nearest' });
+    };
+
+    // Writes the cards that were added or changed inside this page's Card Grids. Returns a list of problems (empty = all saved).
+    async function saveCards() {
+      const problems = [];
+      const blocks = (cur.data.blocks || []).filter((b) => b.type === 'cards');
+      const ids = [...new Set(blocks.flatMap((b) => b.entries || []))];
+      for (const id of ids) {
+        const st = cardStore.get(id);
+        if (!st || !st.loaded || !(st.dirty || st.isNew)) continue;
+        const name = (st.data.title || '').trim() || 'New card';
+        const data = prune(st.data) || {};
+        let r, real = id;
+        if (st.isNew) {
+          const slug = slugify(st.data.title || '');
+          if (!slug) { problems.push('A new card needs a title.'); continue; }
+          real = slug; for (let n = 2; files.entries.some((e) => e.id === real) || (cardStore.has(real) && real !== id); n++) real = slug + '-' + n;
+          r = await api('/api/edit/doc', { method: 'POST', body: { path: 'src/content/work/' + real + '.md', data, body: st.body || '' } });
+        } else {
+          r = await api('/api/edit/doc', { method: 'PUT', body: { path: st.path, data, body: st.body || '', sha: st.sha } });
+        }
+        if (!r.ok) { problems.push(...[r.data.error, ...(r.data.problems || [])].filter(Boolean).map((p) => 'Card "' + name + '": ' + p)); continue; }
+        st.sha = r.data.sha; st.dirty = false;
+        if (st.isNew) {
+          cardStore.delete(id); st.isNew = false; st.id = real; st.path = 'src/content/work/' + real + '.md'; cardStore.set(real, st);
+          for (const b of blocks) b.entries.forEach((x, i) => { if (x === id) b.entries[i] = real; });
+        }
+      }
+      return problems;
+    }
+
     async function save() {
       if (!cur) return;
       const btn = $('#save'); btn.disabled = true; setStatus('Saving…');
+      const cardProblems = cur.kind.startsWith('page:') ? await saveCards() : [];
+      if (cardProblems.length) { btn.disabled = false; showProblems(cardProblems); return; }
       const data = prune(cur.data) || {};
       if (cur.kind.startsWith('page:')) data.blocks = data.blocks || [];
       const r = await api('/api/edit/doc', { method: 'PUT', body: { path: cur.path, data, body: cur.body || '', sha: cur.sha } });
@@ -538,29 +637,13 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
         cur.sha = r.data.sha; dirty = false; box.hidden = true; box.replaceChildren();
         setStatus('Saved');
         toast(MODE === 'local files' ? 'Saved to your local files.' : 'Saved. The live site updates in about a minute.');
+        rememberView();
         await loadFiles();
       } else {
-        setStatus(r.data.error || 'Not saved.', true);
-        box.hidden = false;
-        box.replaceChildren(el('ul', { class: 'problems', role: 'alert' }, [r.data.error ? el('li', { text: r.data.error }) : null, ...(r.data.problems || []).map((p) => el('li', { text: p }))]));
-        box.scrollIntoView({ block: 'nearest' });
+        showProblems([r.data.error, ...(r.data.problems || [])].filter(Boolean));
       }
     }
 
-    // ---- a new entry ----
-    const dlg = $('#new-entry');
-    function newEntry() { if (dirty && !confirm('You have unsaved changes. Leave without saving?')) return; $('#new-entry-form').reset(); $('#ne-msg').textContent = ''; dlg.showModal(); $('#ne-title').focus(); }
-    $('#ne-cancel')?.addEventListener('click', () => dlg.close());
-    $('#new-entry-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const title = $('#ne-title').value.trim();
-      const id = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
-      if (!id) { $('#ne-msg').textContent = 'Give it a title with some letters or numbers.'; return; }
-      const data = { title, outcome: $('#ne-outcome').value.trim(), role: '', org: '', dates: '', sections: [], draft: true };
-      const r = await api('/api/edit/doc', { method: 'POST', body: { path: `src/content/work/${id}.md`, data, body: '' } });
-      if (!r.ok) { $('#ne-msg').textContent = [r.data.error, ...(r.data.problems || [])].filter(Boolean).join(' '); return; }
-      dlg.close(); dirty = false; await loadFiles(); openDoc(`src/content/work/${id}.md`, 'work', id);
-    });
   </script>
 </body>
 </html>

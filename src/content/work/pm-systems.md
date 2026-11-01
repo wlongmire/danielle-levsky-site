@@ -4,8 +4,6 @@ outcome: Determined team assignments, bandwidth, and how to best delegate existi
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: pm-systems-1.png

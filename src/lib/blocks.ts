@@ -4,8 +4,18 @@
 import { z } from 'astro/zod';
 import type { ImageMetadata } from 'astro';
 
-/** Where a Card Grid block gets its entries: every entry tagged for that section page, or a hand-picked list. */
-export const CARD_SOURCES = ['ld-portfolio', 'dei', 'digital-humanities', 'picks'] as const;
+/** Where a hero picture is cropped to when it is cut down to the portrait frame. '' (Automatic) keeps the site's default. */
+export const CROPS = {
+  '': { label: 'Automatic', position: undefined },
+  top: { label: 'Top', position: '50% 0%' },
+  upper: { label: 'Upper middle', position: '50% 30%' },
+  center: { label: 'Center', position: '50% 50%' },
+  bottom: { label: 'Bottom', position: '50% 100%' },
+  left: { label: 'Left', position: '0% 50%' },
+  right: { label: 'Right', position: '100% 50%' },
+} as const;
+export const CROP_KEYS = Object.keys(CROPS).filter(Boolean) as [string, ...string[]];
+
 
 const link = z.object({ label: z.string(), url: z.string() });
 
@@ -13,17 +23,15 @@ const link = z.object({ label: z.string(), url: z.string() });
 export const blocksSchema = (image: () => z.ZodType<ImageMetadata>) =>
   z.array(
     z.discriminatedUnion('type', [
-      // Headline, paragraph(s), optional button(s), optional picture or logo.
+      // Headline, paragraph(s), optional button(s), optional picture.
       z.object({
         type: z.literal('hero'),
         headline: z.string(),
         intro: z.string().default(''),                  // a blank line starts a new paragraph
-        cta: link.optional(),                           // the main button; url "#contact" opens the contact popup
-        showCv: z.boolean().default(false),             // a second, outlined button for the CV link in site.json
+        buttons: z.array(link).default([]),             // the first is the main button, the rest are outlined; url "#contact" opens the contact popup
         image: image().optional(),
         imageAlt: z.string().optional(),
-        imagePosition: z.string().optional(),           // where a wide picture is cropped to, e.g. "46% 30%"
-        logo: z.object({ src: image(), alt: z.string(), url: z.string().optional() }).optional(), // shown whole beside the text
+        imageCrop: z.enum(CROP_KEYS).optional(),        // where the picture is cropped to (see CROPS)
         featured: z.boolean().default(false),           // the big home-page look: taller, on a panel, with a picture slot
       }),
       // A headline over a list of items that open and close.
@@ -36,8 +44,7 @@ export const blocksSchema = (image: () => z.ZodType<ImageMetadata>) =>
       z.object({
         type: z.literal('cards'),
         title: z.string().optional(),
-        source: z.enum(CARD_SOURCES),
-        entries: z.array(z.string()).default([]),       // for source "picks": the entry names, in the order shown
+        entries: z.array(z.string()).default([]),       // the cards (file names in src/content/work), in the order shown; one card can be in several grids
         groupByOrg: z.boolean().default(false),         // true = under a heading for each entry's `org`
       }),
       // Text (Markdown) with optional pictures beside it.
@@ -54,9 +61,9 @@ export type Block = z.infer<ReturnType<typeof blocksSchema>>[number];
 
 /** What the /edit forms show for each block type (a name and a one-line hint). */
 export const BLOCK_TYPES = {
-  hero: { label: 'Hero', hint: 'A headline, a short paragraph, optional buttons and a picture or logo.' },
+  hero: { label: 'Hero', hint: 'A headline, a short paragraph, optional buttons and a picture.' },
   overview: { label: 'Overview list', hint: 'A heading over a list of items that open and close.' },
-  cards: { label: 'Card grid', hint: 'Boxes for portfolio entries; each opens a popup.' },
+  cards: { label: 'Card grid', hint: 'Boxes for portfolio cards; each opens a popup.' },
   text: { label: 'Text and pictures', hint: 'Longer text with optional pictures beside it.' },
 } as const;
 

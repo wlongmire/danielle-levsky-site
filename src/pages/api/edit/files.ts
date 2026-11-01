@@ -13,8 +13,8 @@ const front = (text: string | undefined): any => {
   try { return yamlLoad(parts.fm, { schema: JSON_SCHEMA }) ?? {}; } catch { return {}; }
 };
 
-// What the sidebar shows: the pages (home, about, then the menu pages in menu order), every entry in its site order,
-// and the site details.
+// What the sidebar and the card pickers need: the pages (home, about, then the menu pages in menu order), every card by title
+// (with the pages whose Card Grids list it), and the site details.
 export const GET: APIRoute = async ({ request }) => {
   const blocked = guard(request);
   if (blocked) return blocked;
@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ request }) => {
     const sectionFiles = (await list('src/content/sections')).filter((f) => f.name.endsWith('.md'));
     const sections = await Promise.all(sectionFiles.map(async (f) => {
       const d = front((await read(f.path))?.text);
-      return { id: f.name.replace(/\.md$/, ''), path: f.path, label: d.navLabel || f.name, draft: !!d.draft, data: {} as { order?: number } };
+      return { id: f.name.replace(/\.md$/, ''), path: f.path, label: d.navLabel || f.name, draft: !!d.draft, data: {} as { order?: number }, blocks: (d.blocks ?? []) as any[] };
     }));
     const menu = sortByOrder(sections, 'sections', order).map(({ id, path, label, draft }) => ({ id, path, label, draft, kind: 'section' }));
     const pages = [
@@ -35,14 +35,24 @@ export const GET: APIRoute = async ({ request }) => {
       ...menu,
     ];
 
+    // Which pages list each card, so the card form can say when a change will show up in more than one place.
+    const usedOn = new Map<string, string[]>();
+    const noteUse = (label: string, blocks: any[]) => {
+      for (const b of blocks) if (b?.type === 'cards' && Array.isArray(b.entries))
+        for (const id of b.entries) usedOn.set(id, [...new Set([...(usedOn.get(id) ?? []), label])]);
+    };
+    for (const s of sections) noteUse(s.label, s.blocks);
+    for (const id of ['home', 'about']) noteUse(id === 'home' ? 'Home' : 'About', front((await read(`src/content/pages/${id}.md`))?.text).blocks ?? []);
+
     const entryFiles = (await list('src/content/work')).filter((f) => f.name.endsWith('.md'));
     const entries = await Promise.all(entryFiles.map(async (f) => {
       const d = front((await read(f.path))?.text);
-      return { id: f.name.replace(/\.md$/, ''), path: f.path, title: d.title || f.name, org: d.org || '', sections: d.sections ?? [], draft: !!d.draft, data: {} as { order?: number } };
+      const id = f.name.replace(/\.md$/, '');
+      return { id, path: f.path, title: d.title || f.name, org: d.org || '', draft: !!d.draft, usedOn: usedOn.get(id) ?? [] };
     }));
-    const sortedEntries = sortByOrder(entries, 'work', order).map(({ id, path, title, org, sections, draft }) => ({ id, path, title, org, sections, draft }));
+    const sortedEntries = entries.sort((a, b) => a.title.localeCompare(b.title));
 
-    return json({ mode: storageMode(), pages, entries: sortedEntries, site: { path: 'src/data/site.json', label: 'Site details' } });
+    return json({ mode: storageMode(), pages, entries: sortedEntries, site: { path: 'src/data/site.json', label: 'Site details' }, contact: { path: 'src/data/site.json', label: 'Contact Page' } });
   } catch (e: any) {
     return json({ error: e.message ?? 'Could not load the file list.' }, 502);
   }

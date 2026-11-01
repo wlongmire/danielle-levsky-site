@@ -4,8 +4,6 @@ outcome: Set up initial system, trained, and integrated 30+ members into perform
 role: ''
 org: eighty2i
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Led the end-to-end implementation of Lattice as eighty2i's performance management platform, enabling effective tracking, feedback, and goal alignment for personal and professional growth.

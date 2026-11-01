@@ -4,8 +4,6 @@ outcome: Translated meeting notes, business decisions, and emerging requirements
 role: ''
 org: Baker Tilly
 dates: ''
-sections:
-  - ld-portfolio
 confidential: true
 ---
 

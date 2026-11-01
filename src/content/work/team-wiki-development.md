@@ -4,8 +4,6 @@ outcome: Overhauled team wiki to show protocols, proces es, and resources for pe
 role: ''
 org: Meta
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Served as instrumental sole developer and owner of the Enterprise Learning Operations team wiki, executing a comprehensive overhaul to improve information accessibility, user experience, and onboarding efficiency.

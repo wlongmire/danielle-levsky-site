@@ -4,8 +4,6 @@ outcome: Wrote, developed, and presented webinars as a thought leader in the fie
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: benchprep-webinar-1.jpg

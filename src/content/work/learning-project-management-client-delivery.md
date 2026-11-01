@@ -4,8 +4,6 @@ outcome: Managed end-to-end delivery of custom learning solutions for Fortune 50
 role: ''
 org: Judge Learning Solutions
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Served as Project Manager responsible for all aspects of assigned client programs, managing relationships, project execution, quality assurance, and team coordination across custom eLearning, instructor-led training, and blended learning solutions.

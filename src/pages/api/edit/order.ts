@@ -7,7 +7,7 @@ export const prerender = false;
 // Saves the order of entries (their order on every card grid) or of the menu pages, as one small file so it is one
 // change in the history. The other lists in the file are left exactly as they were.
 const DIRS: Record<string, string> = { work: 'src/content/work', sections: 'src/content/sections' };
-const NAMES: Record<string, string> = { work: 'the entries', sections: 'the menu pages' };
+const NAMES: Record<string, string> = { work: 'the cards', sections: 'the menu pages' };
 
 export const PUT: APIRoute = async ({ request }) => {
   const blocked = guard(request, { change: true });

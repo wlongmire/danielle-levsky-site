@@ -4,8 +4,6 @@ outcome: Created testing structures, ownership models, and sign-off frameworks t
 role: ''
 org: Baker Tilly
 dates: ''
-sections:
-  - ld-portfolio
 confidential: true
 ---
 

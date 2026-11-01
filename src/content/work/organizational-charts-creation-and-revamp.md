@@ -4,8 +4,6 @@ outcome: 'Updated and development organizational charts: traditional and account
 role: ''
 org: eighty2i
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Led the comprehensive redesign of eighty2i's organizational structure documentation to improve team transparency and role clarity across the growing strategic growth services firm.

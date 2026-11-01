@@ -4,8 +4,6 @@ outcome: Co-led large scale multi-phase audit of 300+ piece learning portfolio b
 role: ''
 org: Comcast (Effectv)
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Spearheaded a comprehensive audit initiative providing stakeholders with critical visibility into course health, impact, and rationalization opportunities across Comcast Effectv’s online learning catalog.

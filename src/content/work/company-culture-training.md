@@ -4,8 +4,6 @@ outcome: Created, designed, and revamped SMS Assist’s company culture training
 role: ''
 org: SMS Assist
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: company-culture-training-1.png

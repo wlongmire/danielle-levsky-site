@@ -4,12 +4,12 @@ blocks:
   - type: hero
     headline: Empower your team through strategic learning
     intro: Learning and development programs are key to building high-performing teams and nurturing talent within your organization. My expertise in instructional design, project management, and operations enables me to provide customized solutions tailored to your business needs.
-    cta:
-      label: Get in touch
-      url: '#contact'
+    buttons:
+      - label: Get in touch
+        url: '#contact'
     image: ../../assets/consulting/consulting-1.jpeg
     imageAlt: Danielle Levsky with long red hair, looking down as she types on a vintage typewriter in a dark room
-    imagePosition: 46% 30%
+    imageCrop: upper
   - type: overview
     title: What I offer
     items:

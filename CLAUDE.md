@@ -41,13 +41,13 @@ Left over from the template and not used by any page yet: `Timeline.astro`, `Res
 `src/data/mockCards.ts`, the `timeline` collection. Remove or reuse once the structure settles.
 
 ## Content model (Danielle edits these by hand)
-- `src/content/work/*.md`: one file per portfolio entry (card and popup). `sections:` lists the section pages that show it
-  (`ld-portfolio`, `dei`, `digital-humanities`); an entry in two sections is still one file.
+- `src/content/work/*.md`: one file per portfolio entry (card and popup). /edit calls these "Cards"; the files, code and this guide still say "entry". A card has no page of its own: a Card Grid
+  block lists the cards it shows (`entries:`, in order), so a card listed in two grids is still one file.
   On the L&D Portfolio page each entry is one asset box from her old site (title, one-line `outcome`, the full write-up as the
   body, pictures in `media`). `org` is the position heading the box sits under (`groupCards: true` in that section's file turns
   the headings on); `role` and `dates` are left empty. The text is her old site's, word for word. The picture alt text there is a
   generic placeholder ("Picture 2 of 7 from ...") until she describes each one.
-- `src/content/pages/home.md`, `about.md` and `src/content/sections/<slug>.md`: one file per page. Each is a page name (`title`, or `navLabel` for section pages; `draft: true` hides a section page), an optional `description`, and an ordered `blocks:` list. Block types (defined once in `src/lib/blocks.ts`, drawn by `components/PageBlocks.astro`): `hero` (headline, intro, `cta`, `showCv`, `image`/`imageAlt`/`imagePosition`, `logo`, `featured`), `overview` (title, items), `cards` (title, `source` = a section or `picks` with `entries`, `groupByOrg`), `text` (title, Markdown `body`, `photos`). Pictures live in `src/assets/pages/` (uploads from /edit) or the older `src/assets/<page>/` folders. Menu order is `sections` in `src/data/order.json`.
+- `src/content/pages/home.md`, `about.md` and `src/content/sections/<slug>.md`: one file per page. Each is a page name (`title`, or `navLabel` for section pages; `draft: true` hides a section page), an optional `description`, and an ordered `blocks:` list. Block types (defined once in `src/lib/blocks.ts`, drawn by `components/PageBlocks.astro`): `hero` (headline, intro, `buttons` (first is the main one, the rest outlined; `#contact` opens the contact popup), `image`/`imageAlt`/`imageCrop` (where the picture is cropped to: top, upper, center, bottom, left, right; a picture more than 2.5 times wider than tall, like a logo, is shown whole instead of cropped), `featured`), `overview` (title, items), `cards` (title, `source` = a section or `picks` with `entries`, `groupByOrg`), `text` (title, Markdown `body`, `photos`). Pictures live in `src/assets/pages/` (uploads from /edit) or the older `src/assets/<page>/` folders. Menu order is `sections` in `src/data/order.json`.
 - `public/resumes/*.pdf`: resumes (not wired to a page yet; her CV is a Google Doc link in `site.json`)
 
 Entry front matter:
@@ -71,13 +71,15 @@ Body sections, in order: Context, Approach, What I built, Outcome, Reflection.
 `/edit` (password-protected, content only) saves to GitHub, which redeploys the site; with no `GITHUB_TOKEN` and on the dev server it
 writes local files, and `devBypass()` in `auth.ts` skips the password there (localhost only). It runs as a few on-demand routes via
 `@astrojs/vercel`; every public page stays static. The screen is `src/pages/edit/index.astro`: sidebar of Pages (Home, About, each
-section page), Entries (cards and popups: edit, add as hidden drafts, reorder) and Site details. A page opens as its ordered blocks, which can be
-edited, added, removed and reordered. The forms are drawn from field lists in `src/lib/editor/forms.ts`, data goes through
-`src/pages/api/edit/doc.ts` (one endpoint for pages, entries and site) and is checked in `src/lib/editor/rules.ts` (`validatePage`,
+section page), Site details and the Contact Page. A page opens as its ordered blocks, which can be
+edited, added, removed and reordered. Cards are made, edited and reordered inside the Card Grid block that lists them (there is no
+card list in the sidebar); Save writes the changed cards, then the page. A grid can also add an existing card, which is how one card
+appears in several grids. The forms are drawn from field lists in `src/lib/editor/forms.ts`, data goes through
+`src/pages/api/edit/doc.ts` (one endpoint for pages, cards and site) and is checked in `src/lib/editor/rules.ts` (`validatePage`,
 `validateMarkdown`). Setup and safety rules: `EDITING.md` (partly out of date: still describes the old raw-Markdown editor). Site-wide
-details live in `src/data/site.json`. The order of entries and menu lives in `src/data/order.json`.
+details live in `src/data/site.json`. The menu order lives in `src/data/order.json` (its old `work` list is no longer used; a grid's own list sets card order).
 To teach /edit a new field: add it to `blocks.ts` or `content.config.ts`, to `forms.ts`, and to the checks in `rules.ts`.
-Not editable there: creating new pages, the `timeline` collection, resumes, the contact form endpoint. Saving an entry rewrites its
+Not editable there: creating new pages, the `timeline` collection, resumes, the contact form endpoint. Saving a card rewrites its
 front matter in tidy YAML (same data, different style). In dev, saving triggers a page reload.
 
 ## Rules

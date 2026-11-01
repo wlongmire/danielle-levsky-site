@@ -4,8 +4,6 @@ outcome: Worked with the learning team to analyze instructional outcomes and pro
 role: ''
 org: SMS Assist
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 During my time working at SMS Assist, I worked collaboratively with the training team to analyze instructional outcomes and provide expertise in the planning, development, and delivery of high-quality learning experiences.

@@ -4,8 +4,6 @@ outcome: This project proposal sought to provide an online website that would fu
 role: Graduate project
 org: Digital Humanities Projects
 dates: ''
-sections:
-  - digital-humanities
 tools: []
 tracks: []
 media:

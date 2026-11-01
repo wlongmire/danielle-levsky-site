@@ -4,8 +4,6 @@ outcome: Supported evaluation of OCR and vision-language model approaches by foc
 role: ''
 org: Baker Tilly
 dates: ''
-sections:
-  - ld-portfolio
 confidential: true
 ---
 

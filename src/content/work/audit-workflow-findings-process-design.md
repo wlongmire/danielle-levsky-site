@@ -4,8 +4,6 @@ outcome: Mapped complex audit review workflows, escalation paths, user roles, an
 role: ''
 org: Baker Tilly
 dates: ''
-sections:
-  - ld-portfolio
 confidential: true
 ---
 

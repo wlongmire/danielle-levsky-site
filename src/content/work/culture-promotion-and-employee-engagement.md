@@ -4,8 +4,6 @@ outcome: Transparently communicated with employees about cross-company updates, 
 role: ''
 org: eighty2i
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Drove engagement and retention through proactive culture-focused initiatives that fostered team connection and aligned employees with company vision.

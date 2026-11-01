@@ -4,8 +4,6 @@ outcome: Updated and improved on role-specific onboarding training materials.
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: learning-technologist-onboarding-training-1.png

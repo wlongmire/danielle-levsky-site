@@ -4,8 +4,6 @@ outcome: Organized complex trade-related requirements into scoped, testable, imp
 role: ''
 org: Baker Tilly
 dates: ''
-sections:
-  - ld-portfolio
 confidential: true
 ---
 

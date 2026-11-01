@@ -4,8 +4,6 @@ outcome: Forged trusted partnership with sales SMEs to create comprehensive, ble
 role: ''
 org: Comcast (Effectv)
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Led optimization and content development for the Automotive Learning Journey, Comcast Effectv’s marquee skills development offering for sales representatives selling advertising solutions to automotive dealerships.

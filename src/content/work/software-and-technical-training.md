@@ -4,8 +4,6 @@ outcome: Created, designed, revamped, and/or redesigned web-based trainings and 
 role: ''
 org: SMS Assist
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 During my time working at SMS Assist, I created, designed revamped, and/or redesigned web-based trainings and instructor-led trainings that focused on technical knowledge and abilities required for success at the organization.

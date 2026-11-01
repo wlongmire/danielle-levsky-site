@@ -4,7 +4,7 @@ import { load as yamlLoad } from 'js-yaml';
 import { MAX_TEXT_BYTES } from './config';
 import { shaOf } from './storage';
 import { resumes } from '../../data/resumes';
-import { CARD_SOURCES } from '../blocks';
+import { CROPS } from '../blocks';
 
 export type Kind = 'work' | 'timeline' | 'page' | 'site';
 
@@ -24,8 +24,6 @@ export function previewablePath(path: string): boolean {
 export const canCreate = (path: string) => kindOf(path) === 'work';   // new entries only; pages are not created here
 
 export const TRACKS = ['learning-design', 'teaching', 'engineering', 'design-ux'];
-/** The section pages an entry can be shown on (the Card Grid block's sources, minus hand-picked). */
-export const SECTIONS = CARD_SOURCES.filter((x) => x !== 'picks') as string[];
 
 export function splitFrontMatter(text: string): { fm: string; body: string } | null {
   const m = text.replace(/\r\n/g, '\n').match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -98,8 +96,6 @@ export async function validateMarkdown(path: string, text: string): Promise<stri
     if (d.order !== undefined && typeof d.order !== 'number') errors.push('"order" must be a number.');
     if (d.draft !== undefined && typeof d.draft !== 'boolean') errors.push('"draft" must be true or false.');
     if (d.confidential !== undefined && typeof d.confidential !== 'boolean') errors.push('"confidential" must be true or false.');
-    if (d.sections !== undefined && (!Array.isArray(d.sections) || d.sections.some((x: unknown) => !SECTIONS.includes(x as string))))
-      errors.push(`"sections" may only contain: ${SECTIONS.join(', ')}.`);
     pairList('artifacts'); pairList('links');
     await checkMedia(d.media);   // pictures and YouTube videos shown in the popup
     if (d.images !== undefined) {
@@ -137,7 +133,7 @@ export async function validatePage(path: string, data: any): Promise<string[]> {
   const pic = async (where: string, src: unknown, alt: unknown) => {
     if (!isStr(src)) return;
     if (!(await assetExists(path, src))) errors.push(`${where}: the picture "${src}" has not been uploaded.`);
-    if (!isStr(alt)) errors.push(`${where}: describe the picture in a few words (the alt text).`);
+    if (!isStr(alt)) errors.push(`${where}: add alt text for the picture.`);
   };
   const button = (where: string, b: any) => {
     if (b === undefined) return;
@@ -152,19 +148,14 @@ export async function validatePage(path: string, data: any): Promise<string[]> {
     switch (b.type) {
       case 'hero':
         if (!isStr(b.headline)) errors.push(`${at} (Hero): the headline is required.`);
-        strs(['intro', 'imageAlt', 'imagePosition']);
-        button(`${at} (Hero) main button`, b.cta);
-        if (b.showCv !== undefined && typeof b.showCv !== 'boolean') errors.push(`${at}: the CV button must be on or off.`);
-        if (b.featured !== undefined && typeof b.featured !== 'boolean') errors.push(`${at}: the big style must be on or off.`);
-        if (b.imagePosition && !/^\d{1,3}%\s+\d{1,3}%$/.test(b.imagePosition)) errors.push(`${at}: the crop position looks like "46% 30%" (left/right, then top/bottom).`);
-        await pic(`${at} (Hero) picture`, b.image, b.imageAlt);
-        if (b.logo !== undefined) {
-          if (!isObj(b.logo) || !isStr(b.logo.src)) errors.push(`${at}: the logo needs a picture.`);
-          else {
-            await pic(`${at} (Hero) logo`, b.logo.src, b.logo.alt);
-            if (b.logo.url && !/^https?:\/\/\S+$/.test(b.logo.url)) errors.push(`${at}: the logo's link must start with http:// or https://.`);
-          }
+        strs(['intro', 'imageAlt']);
+        if (b.buttons !== undefined) {
+          if (!Array.isArray(b.buttons) || b.buttons.length > 4) errors.push(`${at} (Hero): the buttons must be a list of at most 4.`);
+          else b.buttons.forEach((btn: any, n: number) => button(`${at} (Hero) button ${n + 1}`, btn));
         }
+        if (b.featured !== undefined && typeof b.featured !== 'boolean') errors.push(`${at}: the big style must be on or off.`);
+        if (b.imageCrop !== undefined && b.imageCrop !== '' && !Object.hasOwn(CROPS, b.imageCrop)) errors.push(`${at}: pick one of the picture cropping choices.`);
+        await pic(`${at} (Hero) picture`, b.image, b.imageAlt);
         if (isStr(b.intro) && /<\s*(script|iframe|object|embed)\b/i.test(b.intro)) errors.push(`${at}: the text may not contain <script>, <iframe>, <object> or <embed>.`);
         break;
       case 'overview':
@@ -179,12 +170,9 @@ export async function validatePage(path: string, data: any): Promise<string[]> {
         break;
       case 'cards':
         strs(['title']);
-        if (!CARD_SOURCES.includes(b.source)) errors.push(`${at} (Card grid): choose where the cards come from.`);
         if (b.groupByOrg !== undefined && typeof b.groupByOrg !== 'boolean') errors.push(`${at}: grouping must be on or off.`);
-        if (b.source === 'picks') {
-          if (!Array.isArray(b.entries) || b.entries.length === 0) errors.push(`${at} (Card grid): pick at least one entry.`);
-          else for (const id of b.entries) if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(id) || (await shaOf(`src/content/work/${id}.md`)) === null) errors.push(`${at}: the entry "${id}" does not exist.`);
-        }
+        if (!Array.isArray(b.entries) || b.entries.length === 0) errors.push(`${at} (Card grid): add at least one card.`);
+        else for (const id of b.entries) if (typeof id !== 'string' || !/^[a-z0-9][a-z0-9-]*$/.test(id) || (await shaOf(`src/content/work/${id}.md`)) === null) errors.push(`${at}: the card "${id}" does not exist.`);
         break;
       case 'text':
         strs(['title', 'body']);
@@ -215,10 +203,12 @@ export function validateSite(text: string, current: string | null): { errors: st
     errors.push('Each link needs a label and a web address starting with http:// or https:// (or leave the address empty to hide it).');
   if (!Array.isArray(d.contactReasons) || d.contactReasons.length < 1 || d.contactReasons.length > 12 || !d.contactReasons.every((r: unknown) => isStr(r) && (r as string).length <= 80))
     errors.push('Add between 1 and 12 contact reasons (80 characters at most each).');
+  for (const [k, max] of [['contactTitle', 80], ['contactThanks', 300]] as const)
+    if (!isStr(d[k]) || d[k].length > max) errors.push(`The contact popup needs ${k === 'contactTitle' ? 'a heading' : 'a line shown after a message is sent'} (${max} characters at most).`);
   // Keep the contact-form address exactly as it is, whatever the browser sent.
   let endpoint = '';
   try { endpoint = JSON.parse(current ?? '{}').contactEndpoint ?? ''; } catch {}
-  const clean = { name: d.name, email: d.email, links: d.links, contactEndpoint: endpoint, contactReasons: d.contactReasons };
+  const clean = { name: d.name, email: d.email, links: d.links, contactEndpoint: endpoint, contactTitle: d.contactTitle, contactThanks: d.contactThanks, contactReasons: d.contactReasons };
   return { errors, text: JSON.stringify(clean, null, 2) + '\n' };
 }
 

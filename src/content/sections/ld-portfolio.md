@@ -4,9 +4,9 @@ blocks:
   - type: hero
     headline: Training solutions that drive measurable business results
     intro: With a decade of experience in Learning & Development, I design and deliver training solutions that drive measurable business results, from reducing onboarding time by 40% to boosting sales proficiency by 30% to increasing learner engagement by 35%. I take an omni-channel approach, architecting blended and microlearning experiences that balance scale with customization.
-    cta:
-      label: Work with me
-      url: /projects/ld-consulting
+    buttons:
+      - label: Work with me
+        url: /projects/ld-consulting
   - type: overview
     title: Top positions
     items:
@@ -96,6 +96,37 @@ blocks:
           Cognitive Arts develops bespoke learning and training programs, recognized as the largest global provider of learning design and development services.
   - type: cards
     title: Project Assets
-    source: ld-portfolio
+    entries:
+      - pmo-requirements-backlog-alignment
+      - qa-qc-uat-process-design
+      - audit-workflow-findings-process-design
+      - client-portal-guides-uat-walkthroughs
+      - regulatory-requirements-translation
+      - ocr-vlm-evaluation-audit-ready-data-requirements
+      - learning-project-management-client-delivery
+      - aos-user-guide-training
+      - global-course-audit-assessment
+      - auto-industry-curriculum-architecture
+      - organizational-charts-creation-and-revamp
+      - quick-start-onboarding-experience
+      - culture-promotion-and-employee-engagement
+      - communication-guidelines-process-refinement
+      - performance-management-system-creation
+      - csod-configuration-analysis
+      - documentation-procedures-session-demand-planning-process-optimization
+      - team-wiki-development
+      - department-intake-process-evaluation
+      - learning-technologist-onboarding-training
+      - course-program-improvements-and-management
+      - company-team-onboarding-training-plan
+      - training-study-plan
+      - benchprep-webinar
+      - coaching-mentoring
+      - pm-systems
+      - managing-and-training-content-review-freelancers
+      - software-and-technical-training
+      - standard-operating-procedures-for-training-teams
+      - company-culture-training
+      - auto-and-property-insurance-course
     groupByOrg: true
 ---

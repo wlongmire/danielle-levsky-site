@@ -4,8 +4,6 @@ outcome: Created templates and processes for building new company-wide team onbo
 role: ''
 org: BenchPrep
 dates: ''
-sections:
-  - ld-portfolio
 media:
   - type: image
     src: company-team-onboarding-training-plan-1.png

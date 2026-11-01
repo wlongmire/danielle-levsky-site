@@ -4,8 +4,6 @@ outcome: Uncovered workflow inconsistencies and proposed solutions across groups
 role: ''
 org: Meta
 dates: ''
-sections:
-  - ld-portfolio
 ---
 
 Conducted comprehensive process analysis examining Desktop Procedures (DTP) creation workflows and Session Demand Planning processes across three distinct organizational "Stacks" (Recruiting/PM/Peeps, L&D, and Tech Learning) to identify standardization opportunities and improve operational efficiency.
