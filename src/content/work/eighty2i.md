@@ -2,7 +2,7 @@
 title: "eighty2i"
 outcome: "Built and managed the Teammate Success team: learning programs, the performance management process, onboarding, and DEI initiatives that fostered belonging and inclusivity."
 role: "Head of Teammate Success"
-org: "eighty2i"
+org: "DEI Projects"
 dates: ""
 sections: [dei]
 tools: ["Lattice", "Notion"]

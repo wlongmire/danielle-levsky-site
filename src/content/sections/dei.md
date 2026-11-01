@@ -8,5 +8,6 @@ overview:
     text: "An interactive series where we invite successful entrepreneurs to share their experiences, challenges, and insights."
   - title: "Celebration posts"
     text: "Unique and meaningful DEI posts for celebrations like Juneteenth, Pride Month, Filipino Independence Day, and the Fourth of July, fostering understanding and open discussion."
-cardsTitle: "Details"
+# true = the cards sit in a dark panel under a heading (each entry's `org`)
+groupCards: true
 ---
