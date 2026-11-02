@@ -8,9 +8,9 @@ export const passwordConfigured = () => !!env('EDIT_PASSWORD');
 
 /** Local testing only: on the dev server, from this computer, with no GitHub token set (so saves go to the local files),
     /edit opens without a password. It is switched off in every built or deployed copy (import.meta.env.DEV is false there),
-    and whenever a GITHUB_TOKEN is set or the page is reached from another address. */
+    and whenever a GITHUB_TOKEN is set, EDIT_REQUIRE_PASSWORD is set, or the page is reached from another address. */
 export function devBypass(request: Request): boolean {
-  if (!import.meta.env.DEV || env('GITHUB_TOKEN')) return false;
+  if (!import.meta.env.DEV || env('GITHUB_TOKEN') || env('EDIT_REQUIRE_PASSWORD')) return false;   // EDIT_REQUIRE_PASSWORD: the test suite checks the sign-in itself
   try { return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(request.url).hostname); } catch { return false; }
 }
 

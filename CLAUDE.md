@@ -85,6 +85,12 @@ To teach /edit a new field: add it to `blocks.ts` or `content.config.ts`, to `fo
 Not editable there: creating new pages, the `timeline` collection, resumes, the contact form endpoint. Saving a card rewrites its
 front matter in tidy YAML (same data, different style). In dev, saving triggers a page reload.
 
+## Tests
+`tests/` is a separate Playwright project (README inside). `npm test` here (or in `tests/`) runs about 100 checks in about three minutes
+against a throwaway copy of the project, so real content and GitHub are never touched. It covers the public pages, popups with their
+addresses, the contact popup, phone layout, and the `/edit` API and screens. Run it before committing changes to blocks, cards, `/edit`
+or the popup, and add a test with each new block type or field. `EDIT_REQUIRE_PASSWORD=1` turns off the localhost sign-in shortcut (the tests set it).
+
 ## Rules
 - Keep content editable by a non-developer: never hard-code entry text in components.
 - Never invent facts about Danielle's work. Take wording only from her own site, CV or LinkedIn, or from her. If a detail is missing, leave a `TODO:` in the Markdown and ask. Some of her work is proprietary: show described or recreated examples, never confidential artifacts.

@@ -180,6 +180,9 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     let toastTimer;
     const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 5000); };
     let uid = 0; const nextId = () => 'f' + ++uid;
+    // Which list items, cards and blocks are open, so redrawing a list (after a move, add or remove) keeps each one as it was.
+    const opened = new WeakSet();
+    const track = (d, o) => { if (d.open) opened.add(o); d.addEventListener('toggle', () => (d.open ? opened.add(o) : opened.delete(o))); };
 
     async function api(path, { method = 'GET', body, form } = {}) {
       const res = await fetch(path, {
@@ -412,14 +415,15 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
         arr.forEach((item, i) => {
           const name = () => (f.itemTitle && item[f.itemTitle]) || (f.itemName || 'item') + ' ' + (i + 1);
           const t = el('span', { class: 't', text: name() });
-          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); openIndex = j; draw(); };
-          const d = el('details', { class: 'card', open: i === openIndex },
+          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); draw(); };
+          const d = el('details', { class: 'card', open: i === openIndex || opened.has(item) },
             el('summary', {}, t,
               el('span', { class: 'ctl' },
                 el('button', { type: 'button', 'aria-label': 'Move up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
                 el('button', { type: 'button', 'aria-label': 'Move down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
                 el('button', { type: 'button', 'aria-label': 'Remove', onclick: (e) => { e.preventDefault(); if (confirm('Remove this ' + (f.itemName || 'item') + '?')) { arr.splice(i, 1); touch(); openIndex = -1; draw(); } } }, '×'))),
             el('div', { class: 'in' }, group(f.fields, item, ctx)));
+          track(d, item);
           d.addEventListener('input', () => { t.textContent = name(); });
           wrap.append(d);
         });
@@ -490,19 +494,20 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
           const st = cardState(id);
           const name = () => ((st.data ? st.data.title : st.title) || '').trim() || 'New card';
           const t = el('span', { class: 't', text: name() });
-          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); openId = id; draw(); };
+          const move = (d) => { const j = i + d; if (j < 0 || j >= arr.length) return; [arr[i], arr[j]] = [arr[j], arr[i]]; touch(); draw(); };
           const remove = () => {
             if (!confirm('Take "' + name() + '" out of this grid? The card itself is kept, and you can add it again from the menu.')) return;
             arr.splice(i, 1); if (st.isNew) cardStore.delete(id); touch(); openId = null; draw();
           };
           const inner = el('div', { class: 'in' });
-          const d = el('details', { class: 'card', open: id === openId },
+          const d = el('details', { class: 'card', open: id === openId || opened.has(st) },
             el('summary', {}, t,
               el('span', { class: 'ctl' },
                 el('button', { type: 'button', 'aria-label': 'Move card up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
                 el('button', { type: 'button', 'aria-label': 'Move card down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
                 el('button', { type: 'button', 'aria-label': 'Take card out of this grid', onclick: (e) => { e.preventDefault(); remove(); } }, '×'))),
             inner);
+          track(d, st);
           const show = async () => {
             if (inner.firstChild) return;
             if (!st.loaded) {
@@ -556,14 +561,15 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
         blocks.forEach((b, i) => {
           const spec = SPEC.blocks[b.type]; if (!spec) return;
           const t = el('span', { class: 't', text: b.headline || b.title || spec.label });
-          const move = (d) => { const j = i + d; if (j < 0 || j >= blocks.length) return; [blocks[i], blocks[j]] = [blocks[j], blocks[i]]; touch(); openIndex = j; drawBlocks(); };
-          const d = el('details', { class: 'card block', open: i === openIndex || blocks.length === 1 },
+          const move = (d) => { const j = i + d; if (j < 0 || j >= blocks.length) return; [blocks[i], blocks[j]] = [blocks[j], blocks[i]]; touch(); drawBlocks(); };
+          const d = el('details', { class: 'card block', open: i === openIndex || blocks.length === 1 || opened.has(b) },
             el('summary', {}, el('span', { class: 'k', text: spec.label }), t,
               el('span', { class: 'ctl' },
                 el('button', { type: 'button', 'aria-label': 'Move block up', onclick: (e) => { e.preventDefault(); move(-1); } }, '↑'),
                 el('button', { type: 'button', 'aria-label': 'Move block down', onclick: (e) => { e.preventDefault(); move(1); } }, '↓'),
                 el('button', { type: 'button', 'aria-label': 'Remove block', onclick: (e) => { e.preventDefault(); if (confirm('Remove this ' + spec.label + ' block from the page?')) { blocks.splice(i, 1); touch(); openIndex = -1; drawBlocks(); } } }, '×'))),
             el('div', { class: 'in' }, el('div', { class: 'demo-row' }, demo(b.type), el('p', { class: 'hint', text: spec.hint })), group(spec.fields, b, { target: 'page-image' })));
+          track(d, b);
           d.addEventListener('input', () => { t.textContent = b.headline || b.title || spec.label; });
           list.append(d);
         });

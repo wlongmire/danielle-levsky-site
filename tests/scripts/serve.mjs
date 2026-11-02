@@ -23,6 +23,7 @@ const astro = path.join(COPY, 'node_modules', '.bin', 'astro');
 const env = {
   ...process.env,
   EDIT_PASSWORD: PASSWORD,
+  EDIT_REQUIRE_PASSWORD: '1',   // the dev shortcut that skips the password on localhost is off, so the sign-in tests mean something
   GITHUB_TOKEN: '',          // empty = the editor saves to the local copy, never to GitHub
   GITHUB_REPO: '', GITHUB_BRANCH: '',
   ASTRO_TELEMETRY_DISABLED: '1',
