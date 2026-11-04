@@ -9,6 +9,7 @@ They live in their own folder with their own `package.json`, so the site and its
 cd tests
 npm install              # first time only
 npm run install-browsers # first time only, if Playwright says it has no browser (~100 MB)
+                         # or skip it and use the Chrome you already have: PW_CHANNEL=chrome npm test
 npm test                 # everything (about 3 minutes)
 npm run test:site        # public site (desktop and phone)
 npm run test:editor      # the /edit page and its API

@@ -134,6 +134,8 @@ test.describe('a page and its blocks', () => {
     await expect(block(page, 0)).not.toHaveAttribute('open', '');
     await block(page, 0).getByRole('button', { name: 'Move block down' }).click();
     await expect(page.locator('details.card.block[open]')).toHaveCount(0);   // moving a closed block does not open it
+    await expect(block(page, 1)).toHaveClass(/moved/);                       // the moved block flashes where it lands
+    await expect(page.locator(':focus')).toHaveAttribute('aria-label', 'Move block down');   // keyboard focus stays on the arrow
     await head(page, 1).click();
     await block(page, 1).getByRole('button', { name: 'Move block up' }).click();
     await expect(block(page, 0)).toHaveAttribute('open', '');                // and an open one stays open where it lands
@@ -251,6 +253,13 @@ test.describe('cards inside a Card Grid', () => {
     await cards.nth(1).getByRole('button', { name: 'Move card up' }).click();
     await expect(cards.nth(0)).toHaveAttribute('open', '');
     await expect(cards.nth(1)).not.toHaveAttribute('open', '');
+  });
+
+  test('moving a menu page in the sidebar flashes it', async ({ page }) => {
+    await openEditor(page);
+    const row = page.locator('#side li').filter({ has: page.locator('button.open', { hasText: sections[0].navLabel }) });
+    await row.locator('button[aria-label="Move down"]').click({ force: true });
+    await expect(page.locator('#side li.moved')).toContainText(sections[0].navLabel);   // (the dev server reloads the page once the order is saved, so focus is not checked here)
   });
 
   test('a card shared by two grids says so', async ({ page }) => {

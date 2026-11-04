@@ -11,7 +11,8 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   reporter: [['list'], ['html', { open: 'never' }]],
-  use: { baseURL: BASE_URL, trace: 'retain-on-failure', screenshot: 'only-on-failure' },
+  // PW_CHANNEL=chrome runs the tests in the Google Chrome you already have, instead of the browser Playwright downloads.
+  use: { baseURL: BASE_URL, trace: 'retain-on-failure', screenshot: 'only-on-failure', ...(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {}) },
   webServer: {
     command: 'node scripts/serve.mjs',
     url: BASE_URL,
