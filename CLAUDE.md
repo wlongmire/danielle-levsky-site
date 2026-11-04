@@ -82,6 +82,7 @@ appears in several grids. The forms are drawn from field lists in `src/lib/edito
 details live in `src/data/site.json`. The menu order lives in `src/data/order.json` (its old `work` list is no longer used; a grid's own list sets card order).
 Each block's form opens with a small drawing of that block type (`DEMOS` in `src/pages/edit/index.astro`); a new block type needs a drawing there too.
 Moving a block, card, list item or menu page with its arrows goes through `motion()` in `index.astro`: the others slide, the moved one flashes, the page scrolls to keep it under the pointer and focus returns to the arrow (reduced motion: flash only). Use it for any new reorderable list.
+`EDIT_OPEN=1` (an environment variable, off by default; see `.env.example`) turns the password off on a deployed copy for demos. It makes `/edit` public, so never leave it on together with a real `GITHUB_TOKEN`.
 To teach /edit a new field: add it to `blocks.ts` or `content.config.ts`, to `forms.ts`, and to the checks in `rules.ts`.
 Not editable there: creating new pages, the `timeline` collection, resumes, the contact form endpoint. Saving a card rewrites its
 front matter in tidy YAML (same data, different style). In dev, saving triggers a page reload.

@@ -4,14 +4,14 @@
 // (the cards and their popups) and the site details. Saves become commits on GitHub, which redeploy the site; on your own
 // computer, with no GitHub token, they write straight to the local files. The forms are drawn from src/lib/editor/forms.ts.
 import '../../styles/tokens.css';
-import { devBypass, isAuthed, passwordConfigured } from '../../lib/editor/auth';
+import { devBypass, editOpen, isAuthed, passwordConfigured } from '../../lib/editor/auth';
 import { storageMode } from '../../lib/editor/storage';
 import { BLOCK_FORMS, CONTACT_FIELDS, ENTRY_FIELDS, SITE_FIELDS } from '../../lib/editor/forms';
 
 export const prerender = false;
 
 const authed = isAuthed(Astro.request);
-const setupNeeded = !passwordConfigured() && !devBypass(Astro.request);
+const setupNeeded = !passwordConfigured() && !devBypass(Astro.request) && !editOpen();
 const SPEC = { blocks: BLOCK_FORMS, entry: ENTRY_FIELDS, site: SITE_FIELDS, contact: CONTACT_FIELDS };
 const MODE = storageMode();
 Astro.response.headers.set('Cache-Control', 'no-store');

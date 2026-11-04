@@ -14,6 +14,10 @@ export function devBypass(request: Request): boolean {
   try { return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(request.url).hostname); } catch { return false; }
 }
 
+/** Demo switch: with EDIT_OPEN=1 set (for example in Vercel's environment variables), /edit needs no password, for anyone who can
+    reach it. If a GITHUB_TOKEN is also set, anyone can then change the live site's content. Remove EDIT_OPEN to lock it again. */
+export const editOpen = () => env('EDIT_OPEN') === '1' && !env('EDIT_REQUIRE_PASSWORD');
+
 const sha = (s: string) => createHash('sha256').update(s).digest();
 
 // The signing key is derived from the password, so changing the password signs everyone out.
@@ -47,7 +51,7 @@ function readCookie(header: string | null): string | null {
 }
 
 export function isAuthed(request: Request): boolean {
-  if (devBypass(request)) return true;
+  if (devBypass(request) || editOpen()) return true;
   if (!passwordConfigured()) return false;
   const token = readCookie(request.headers.get('cookie'));
   if (!token) return false;
