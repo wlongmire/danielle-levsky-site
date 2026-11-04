@@ -81,7 +81,7 @@ appears in several grids. The forms are drawn from field lists in `src/lib/edito
 `validateMarkdown`). Setup and safety rules: `EDITING.md` (partly out of date: still describes the old raw-Markdown editor). Site-wide
 details live in `src/data/site.json`. The menu order lives in `src/data/order.json` (its old `work` list is no longer used; a grid's own list sets card order).
 Each block's form opens with a small drawing of that block type (`DEMOS` in `src/pages/edit/index.astro`); a new block type needs a drawing there too.
-Moving a block, card, list item or menu page with its arrows goes through `motion()` in `index.astro`: the others slide, the moved one flashes, the page scrolls to keep it under the pointer and focus returns to the arrow (reduced motion: flash only). Use it for any new reorderable list.
+Moving a block, card, list item or menu page with its arrows goes through `motion()` in `index.astro`: the others slide, the moved one gets a `moved` class for a second (no visible style; the amber glow was removed as too much), the page scrolls to keep it under the pointer and focus returns to the arrow (reduced motion: no slide, so only the scroll and focus show where it went). Use it for any new reorderable list.
 `EDIT_OPEN=1` (an environment variable, off by default; see `.env.example`) turns the password off on a deployed copy for demos. It makes `/edit` public, so never leave it on together with a real `GITHUB_TOKEN`.
 To teach /edit a new field: add it to `blocks.ts` or `content.config.ts`, to `forms.ts`, and to the checks in `rules.ts`.
 Not editable there: creating new pages, the `timeline` collection, resumes, the contact form endpoint. Saving a card rewrites its

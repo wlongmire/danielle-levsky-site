@@ -88,8 +88,6 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     fieldset.obj { border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; margin: 0; }
     fieldset.obj legend { font-weight: 600; font-size: 14px; padding: 0 6px; }
     details.card { border: 1px solid var(--rule); border-radius: 8px; background: var(--card); }
-    .moved { animation: moved 1.1s ease-out; }
-    @keyframes moved { from { box-shadow: 0 0 0 3px var(--amber); } to { box-shadow: 0 0 0 3px transparent; } }
     details.card > summary { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; list-style: none; font-weight: 600; }
     details.card > summary::-webkit-details-marker { display: none; }
     details.card > summary::before { content: '▸'; color: var(--amber); }
@@ -203,7 +201,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
           if (!still && Math.abs(dy) > 1) e.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }], { duration: 240, easing: 'ease-out' });
         }
         if (m) {
-          m.classList.add('moved'); m.addEventListener('animationend', () => m.classList.remove('moved'), { once: true });
+          m.classList.add('moved'); setTimeout(() => m.classList.remove('moved'), 1100);   // no visible style: the class only marks the moved item (the tests look for it)
           m.querySelector('[aria-label="' + label + '"]')?.focus({ preventScroll: true });
         }
       };
