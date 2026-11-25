@@ -159,7 +159,7 @@ const nav = built.map((n) => ('group' in n && n.items.length === 1 ? n.items[0] 
   .b .site-nav a[aria-current] { color: var(--amber); background: linear-gradient(var(--amber), var(--amber)) 0 calc(100% - 6px) / 100% 2px no-repeat; }
   /* Dropdown (a menu group): a button that opens a small list of pages under it. Without JavaScript the button hides and its pages show as plain links in the row. */
   .b .nav-group { position: relative; }
-  .b .nav-group-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 10px 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+  .b .nav-group-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 10px 0; border: 0; border-bottom: 2px solid transparent; background: none; color: inherit; font: inherit; cursor: pointer; }   /* the 2px border matches the plain links, so the words line up */
   .b .nav-group-btn:hover, .b .nav-group-btn[aria-expanded='true'] { color: var(--amber); }
   .b .nav-group-btn[data-current] { color: var(--amber); background: linear-gradient(var(--amber), var(--amber)) 0 calc(100% - 6px) / 100% 2px no-repeat; }
   .b .nav-group-btn .chev { width: 11px; height: 7px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
