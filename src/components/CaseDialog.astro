@@ -67,7 +67,8 @@ function youtubeId(url: string): string | null {
         </div>
       )}
 
-      <p class="cs-outcome">{d.outcome}</p>
+      {/* The summary can run to several paragraphs: a blank line in it starts a new one. */}
+      {d.outcome.split(/\n\s*\n/).map((p: string) => p.trim()).filter(Boolean).map((p: string) => <p class="cs-outcome">{p}</p>)}
       <div class="cs-text"><Content /></div>
 
       {artifacts.length > 0 && (

@@ -7,6 +7,9 @@ const { title, cases, boxed = false, below = false, uid = '' } = Astro.props;
 // The subtitle (organization) sits under the card's title; inside a titled panel it is left out, since the panel's title already says it.
 const headed = boxed && !!title;
 const roleLine = (d: any) => (!headed && d.org && !d.title.includes(d.org) ? d.org : '');
+// A summary can run to several paragraphs (a blank line starts a new one). On the card they run together as one block of text,
+// which the four-line limit below then trims; the popup shows them as separate paragraphs.
+const summary = (text: string) => text.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean).join(' ');
 // A card only gets a "More info" button when there is something to open.
 const hasDetail = (e: any) => Boolean(e.body?.trim()) || e.data.media.length > 0 || e.data.images.length > 0 || e.data.artifacts.length > 0 || e.data.links.length > 0;
 
@@ -24,7 +27,7 @@ const Heading = title ? (below ? 'h4' : 'h3') : 'h3';
           <article class="card" id={entry.id}>
             <Heading class="card-title">{entry.data.title}</Heading>
             {roleLine(entry.data) && <p class="role">{roleLine(entry.data)}</p>}
-            <p class="outcome">{entry.data.outcome}</p>
+            <p class:list={['outcome', { clamp: hasDetail(entry) }]}>{summary(entry.data.outcome)}</p>
             {hasDetail(entry) && <button type="button" class="card-more" data-case={entry.id} aria-haspopup="dialog">More info</button>}
           </article>
         </li>
@@ -46,6 +49,8 @@ const Heading = title ? (below ? 'h4' : 'h3') : 'h3';
   .role { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
   .outcome { margin: 0 0 14px; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
   .card .outcome:last-child { margin-bottom: 0; }
+  /* A long summary stops after four lines with an ellipsis; the whole text is in the popup (More info). A card with nothing to open shows all of it. */
+  .outcome.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
   .card-more { margin-top: auto; align-self: flex-start; font: 600 14px var(--font-body); color: var(--amber); background: transparent; border: 1.5px solid var(--amber); border-radius: 6px; padding: 6px 14px; min-height: 40px; cursor: pointer; }
   .card-more:hover { background: var(--amber); color: var(--on-amber); }
   .card-more:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }

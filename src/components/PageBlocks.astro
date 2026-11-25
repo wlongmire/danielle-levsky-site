@@ -46,7 +46,7 @@ const firstTitled = blocks.findIndex((b) => b.type === 'hero' || (b.type === 'te
     case 'title':
       return <TitleBlock title={b.title} h1={i === firstTitled} uid={uid} />;
     case 'text':
-      return <TextBlock title={b.title} body={b.body} photos={b.photos} h1={i === firstTitled} />;
+      return <TextBlock title={b.title} body={b.body} photos={b.photos} h1={i === firstTitled} after={i > 0} />;
   }
 })}
 {popupCases.length > 0 && <CaseDialog cases={popupCases} />}

@@ -67,6 +67,7 @@ const sections = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/sections' }),
   schema: ({ image }) => z.object({
     navLabel: z.string(),
+    menuGroup: z.string().optional(),   // pages with the same name here share one dropdown in the menu (e.g. "Consulting")
     description: z.string().optional(),
     blocks: blocksSchema(image),
     draft: z.boolean().default(false),

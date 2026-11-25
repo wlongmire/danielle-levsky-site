@@ -1,5 +1,6 @@
 ---
 navLabel: L&D Consulting
+menuGroup: Consulting
 blocks:
   - type: hero
     headline: Empower your team through strategic learning

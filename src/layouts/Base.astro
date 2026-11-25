@@ -15,10 +15,19 @@ const { title, description } = Astro.props;
 const pageTitle = title ? `${title} | ${site.name}` : site.name;
 const sections = sortByOrder(await getCollection('sections', (e) => !e.data.draft), 'sections');
 const here = Astro.url.pathname.replace(/\/$/, '') || '/';
-const nav = [
-  { label: 'About', href: '/about' },
-  ...sections.map((s) => ({ label: s.data.navLabel, href: `/projects/${s.id}` })),
-];
+// The menu: About, then each section page in order. Pages that share a `menuGroup` name (set on /edit as "Dropdown name") sit together in
+// one dropdown, placed where the first of them comes in the order. A dropdown holding only one page is just a plain link.
+type Link = { label: string; href: string };
+type Item = Link | { group: string; items: Link[] };
+const built: Item[] = [{ label: 'About', href: '/about' }];
+for (const s of sections) {
+  const link = { label: s.data.navLabel, href: `/projects/${s.id}` };
+  const name = s.data.menuGroup?.trim();
+  if (!name) { built.push(link); continue; }
+  const open = built.find((n): n is { group: string; items: Link[] } => 'group' in n && n.group.toLowerCase() === name.toLowerCase());
+  if (open) open.items.push(link); else built.push({ group: name, items: [link] });
+}
+const nav = built.map((n) => ('group' in n && n.items.length === 1 ? n.items[0] : n));
 ---
 <!doctype html>
 <html lang="en">
@@ -48,7 +57,19 @@ const nav = [
         <span class="menu-label">Menu</span>
       </button>
       <nav id="site-nav" class="site-nav" aria-label="Main">
-        {nav.map((n) => <a href={n.href} aria-current={here === n.href ? 'page' : undefined}>{n.label}</a>)}
+        {nav.map((n, i) => 'group' in n ? (
+          <div class="nav-group">
+            <button type="button" class="nav-group-btn" aria-expanded="false" aria-controls={`nav-sub-${i}`} data-current={n.items.some((x) => x.href === here) ? '' : undefined}>
+              {n.group}
+              <svg class="chev" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" /></svg>
+            </button>
+            <ul id={`nav-sub-${i}`} class="nav-sub">
+              {n.items.map((x) => <li><a href={x.href} aria-current={here === x.href ? 'page' : undefined}>{x.label}</a></li>)}
+            </ul>
+          </div>
+        ) : (
+          <a href={n.href} aria-current={here === n.href ? 'page' : undefined}>{n.label}</a>
+        ))}
         <a class="btn" href={`mailto:${site.email}`} data-open-contact>Contact</a>
       </nav>
     </div>
@@ -78,17 +99,35 @@ const nav = [
     const header = document.querySelector<HTMLElement>('.site-header')!;
     const btn = header.querySelector<HTMLButtonElement>('.menu-btn')!;
     const label = btn.querySelector<HTMLElement>('.menu-label')!;
+    // Dropdowns (a menu group such as Consulting): the button opens and closes its list of pages. Only one is open at a time.
+    const groups = [...header.querySelectorAll<HTMLElement>('.nav-group')];
+    const setGroup = (g: HTMLElement, open: boolean) => {
+      g.toggleAttribute('data-open', open);
+      g.querySelector('button')!.setAttribute('aria-expanded', String(open));
+    };
+    const closeGroups = (except?: HTMLElement) => groups.forEach((g) => { if (g !== except) setGroup(g, false); });
+    groups.forEach((g) => {
+      g.querySelector('button')!.addEventListener('click', () => { const open = !g.hasAttribute('data-open'); closeGroups(g); setGroup(g, open); });
+      g.addEventListener('focusout', (e) => { if (!g.contains(e.relatedTarget as Node | null) && e.relatedTarget) setGroup(g, false); });
+    });
+    document.addEventListener('click', (e) => { if (!(e.target as Element).closest('.nav-group')) closeGroups(); });
+
     const setOpen = (open: boolean) => {
       header.toggleAttribute('data-open', open);
       btn.setAttribute('aria-expanded', String(open));
       label.textContent = open ? 'Close' : 'Menu';
+      if (!open) closeGroups();
     };
     btn.addEventListener('click', () => setOpen(!header.hasAttribute('data-open')));
     header.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && header.hasAttribute('data-open')) { setOpen(false); btn.focus(); }
+      if (e.key !== 'Escape') return;
+      // Escape closes an open dropdown first (focus returns to its button), then the phone menu.
+      const g = groups.find((x) => x.hasAttribute('data-open'));
+      if (g) { setGroup(g, false); g.querySelector('button')!.focus(); return; }
+      if (header.hasAttribute('data-open')) { setOpen(false); btn.focus(); }
     });
     // Choosing Contact opens its popup, so close the menu behind it.
-    header.querySelectorAll('[data-open-contact]').forEach((el) => el.addEventListener('click', () => setOpen(false)));
+    header.querySelectorAll('[data-open-contact]').forEach((el) => el.addEventListener('click', () => { closeGroups(); setOpen(false); }));
     // Growing past the phone layout resets it.
     matchMedia('(min-width: 770px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
   </script>
@@ -118,6 +157,21 @@ const nav = [
   .b .site-nav a:not(.btn):hover { color: var(--amber); }
   /* The selected page's underline is drawn as a background, a few pixels under the text (a border would sit at the bottom of the link's padding, further away). */
   .b .site-nav a[aria-current] { color: var(--amber); background: linear-gradient(var(--amber), var(--amber)) 0 calc(100% - 6px) / 100% 2px no-repeat; }
+  /* Dropdown (a menu group): a button that opens a small list of pages under it. Without JavaScript the button hides and its pages show as plain links in the row. */
+  .b .nav-group { position: relative; }
+  .b .nav-group-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 10px 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+  .b .nav-group-btn:hover, .b .nav-group-btn[aria-expanded='true'] { color: var(--amber); }
+  .b .nav-group-btn[data-current] { color: var(--amber); background: linear-gradient(var(--amber), var(--amber)) 0 calc(100% - 6px) / 100% 2px no-repeat; }
+  .b .nav-group-btn .chev { width: 11px; height: 7px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.15s; }
+  .b .nav-group-btn[aria-expanded='true'] .chev { transform: rotate(180deg); }
+  @media (prefers-reduced-motion: reduce) { .b .nav-group-btn .chev { transition: none; } }
+  .b .nav-sub { list-style: none; margin: 0; padding: 0; }
+  .js .nav-sub { display: none; position: absolute; top: calc(100% + 4px); left: -16px; z-index: 20; min-width: 270px; padding: 8px 0; background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; box-shadow: 0 12px 28px rgb(0 0 0 / 0.14); }
+  .js .nav-group[data-open] .nav-sub { display: block; }
+  .b .nav-sub a:not(.btn) { display: block; padding: 11px 18px; border-bottom: 0; white-space: nowrap; }
+  .b .nav-sub a[aria-current] { background: none; box-shadow: inset 3px 0 0 var(--amber); }
+  html:not(.js) .nav-group-btn { display: none; }
+  html:not(.js) .nav-group, html:not(.js) .nav-sub, html:not(.js) .nav-sub li { display: contents; }
   /* Contact and Menu share one look: the filled accent button. */
   .b .btn, .b .menu-btn { display: inline-flex; align-items: center; background: var(--amber); color: var(--on-amber); text-decoration: none; padding: 12px 22px; min-height: 44px; border-radius: 4px; font: 500 16px var(--font-body); }
   .b .btn:hover, .b .menu-btn:hover { filter: brightness(1.15); }
@@ -137,6 +191,12 @@ const nav = [
     .js .site-nav a:not(.btn) { display: flex; align-items: center; min-height: 52px; padding: 12px 4px; border-bottom: 1px solid var(--rule); }
     .js .site-nav a[aria-current] { background: none; border-bottom-color: var(--rule); box-shadow: inset 4px 0 0 var(--amber); padding-left: 16px; }
     .js .site-nav .btn { justify-content: center; margin-top: 16px; }
+    /* A dropdown on the phone: its button is a full row, and its pages open inline under it, indented. */
+    .js .nav-group-btn { display: flex; justify-content: space-between; width: 100%; min-height: 52px; padding: 12px 4px; border-bottom: 1px solid var(--rule); font-size: 18px; }
+    .js .nav-group-btn[data-current] { background: none; box-shadow: inset 4px 0 0 var(--amber); padding-left: 16px; }
+    .js .nav-sub { position: static; min-width: 0; padding: 0 0 0 16px; border: 0; border-radius: 0; box-shadow: none; background: none; }
+    .js .nav-sub a:not(.btn) { padding: 12px 4px; }
+    .js .nav-sub a[aria-current] { padding-left: 16px; }
   }
 
   .b .section-title { font: 500 clamp(30px, 4vw, 42px)/1.15 var(--font-display); color: var(--amber); margin: 0 0 24px; }

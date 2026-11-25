@@ -575,6 +575,7 @@ Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
       const isSection = cur.kind === 'page:section';
       const top = [
         { key: isSection ? 'navLabel' : 'title', label: isSection ? 'Page Title (also the menu name)' : 'Page Title', type: 'text' },
+        ...(isSection ? [{ key: 'menuGroup', label: 'Dropdown name (optional; pages with the same name share a dropdown)', type: 'text' }] : []),
       ];
       const wrap = el('div', { class: 'grp' }, group(top, cur.data, {}));
       const list = el('div', { class: 'grp' });

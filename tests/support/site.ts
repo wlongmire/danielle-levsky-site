@@ -33,8 +33,21 @@ export const orderJson = () => JSON.parse(readRoot('src/data/order.json')) as { 
 export function sectionPages() {
   return orderJson().sections.map((id) => {
     const { data } = frontMatter(`src/content/sections/${id}.md`);
-    return { id, href: `/projects/${id}`, path: `src/content/sections/${id}.md`, navLabel: data.navLabel as string, draft: !!data.draft, blocks: (data.blocks ?? []) as any[] };
+    return { id, href: `/projects/${id}`, path: `src/content/sections/${id}.md`, navLabel: data.navLabel as string, menuGroup: ((data.menuGroup as string | undefined) ?? '').trim(), draft: !!data.draft, blocks: (data.blocks ?? []) as any[] };
   }).filter((p) => !p.draft);
+}
+/** The menu as the header draws it: About, then the pages in order, with pages that share a menuGroup collected into one dropdown
+    (placed where the first of them comes; a dropdown holding one page is a plain link). */
+export function menuItems() {
+  type Link = { label: string; href: string };
+  const items: ({ link: Link } | { group: string; links: Link[] })[] = [{ link: { label: 'About', href: '/about' } }];
+  for (const s of sectionPages()) {
+    const link = { label: s.navLabel, href: s.href };
+    if (!s.menuGroup) { items.push({ link }); continue; }
+    const open = items.find((i): i is { group: string; links: Link[] } => 'group' in i && i.group.toLowerCase() === s.menuGroup.toLowerCase());
+    if (open) open.links.push(link); else items.push({ group: s.menuGroup, links: [link] });
+  }
+  return items.map((i) => ('group' in i && i.links.length === 1 ? { link: i.links[0] } : i));
 }
 /** How many cards a page's Card Grid blocks list in all. */
 export const cardCount = (blocks: any[]) => blocks.filter((b) => b.type === 'cards').reduce((n, b) => n + (b.entries?.length ?? 0), 0);

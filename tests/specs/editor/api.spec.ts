@@ -190,6 +190,11 @@ test.describe('signed in', () => {
       expect((await trySave(request, (d) => ({ ...d, blocks: [{ type: 'carousel' }] }))).status).toBe(422);
       expect((await trySave(request, (d) => { delete d.navLabel; return d; })).status).toBe(422);
     });
+    test('a dropdown name that is not text, or is too long', async ({ request }) => {
+      expect((await trySave(request, (d) => ({ ...d, menuGroup: 5 }))).status).toBe(422);
+      expect((await trySave(request, (d) => ({ ...d, menuGroup: 'x'.repeat(41) }))).status).toBe(422);
+      expect((await trySave(request, (d) => ({ ...d, menuGroup: 'Consulting' }))).status).toBe(200);
+    });
   });
 
   test.describe('uploads', () => {

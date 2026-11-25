@@ -1,5 +1,6 @@
 import { test, expect } from '../../support/fixtures';
-import { cardCount, cardTitle, frontMatter, readRoot, sectionPages, sharedCards } from '../../support/site';
+import { cardCount, cardTitle, frontMatter, menuItems, readRoot, resetContent, sectionPages, sharedCards } from '../../support/site';
+import { putDoc, readDoc, signIn } from '../../support/editor';
 
 const sections = sectionPages();
 const home = frontMatter('src/content/pages/home.md').data;
@@ -28,14 +29,58 @@ test.describe('header and footer', () => {
   test('the menu lists About, then the menu pages in the saved order, and highlights the page you are on', async ({ page }) => {
     await page.goto('/');
     const links = page.locator('.site-nav a:not(.btn)');
-    await expect(links).toHaveText(['About', ...sections.map((s) => s.navLabel)]);
+    const flat = menuItems().flatMap((i) => ('group' in i ? i.links : [i.link]));   // pages inside a dropdown come in the dropdown's place
+    await expect(links).toHaveText(flat.map((l) => l.label));
     const hrefs = await links.evaluateAll((as) => as.map((a) => a.getAttribute('href')));
-    expect(hrefs).toEqual(['/about', ...sections.map((s) => s.href)]);
+    expect(hrefs).toEqual(flat.map((l) => l.href));
     await expect(page.locator('.site-nav [aria-current]')).toHaveCount(0);   // Home is the logo, not a menu item
     for (const s of sections) {
       await page.goto(s.href);
       await expect(page.locator('.site-nav [aria-current]')).toHaveText(s.navLabel);
     }
+  });
+
+  test('pages that share a dropdown name sit in one dropdown that opens, marks the current page, and closes with Esc or a click elsewhere', async ({ page }) => {
+    const group = menuItems().find((i): i is Extract<ReturnType<typeof menuItems>[number], { group: string }> => 'group' in i);
+    expect(group, 'at least one dropdown is set in the content files').toBeTruthy();
+    const g = page.locator('.nav-group').first();
+    const btn = g.locator('button');
+    const list = g.locator('.nav-sub');
+
+    await page.goto('/');
+    await expect(btn).toHaveText(group!.group);
+    await expect(btn).toHaveAttribute('aria-expanded', 'false');
+    await expect(list).toBeHidden();
+    await btn.click();
+    await expect(btn).toHaveAttribute('aria-expanded', 'true');
+    await expect(list.locator('a')).toHaveText(group!.links.map((l) => l.label));
+    await page.keyboard.press('Escape');
+    await expect(list).toBeHidden();
+    await expect(btn).toBeFocused();
+    await btn.click();
+    await page.locator('main').click({ position: { x: 5, y: 5 } });
+    await expect(list).toBeHidden();
+
+    // On one of its pages the dropdown button is marked, and the page's own link is the current one.
+    await page.goto(group!.links[1].href);
+    await expect(btn).toHaveAttribute('data-current', '');
+    await btn.click();
+    await expect(list.locator('[aria-current]')).toHaveText(group!.links[1].label);
+    await list.locator('a').first().click();
+    await expect(page).toHaveURL(new RegExp(group!.links[0].href + '$'));
+  });
+
+  test('a dropdown can be opened and walked through with the keyboard', async ({ page }) => {
+    await page.goto('/');
+    const btn = page.locator('.nav-group button').first();
+    await btn.focus();
+    await page.keyboard.press('Enter');
+    await expect(btn).toHaveAttribute('aria-expanded', 'true');
+    await page.keyboard.press('Tab');
+    await expect(page.locator('.nav-sub a').first()).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(btn).toBeFocused();
+    await expect(btn).toHaveAttribute('aria-expanded', 'false');
   });
 
   test('the footer shows the email and the site links from the site details', async ({ page }) => {
@@ -184,5 +229,24 @@ test.describe('project popups', () => {
       await page.goto(`${href}#${id}`);
       await expect(page.locator('#case-title')).toHaveText(cardTitle(id));
     }
+  });
+});
+
+test.describe('a summary with several paragraphs', () => {
+  test.afterEach(() => resetContent());
+
+  test('runs together on the card, and shows as separate paragraphs in the popup', async ({ page, request }) => {
+    resetContent();
+    await signIn(request);
+    const { id, hrefs } = sharedCards()[0];
+    const path = `src/content/work/${id}.md`;
+    const doc = await readDoc(request, path);
+    const saved = await putDoc(request, path, { ...doc.data, outcome: 'First paragraph of the summary.\n\nSecond paragraph of the summary.' }, doc.sha, doc.body);
+    expect(saved.status()).toBe(200);
+    await page.waitForTimeout(800);                                   // the dev server reloads its content after a save
+    await page.goto(`${hrefs[0]}#${id}`);
+    await expect(page.locator('#case-dialog .cs-outcome')).toHaveText(['First paragraph of the summary.', 'Second paragraph of the summary.']);
+    await page.keyboard.press('Escape');
+    await expect(page.locator(`article.card#${id}`).first().locator('.outcome')).toHaveText('First paragraph of the summary. Second paragraph of the summary.');
   });
 });

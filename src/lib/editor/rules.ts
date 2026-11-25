@@ -127,6 +127,7 @@ export async function validatePage(path: string, data: any): Promise<string[]> {
   const isSection = path.startsWith('src/content/sections/');
   if (isSection ? !isStr(data.navLabel) : !isStr(data.title)) errors.push(isSection ? 'The menu name is required.' : 'The page name is required.');
   if (data.description !== undefined && typeof data.description !== 'string') errors.push('The search description must be text.');
+  if (data.menuGroup !== undefined && (typeof data.menuGroup !== 'string' || data.menuGroup.length > 40)) errors.push('The dropdown name must be text of at most 40 characters.');
   if (data.draft !== undefined && typeof data.draft !== 'boolean') errors.push('"draft" must be true or false.');
   if (!Array.isArray(data.blocks)) return [...errors, 'The page needs a list of blocks.'];
   if (data.blocks.length > 30) errors.push('A page can have at most 30 blocks.');

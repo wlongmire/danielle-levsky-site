@@ -69,6 +69,21 @@ test.describe('a page and its blocks', () => {
     await expect(page.locator('details.card.block')).toHaveCount(s.blocks.length);
   });
 
+  test('a menu page has a Dropdown name; setting and clearing it saves menuGroup (and Home and About have none)', async ({ page }) => {
+    const label = 'Dropdown name (optional; pages with the same name share a dropdown)';
+    await openEditor(page);
+    await openPage(page, 'About');
+    await expect(page.locator(`label:text-is("${label}")`)).toHaveCount(0);
+    const plain = sections.find((x) => !x.menuGroup)!;
+    await openPage(page, plain.navLabel);
+    await page.locator('.field', { has: page.locator(`label:text-is("${label}")`) }).locator('input').fill('Test dropdown');
+    await save(page);
+    expect(frontMatter(plain.path, true).data.menuGroup).toBe('Test dropdown');
+    await page.locator('.field', { has: page.locator(`label:text-is("${label}")`) }).locator('input').fill('');
+    await save(page);
+    expect('menuGroup' in frontMatter(plain.path, true).data).toBe(false);   // emptied, so the key is dropped
+  });
+
   test('every block form opens with a small drawing of its kind', async ({ page }) => {
     await openEditor(page);
     await openPage(page, s.navLabel);

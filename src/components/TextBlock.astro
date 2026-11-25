@@ -10,12 +10,13 @@ interface Props {
   body: string;
   photos: { src: ImageMetadata; alt: string }[];
   h1?: boolean;   // the page's main title (the first block on a page)
+  after?: boolean; // sits below another block, so it takes the tighter spacing the other blocks use
 }
-const { title, body, photos, h1 = false } = Astro.props;
+const { title, body, photos, h1 = false, after = false } = Astro.props;
 const Tag = h1 ? 'h1' : 'h2';
 const html = markdown(body);
 ---
-<article class="about">
+<article class:list={['about', { after }]}>
   <div class="about-text">
     {title && <Tag class="about-title">{title}</Tag>}
     <div set:html={html} />
@@ -31,12 +32,16 @@ const html = markdown(body);
 
 <style>
   .about { display: flex; flex-wrap: wrap; gap: 48px; padding: 72px 0 96px; }
+  /* Below another block (not the page's opening text): the same spacing as the Overview List, so sections sit closer together. */
+  .about.after { padding: 24px 0 56px; }
   .about-text { flex: 2 1 380px; min-width: 0; max-width: 44em; }
   .about-title { margin: 0 0 24px; font: 500 clamp(40px, 5vw, 60px)/1.05 var(--font-display); color: var(--amber); }
   .about-text :global(p) { margin: 0 0 1.1em; font-size: 18px; line-height: 1.65; }
   .about-text :global(p:first-of-type) { font: 500 clamp(24px, 3vw, 32px)/1.25 var(--font-display); color: var(--text); }
   /* Subheadings (a line starting with ## in the text) break up the long text. */
   .about-text :global(h2) { margin: 1.8em 0 0.5em; font: 500 clamp(26px, 3vw, 34px)/1.15 var(--font-display); color: var(--amber); }
+  .about-text :global(ul) { margin: 0 0 1.4em; padding-left: 1.2em; font-size: 18px; line-height: 1.6; }
+  .about-text :global(li) { margin: 0 0 0.5em; }
   .about-text :global(a) { color: var(--amber); text-underline-offset: 3px; }
   .about-text :global(a:hover) { text-decoration-thickness: 2px; }
   /* The picture column is as tall as the text beside it, with the pictures spaced down it (top, middle, bottom). */
@@ -48,6 +53,7 @@ const html = markdown(body);
      a third (wide) one runs full width beneath them. */
   @media (max-width: 769px) {
     .about { padding: 20px 0 64px; gap: 28px; }
+    .about.after { padding: 8px 0 40px; }
     .about-pics { order: -1; flex: 1 1 100%; max-width: none; align-self: auto; justify-content: normal; flex-direction: row; flex-wrap: wrap; gap: 12px; }
     .about-img { flex: 1 1 calc(50% - 6px); min-width: 0; border-radius: 4px 24px 4px 4px; }
     .about-img:nth-child(even) { border-radius: 4px 4px 24px 4px; }
